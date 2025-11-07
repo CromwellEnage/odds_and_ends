@@ -7,10 +7,16 @@
 #include <utility>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
+#include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
+#include <odds_and_ends/composite_type/event/arg_pack_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
+#include <odds_and_ends/composite_type/event/copy_assignment.hpp>
+#include <odds_and_ends/composite_type/event/copy_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
+#include <odds_and_ends/composite_type/event/move_assignment.hpp>
+#include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/parameter/integral_part.hpp>
 #include <odds_and_ends/composite_type/parameter/fractional_part.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
@@ -90,7 +96,24 @@ namespace odds_and_ends { namespace composite_type {
                             _integral_part(::std::forward<A0>(a0)),
                             _fractional_part(::std::forward<Args>(args)...)
                         {
+                        }
+
+                        template <typename A0, typename ...Args>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::variadic_constructor_2nd_stage_event const& e,
+                                A0&& a0,
+                                Args&&... args
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
+                                ::std::forward<A0>(a0),
+                                ::std::forward<Args>(args)...
+                            );
                             this->normalize();
+                            return result;
                         }
 
                         template <typename ArgumentPack>
@@ -110,7 +133,19 @@ namespace odds_and_ends { namespace composite_type {
                                 ]
                             )
                         {
+                        }
+
+                        template <typename ArgumentPack>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::arg_pack_constructor_2nd_stage_event const& e,
+                                ArgumentPack const& arg_pack
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(e, arg_pack);
                             this->normalize();
+                            return result;
                         }
 
                         template <typename Arg>
@@ -142,6 +177,31 @@ namespace odds_and_ends { namespace composite_type {
                         {
                         }
 
+                        template <typename Copy>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_assignment_event const& e,
+                                Copy const& copy
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(e, copy);
+                            this->_integral_part = copy.integral_part();
+                            this->_fractional_part = copy.fractional_part();
+                            return result;
+                        }
+
+                        template <typename Copy>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_2nd_stage_event const& e,
+                                Copy const& copy
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(e, copy);
+                            this->normalize();
+                            return result;
+                        }
+
                         template <typename Source>
                         inline _result(
                             ::odds_and_ends::composite_type
@@ -158,8 +218,37 @@ namespace odds_and_ends { namespace composite_type {
                         {
                         }
 
-                        inline ~_result()
+                        template <typename Source>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_assignment_event const& e,
+                                Source&& source
+                            )
                         {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source)
+                            );
+                            this->_integral_part = ::std::move(source.integral_part_reference());
+                            this->_fractional_part = ::std::move(
+                                source.fractional_part_reference()
+                            );
+                            return result;
+                        }
+
+                        template <typename Source>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_2nd_stage_event const& e,
+                                Source&& source
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source)
+                            );
+                            this->normalize();
+                            return result;
                         }
 
                         inline typename traits::integral_part const&
@@ -294,6 +383,10 @@ namespace odds_and_ends { namespace composite_type {
                         }
 
                     public:
+                        inline ~_result()
+                        {
+                        }
+
                         inline typename traits::integral_part const& integral_part() const
                         {
                             return this->_integral_part;

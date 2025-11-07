@@ -30,7 +30,6 @@ namespace odds_and_ends { namespace composite_type { namespace _detail {
 #include <type_traits>
 #include <utility>
 #include <odds_and_ends/composite_type/composite_base.hpp>
-#include <odds_and_ends/composite_type/listener/base.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
@@ -83,8 +82,7 @@ namespace odds_and_ends { namespace composite_type {
                 ::boost::parameter::is_argument_pack<ArgPack>,
                 _enabler
             >::type = _enabler()
-        ) :
-            _composite_parent_t(
+        ) : _composite_parent_t(
                 ::odds_and_ends::composite_type::arg_pack_constructor_1st_stage_event(),
                 arg_pack
             )
@@ -105,8 +103,7 @@ namespace odds_and_ends { namespace composite_type {
                 >,
                 _enabler
             >::type = _enabler()
-        ) :
-            _composite_parent_t(
+        ) : _composite_parent_t(
                 ::odds_and_ends::composite_type::conversion_constructor_1st_stage_event(),
                 arg1
             )
