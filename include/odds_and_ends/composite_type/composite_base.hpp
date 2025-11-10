@@ -80,10 +80,10 @@ namespace odds_and_ends { namespace composite_type {
         template <typename ...Args>
         bool listen_to(::odds_and_ends::composite_type::operator_event const& e, Args&& ...args);
 
-        template <typename U, typename ...Args>
+        template <typename ...Args>
         bool
             listen_to(
-                ::odds_and_ends::composite_type::function_call_broadcast_event<U> const& e,
+                ::odds_and_ends::composite_type::function_call_broadcast_event const& e,
                 Args&& ...args
             );
 
@@ -186,10 +186,10 @@ namespace odds_and_ends { namespace composite_type {
     }
 
     template <typename Derived>
-    template <typename U, typename ...Args>
+    template <typename ...Args>
     inline bool
         composite_base<Derived>::listen_to(
-            ::odds_and_ends::composite_type::function_call_broadcast_event<U> const&,
+            ::odds_and_ends::composite_type::function_call_broadcast_event const&,
             Args&&...
         )
     {

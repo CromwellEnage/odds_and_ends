@@ -1,7 +1,7 @@
 // Copyright (C) 2025 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_CONTAINER_HPP
-#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_CONTAINER_HPP
+#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_HPP
+#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_HPP
 
 #include <type_traits>
 #include <odds_and_ends/static_introspection/nested_type/allocator_type_of.hpp>
@@ -19,7 +19,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
         typename _T_value = typename ::odds_and_ends
         ::static_introspection::nested_type::value_type_of<T>::type
     >
-    struct is_const_allocator_aware_container_impl :
+    struct is_const_allocator_aware_impl :
         ::boost::mpl::eval_if<
             ::std::is_same<
                 typename ::odds_and_ends::static_introspection
@@ -45,14 +45,14 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct is_const_allocator_aware_container :
+    struct is_const_allocator_aware :
 /*
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept::_detail::is_const_container<T>,
             ::boost::mpl::if_<
                 ::odds_and_ends::static_introspection::member_function::has_get_allocator<T>,
                 ::odds_and_ends::static_introspection::concept
-                ::_detail::is_const_allocator_aware_container_impl<T>,
+                ::_detail::is_const_allocator_aware_impl<T>,
                 ::boost::mpl::false_
             >,
             ::boost::mpl::false_
@@ -64,5 +64,5 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
-#endif  // ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_CONTAINER_HPP
+#endif  // ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_HPP
 

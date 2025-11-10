@@ -33,8 +33,6 @@ namespace odds_and_ends { namespace composite_type {
     struct bit_xor_assignment_event;
     struct left_shift_assignment_event;
     struct right_shift_assignment_event;
-
-    template <typename U>
     struct function_call_broadcast_event;
 }}  // namespace odds_and_ends::composite_type
 

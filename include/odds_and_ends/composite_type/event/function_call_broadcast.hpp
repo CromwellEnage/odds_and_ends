@@ -7,7 +7,6 @@
 
 namespace odds_and_ends { namespace composite_type {
 
-    template <typename U>
     struct function_call_broadcast_event
     {
     };
