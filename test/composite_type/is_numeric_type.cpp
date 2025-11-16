@@ -87,7 +87,11 @@ int main(int argc, char** argv)
     BOOST_ASSERT(0 == numerator(unit.fractional_part()));
     BOOST_ASSERT(1 == denominator(unit.fractional_part()));
 
-    foo shoe_size(4, 5, 8);
+    foo shoe_size((
+        ::odds_and_ends::composite_type::parameter
+        ::fractional_part = foo::traits::fractional_part(5, 8),
+        ::odds_and_ends::composite_type::parameter::integral_part = 4
+    ));
 
     BOOST_ASSERT(4 == shoe_size.integral_part());
     BOOST_ASSERT(5 == numerator(shoe_size.fractional_part()));
@@ -120,6 +124,15 @@ int main(int argc, char** argv)
     BOOST_ASSERT(shoe_size == shoe_size_minus_1 + unit);
     BOOST_ASSERT(shoe_size * shoe_size_inverse == unit);
     BOOST_ASSERT(shoe_size / shoe_size == unit);
+
+    using ::std::swap;
+    swap(shoe_size, shoe_size_inverse);
+    BOOST_ASSERT(0 == shoe_size.integral_part());
+    BOOST_ASSERT(37 == denominator(shoe_size.fractional_part()));
+    BOOST_ASSERT(8 == numerator(shoe_size.fractional_part()));
+    BOOST_ASSERT(4 == shoe_size_inverse.integral_part());
+    BOOST_ASSERT(5 == numerator(shoe_size_inverse.fractional_part()));
+    BOOST_ASSERT(8 == denominator(shoe_size_inverse.fractional_part()));
 
 //    test_math_real_type();
 //    test_math_rational_type();

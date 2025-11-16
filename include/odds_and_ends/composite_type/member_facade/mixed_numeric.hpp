@@ -5,7 +5,10 @@
 
 #include <type_traits>
 #include <utility>
+#include <memory>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
+#include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/allocator_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
@@ -17,6 +20,7 @@
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/event/move_assignment.hpp>
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/swap.hpp>
 #include <odds_and_ends/composite_type/parameter/integral_part.hpp>
 #include <odds_and_ends/composite_type/parameter/fractional_part.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
@@ -82,6 +86,15 @@ namespace odds_and_ends { namespace composite_type {
                         {
                         }
 
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::default_constructor_2nd_stage_event const& e
+                            )
+                        {
+                            return _composite_parent_t::post_construct(e);
+                        }
+
                         template <typename A0, typename ...Args>
                         inline _result(
                             ::odds_and_ends::composite_type
@@ -98,18 +111,57 @@ namespace odds_and_ends { namespace composite_type {
                         {
                         }
 
-                        template <typename A0, typename ...Args>
+                        template <typename ...Args>
                         inline bool
                             post_construct(
                                 ::odds_and_ends::composite_type
                                 ::variadic_constructor_2nd_stage_event const& e,
-                                A0&& a0,
                                 Args&&... args
                             )
                         {
                             bool const result = _composite_parent_t::post_construct(
                                 e,
+                                ::std::forward<Args>(args)...
+                            );
+                            this->normalize();
+                            return result;
+                        }
+
+                        template <typename Alloc>
+                        inline _result(::std::allocator_arg_t const& o, Alloc const& alloc) :
+                            _composite_parent_t(o, alloc),
+                            _integral_part(::boost::initialized_value),
+                            _fractional_part()
+                        {
+                        }
+
+                        template <typename A0, typename A1, typename ...Args>
+                        inline _result(
+                            ::std::allocator_arg_t const& o,
+                            A0&& a0,
+                            A1&& a1,
+                            Args&& ...args
+                        ) : _composite_parent_t(
+                                o,
                                 ::std::forward<A0>(a0),
+                                ::std::forward<A1>(a1),
+                                ::std::forward<Args>(args)...
+                            ),
+                            _integral_part(::std::forward<A1>(a1)),
+                            _fractional_part(::std::forward<Args>(args)...)
+                        {
+                        }
+
+                        template <typename ...Args>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::allocator_constructor_2nd_stage_event const& e,
+                                Args&&... args
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
                                 ::std::forward<Args>(args)...
                             );
                             this->normalize();
@@ -177,6 +229,23 @@ namespace odds_and_ends { namespace composite_type {
                         {
                         }
 
+                        template <typename Copy, typename Alloc>
+                        inline _result(
+                            ::odds_and_ends::composite_type
+                            ::coercive_copy_constructor_event const& e,
+                            Copy const& copy,
+                            Alloc const& alloc/*,
+                            typename ::boost::enable_if<
+                                ::odds_and_ends::static_introspection
+                                ::concept::is_math_mixed_numeric_type<Copy>,
+                                _enabler
+                            >::type = _enabler()*/
+                        ) : _composite_parent_t(e, copy, alloc),
+                            _integral_part(copy.integral_part()),
+                            _fractional_part(copy.fractional_part())
+                        {
+                        }
+
                         template <typename Copy>
                         inline bool
                             post_construct(
@@ -185,6 +254,22 @@ namespace odds_and_ends { namespace composite_type {
                             )
                         {
                             bool const result = _composite_parent_t::post_construct(e, copy);
+                            this->_integral_part = copy.integral_part();
+                            this->_fractional_part = copy.fractional_part();
+                            return result;
+                        }
+
+                        template <typename Copy, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_assignment_event const& e,
+                                Copy const& copy,
+                                Alloc const& alloc
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, copy, alloc)
+                            );
                             this->_integral_part = copy.integral_part();
                             this->_fractional_part = copy.fractional_part();
                             return result;
@@ -202,6 +287,21 @@ namespace odds_and_ends { namespace composite_type {
                             return result;
                         }
 
+                        template <typename Copy, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_2nd_stage_event const& e,
+                                Copy const& copy,
+                                Alloc const& alloc
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, copy, alloc)
+                            );
+                            this->normalize();
+                            return result;
+                        }
+
                         template <typename Source>
                         inline _result(
                             ::odds_and_ends::composite_type
@@ -213,6 +313,23 @@ namespace odds_and_ends { namespace composite_type {
                                 _enabler
                             >::type = _enabler()*/
                         ) : _composite_parent_t(e, static_cast<Source&&>(source)),
+                            _integral_part(::std::move(source.integral_part_reference())),
+                            _fractional_part(::std::move(source.fractional_part_reference()))
+                        {
+                        }
+
+                        template <typename Source, typename Alloc>
+                        inline _result(
+                            ::odds_and_ends::composite_type
+                            ::coercive_move_constructor_event const& e,
+                            Source&& source,
+                            Alloc const& alloc/*,
+                            typename ::boost::enable_if<
+                                ::odds_and_ends::static_introspection
+                                ::concept::is_math_mixed_numeric_type<Source>,
+                                _enabler
+                            >::type = _enabler()*/
+                        ) : _composite_parent_t(e, static_cast<Source&&>(source), alloc),
                             _integral_part(::std::move(source.integral_part_reference())),
                             _fractional_part(::std::move(source.fractional_part_reference()))
                         {
@@ -236,6 +353,26 @@ namespace odds_and_ends { namespace composite_type {
                             return result;
                         }
 
+                        template <typename Source, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_assignment_event const& e,
+                                Source&& source,
+                                Alloc const& alloc
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source),
+                                alloc
+                            );
+                            this->_integral_part = ::std::move(source.integral_part_reference());
+                            this->_fractional_part = ::std::move(
+                                source.fractional_part_reference()
+                            );
+                            return result;
+                        }
+
                         template <typename Source>
                         inline bool
                             post_construct(
@@ -246,6 +383,23 @@ namespace odds_and_ends { namespace composite_type {
                             bool const result = _composite_parent_t::post_construct(
                                 e,
                                 static_cast<Source&&>(source)
+                            );
+                            this->normalize();
+                            return result;
+                        }
+
+                        template <typename Source, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_2nd_stage_event const& e,
+                                Source&& source,
+                                Alloc const& alloc
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source),
+                                alloc
                             );
                             this->normalize();
                             return result;
@@ -273,6 +427,32 @@ namespace odds_and_ends { namespace composite_type {
                             fractional_part_reference()
                         {
                             return this->_fractional_part;
+                        }
+
+                        inline bool
+                            listen_to(
+                                ::odds_and_ends::composite_type::swap_event const& e,
+                                Derived& other
+                            )
+                        {
+                            bool const result = _composite_parent_t::listen_to(e, other);
+                            using ::std::swap;
+                            swap(this->_integral_part, other.integral_part_reference());
+                            swap(this->_fractional_part, other.fractional_part_reference());
+                            return result;
+                        }
+
+                        template <typename Event, typename ...Args>
+                        inline typename ::boost::disable_if<
+                            ::std::is_same<Event,::odds_and_ends::composite_type::swap_event>,
+                            bool
+                        >::type
+                            listen_to(Event const& e, Args&& ...args)
+                        {
+                            return _composite_parent_t::listen_to(
+                                e,
+                                ::std::forward<Args>(args)...
+                            );
                         }
 
                         inline void normalize()

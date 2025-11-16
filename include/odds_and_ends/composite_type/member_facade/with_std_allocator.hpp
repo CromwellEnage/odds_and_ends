@@ -1,11 +1,12 @@
 // Copyright (C) 2012-2025 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__COMPOSITE_TYPE__OPERABLE__DIVISION_HPP
-#define ODDS_AND_ENDS__COMPOSITE_TYPE__OPERABLE__DIVISION_HPP
+#ifndef OODS_AND_ENDS__COMPOSITE_TYPE__MEMBER_FACADE__WITH_STD_ALLOCATOR_HPP
+#define OODS_AND_ENDS__COMPOSITE_TYPE__MEMBER_FACADE__WITH_STD_ALLOCATOR_HPP
 
+#include <type_traits>
 #include <utility>
+#include <memory>
 #include <odds_and_ends/composite_type/operable_fwd.hpp>
-#include <odds_and_ends/composite_type/event/division_assignment.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
 #include <odds_and_ends/composite_type/preprocessor/stateless_body.hpp>
 #include <boost/mpl/apply_wrap.hpp>
@@ -13,10 +14,9 @@
 namespace odds_and_ends { namespace composite_type {
 
     template <typename CompositeParentGenerator>
-    struct division_operable
+    struct with_std_allocator
     {
-        typedef ::odds_and_ends::composite_type
-        ::division_operable<CompositeParentGenerator> type;
+        typedef ::odds_and_ends::composite_type::with_std_allocator<CompositeParentGenerator> type;
 
         template <typename Derived>
         class apply
@@ -30,24 +30,13 @@ namespace odds_and_ends { namespace composite_type {
             {
                 struct traits : _composite_parent_t::traits
                 {
+                    typedef ::std::allocator<Derived> allocator_type;
+                    typedef allocator_type allocator_reference;
                 };
 
-                template <typename Operand>
-                inline Derived& operator/=(Operand const& operand)
+                inline typename traits::allocator_type get_allocator() const
                 {
-                    this->handle(
-                        ::odds_and_ends::composite_type::division_assignment_event(),
-                        operand
-                    );
-                    return this->derived();
-                }
-
-                template <typename Operand>
-                inline Derived operator/(Operand const& operand) const
-                {
-                    Derived result(this->derived());
-                    result /= operand;
-                    return result;
+                    return typename traits::allocator_type();
                 }
 
                 ODDS_AND_ENDS__COMPOSITE_TYPE__STATELESS_BODY(_result, _composite_parent_t)
@@ -60,5 +49,5 @@ namespace odds_and_ends { namespace composite_type {
     };
 }}  // namespace odds_and_ends::composite_type
 
-#endif  // ODDS_AND_ENDS__COMPOSITE_TYPE__OPERABLE__DIVISION_HPP
+#endif  // OODS_AND_ENDS__COMPOSITE_TYPE__MEMBER_FACADE__WITH_STD_ALLOCATOR_HPP
 

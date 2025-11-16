@@ -6,6 +6,7 @@
 namespace odds_and_ends { namespace composite_type {
 
     struct constructor_2nd_stage_event;
+    struct allocator_constructor_2nd_stage_event;
     struct arg_pack_constructor_1st_stage_event;
     struct arg_pack_constructor_2nd_stage_event;
     struct variadic_constructor_1st_stage_event;
@@ -34,6 +35,7 @@ namespace odds_and_ends { namespace composite_type {
     struct left_shift_assignment_event;
     struct right_shift_assignment_event;
     struct function_call_broadcast_event;
+    struct swap_event;
 }}  // namespace odds_and_ends::composite_type
 
 #endif  // ODDS_AND_ENDS__COMPOSITE_TYPE__EVENT_FWD_HPP

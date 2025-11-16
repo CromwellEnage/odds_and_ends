@@ -5,6 +5,7 @@
 
 #include <type_traits>
 #include <utility>
+#include <memory>
 #include <odds_and_ends/composite_type/composite_base_fwd.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
@@ -16,8 +17,6 @@
 #include <odds_and_ends/composite_type/event/operator.hpp>
 #include <odds_and_ends/composite_type/event/function_call_broadcast.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
-#include <boost/move/move.hpp>
-#include <boost/core/enable_if.hpp>
 
 namespace odds_and_ends { namespace composite_type {
 
@@ -37,10 +36,12 @@ namespace odds_and_ends { namespace composite_type {
             ::odds_and_ends::composite_type::default_constructor_1st_stage_event const&
         );
 
-        template <typename A0, typename ...Args>
-        composite_base(
+        template <typename ...Args>
+        explicit composite_base(::std::allocator_arg_t const&, Args&& ...args);
+
+        template <typename ...Args>
+        explicit composite_base(
             ::odds_and_ends::composite_type::variadic_constructor_1st_stage_event const&,
-            A0&& a0,
             Args&& ...args
         );
 
@@ -62,10 +63,24 @@ namespace odds_and_ends { namespace composite_type {
             Copy const& copy
         );
 
+        template <typename Copy, typename Alloc>
+        composite_base(
+            ::odds_and_ends::composite_type::coercive_copy_constructor_event const&,
+            Copy const& copy,
+            Alloc const& alloc
+        );
+
         template <typename Source>
         composite_base(
             ::odds_and_ends::composite_type::coercive_move_constructor_event const&,
             Source&& source
+        );
+
+        template <typename Source, typename Alloc>
+        composite_base(
+            ::odds_and_ends::composite_type::coercive_move_constructor_event const&,
+            Source&& source,
+            Alloc const& alloc
         );
 
         ~composite_base();
@@ -88,14 +103,11 @@ namespace odds_and_ends { namespace composite_type {
             );
 
         template <typename Event, typename ...Args>
-        inline typename ::boost::disable_if<
+        typename ::boost::disable_if<
             ::std::is_base_of< ::odds_and_ends::composite_type::constructor_2nd_stage_event,Event>,
             bool
         >::type
-            handle(Event const& e, Args&& ...args)
-        {
-            return this->derived().listen_to(e, ::std::forward<Args>(args)...);
-        }
+            handle(Event const& e, Args&& ...args);
 
     public:
         typename traits::const_reference derived() const;
@@ -104,6 +116,10 @@ namespace odds_and_ends { namespace composite_type {
 
         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(composite_base)
     };
+}}  // namespace odds_and_ends::composite_type
+
+
+namespace odds_and_ends { namespace composite_type {
 
     template <typename Derived>
     inline composite_base<Derived>::composite_base(
@@ -113,10 +129,15 @@ namespace odds_and_ends { namespace composite_type {
     }
 
     template <typename Derived>
-    template <typename A0, typename ...Args>
+    template <typename ...Args>
+    inline composite_base<Derived>::composite_base(::std::allocator_arg_t const&, Args&& ...args)
+    {
+    }
+
+    template <typename Derived>
+    template <typename ...Args>
     inline composite_base<Derived>::composite_base(
         ::odds_and_ends::composite_type::variadic_constructor_1st_stage_event const&,
-        A0&& a0,
         Args&& ...args
     )
     {
@@ -150,10 +171,30 @@ namespace odds_and_ends { namespace composite_type {
     }
 
     template <typename Derived>
+    template <typename Copy, typename Alloc>
+    inline composite_base<Derived>::composite_base(
+        ::odds_and_ends::composite_type::coercive_copy_constructor_event const&,
+        Copy const& copy,
+        Alloc const& alloc
+    )
+    {
+    }
+
+    template <typename Derived>
     template <typename Source>
     inline composite_base<Derived>::composite_base(
         ::odds_and_ends::composite_type::coercive_move_constructor_event const&,
         Source&& source
+    )
+    {
+    }
+
+    template <typename Derived>
+    template <typename Source, typename Alloc>
+    inline composite_base<Derived>::composite_base(
+        ::odds_and_ends::composite_type::coercive_move_constructor_event const&,
+        Source&& source,
+        Alloc const& alloc
     )
     {
     }
@@ -194,6 +235,17 @@ namespace odds_and_ends { namespace composite_type {
         )
     {
         return true;
+    }
+
+    template <typename Derived>
+    template <typename Event, typename ...Args>
+    inline typename ::boost::disable_if<
+        ::std::is_base_of< ::odds_and_ends::composite_type::constructor_2nd_stage_event,Event>,
+        bool
+    >::type
+        composite_base<Derived>::handle(Event const& e, Args&& ...args)
+    {
+        return this->derived().listen_to(e, ::std::forward<Args>(args)...);
     }
 
     template <typename Derived>

@@ -6,12 +6,6 @@
 #include <utility>
 #include <odds_and_ends/composite_type/operable_fwd.hpp>
 #include <odds_and_ends/composite_type/operable/pre_decrement.hpp>
-#include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
-#include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
 #include <odds_and_ends/composite_type/preprocessor/stateless_body.hpp>
 #include <boost/mpl/apply_wrap.hpp>

@@ -5927,6 +5927,292 @@ void test_stack_or_heap()
     );
 }
 
+#include <odds_and_ends/static_introspection/concept/is_mergeable_heap.hpp>
+
+void test_mergeable_heap()
+{
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::pair<char,short> >::value,
+        "::std::pair is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::tuple<char,short> >::value,
+        "::std::tuple is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::array<int,5> >::value,
+        "::std::array is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::vector<int> >::value,
+        "::std::vector is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::deque<int> >::value,
+        "::std::deque is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::forward_list<int> >::value,
+        "::std::forward_list is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::list<int> >::value,
+        "::std::list is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::set<int> >::value,
+        "::std::set is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::multiset<int> >::value,
+        "::std::multiset is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::unordered_set<int> >::value,
+        "::std::unordered_set is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::unordered_multiset<int> >::value,
+        "::std::unordered_multiset is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::map<int,int> >::value,
+        "::std::map is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::multimap<int,int> >::value,
+        "::std::multimap is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::unordered_map<int,int> >::value,
+        "::std::unordered_map is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::unordered_multimap<int,int> >::value,
+        "::std::unordered_multimap is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::stack<int> >::value,
+        "::std::stack is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::queue<int> >::value,
+        "::std::queue is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::std::priority_queue<int> >::value,
+        "::std::priority_queue is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::vector<int> >::value,
+        "::boost::container::vector is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::stable_vector<int> >::value,
+        "::boost::container::stable_vector is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::static_vector<int,10> >::value,
+        "::boost::container::static_vector is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::small_vector<int,5> >::value,
+        "::boost::container::small_vector is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::devector<int> >::value,
+        "::boost::container::devector is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::deque<int> >::value,
+        "::boost::container::deque is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::slist<int> >::value,
+        "::boost::container::slist is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::list<int> >::value,
+        "::boost::container::list is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::set<int> >::value,
+        "::boost::container::set is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::flat_set<int> >::value,
+        "::boost::container::flat_set is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::unordered::unordered_set<int> >::value,
+        "::boost::unordered::unordered_set is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::multiset<int> >::value,
+        "::boost::container::multiset is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::flat_multiset<int> >::value,
+        "::boost::container::flat_multiset is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::unordered::unordered_multiset<int> >::value,
+        "::boost::unordered::unordered_multiset is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::map<int,int> >::value,
+        "::boost::container::map is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::flat_map<int,int> >::value,
+        "::boost::container::flat_map is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::unordered::unordered_map<int,int> >::value,
+        "::boost::unordered::unordered_map is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::multimap<int,int> >::value,
+        "::boost::container::multimap is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::container::flat_multimap<int,int> >::value,
+        "::boost::container::flat_multimap is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::unordered::unordered_multimap<int,int> >::value,
+        "::boost::unordered::unordered_multimap is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_array<int,5> >::value,
+        "::boost::ptr_array is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_vector<int> >::value,
+        "::boost::ptr_vector is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_deque<int> >::value,
+        "::boost::ptr_deque is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_list<int> >::value,
+        "::boost::ptr_list is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_set<int> >::value,
+        "::boost::ptr_set is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_unordered_set<int> >::value,
+        "::boost::ptr_unordered_set is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_multiset<int> >::value,
+        "::boost:ptr_multiset is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_unordered_multiset<int> >::value,
+        "::boost::ptr_unordered_multiset is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_map<int,int> >::value,
+        "::boost::ptr_map is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_unordered_map<int,int> >::value,
+        "::boost::ptr_unordered_map is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_multimap<int,int> >::value,
+        "::boost::ptr_multimap is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::ptr_unordered_multimap<int,int> >::value,
+        "::boost::ptr_unordered_multimap is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::heap::priority_queue<int> >::value,
+        "::boost::heap::priority_queue is not a Mergeable Heap."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::heap::d_ary_heap<int,::boost::heap::arity<2> > >::value,
+        "::boost::heap::d_ary_heap is not a Mergeable Heap."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::heap::binomial_heap<int> >::value,
+        "::boost::heap::binomial_heap is a Mergeable Heap."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::heap::fibonacci_heap<int> >::value,
+        "::boost::heap::fibonacci_heap is a Mergeable Heap."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::heap::pairing_heap<int> >::value,
+        "::boost::heap::pairing_heap is a Mergeable Heap."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_mergeable_heap< ::boost::heap::skew_heap<int> >::value,
+        "::boost::heap::skew_heap is a Mergeable Heap."
+    );
+}
+
 #include <boost/core/lightweight_test.hpp>
 
 int main(int argc, char** argv)
@@ -5951,5 +6237,6 @@ int main(int argc, char** argv)
     test_legacy_unordered_associative_container();
     test_queue();
     test_stack_or_heap();
+    test_mergeable_heap();
     return ::boost::report_errors();
 }

@@ -3,6 +3,7 @@
 #ifndef ODDS_AND_ENDS__COMPOSITE_TYPE__PP__STATELESS_BODY_HPP
 #define ODDS_AND_ENDS__COMPOSITE_TYPE__PP__STATELESS_BODY_HPP
 
+#include <memory>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
@@ -12,9 +13,14 @@
 
 #define ODDS_AND_ENDS__COMPOSITE_TYPE__STATELESS_BODY(Type, Base)                                \
     protected:                                                                                   \
-    explicit inline Type(                                                                        \
+    inline explicit Type(                                                                        \
         ::odds_and_ends::composite_type::default_constructor_1st_stage_event const& e            \
     ) : Base(e)                                                                                  \
+    {                                                                                            \
+    }                                                                                            \
+    template <typename A0, typename ...Args>                                                     \
+    inline Type(::std::allocator_arg_t const& o, A0&& a0, Args&& ...args) :                      \
+        Base(o, ::std::forward<A0>(a0), ::std::forward<Args>(args)...)                           \
     {                                                                                            \
     }                                                                                            \
     template <typename A0, typename ...Args>                                                     \
@@ -46,11 +52,27 @@
     ) : Base(e, copy)                                                                            \
     {                                                                                            \
     }                                                                                            \
+    template <typename Copy, typename Alloc>                                                     \
+    inline Type(                                                                                 \
+        ::odds_and_ends::composite_type::coercive_copy_constructor_event const& e,               \
+        Copy const& copy,                                                                        \
+        Alloc& alloc                                                                             \
+    ) : Base(e, copy, alloc)                                                                     \
+    {                                                                                            \
+    }                                                                                            \
     template <typename Source>                                                                   \
     inline Type(                                                                                 \
         ::odds_and_ends::composite_type::coercive_move_constructor_event const& e,               \
         Source&& source                                                                          \
     ) : Base(e, static_cast<Source&&>(source))                                                   \
+    {                                                                                            \
+    }                                                                                            \
+    template <typename Source, typename Alloc>                                                   \
+    inline Type(                                                                                 \
+        ::odds_and_ends::composite_type::coercive_move_constructor_event const& e,               \
+        Source&& source,                                                                         \
+        Alloc const& alloc                                                                       \
+    ) : Base(e, static_cast<Source&&>(source), alloc)                                            \
     {                                                                                            \
     }                                                                                            \
     public:                                                                                      \
