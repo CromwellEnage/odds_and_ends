@@ -17,6 +17,7 @@
 #include <odds_and_ends/composite_type/event/operator.hpp>
 #include <odds_and_ends/composite_type/event/function_call_broadcast.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
+#include <boost/core/enable_if.hpp>
 
 namespace odds_and_ends { namespace composite_type {
 
