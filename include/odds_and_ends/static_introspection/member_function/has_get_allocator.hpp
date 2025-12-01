@@ -21,52 +21,9 @@ namespace _detail {
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 #include <type_traits>
-#include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
-#include <odds_and_ends/static_introspection/nested_type/allocator_type_of.hpp>
+#include <odds_and_ends/static_introspection/remove_cvref.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
-
-namespace odds_and_ends { namespace static_introspection { namespace member_function {
-namespace _detail {
-
-    template <
-        typename T,
-        typename _T_alloc = typename ::odds_and_ends
-        ::static_introspection::nested_type::allocator_type_of<T>::type
-    >
-    struct has_get_allocator_impl_default :
-        ::boost::mpl::if_<
-            ::std::is_same<
-                decltype(::odds_and_ends::static_introspection::declcref<T>().get_allocator()),
-                _T_alloc
-            >,
-            ::odds_and_ends::static_introspection::concept::is_allocator<_T_alloc>,
-            ::boost::mpl::false_
-        >::type
-    {
-    };
-}  // namespace _detail
-}}}  // namespace odds_and_ends::static_introspection::member_function
-
-#include <odds_and_ends/use_default_policy.hpp>
-#include <odds_and_ends/static_introspection/nested_type/has_allocator_type.hpp>
-
-namespace odds_and_ends { namespace static_introspection { namespace member_function {
-namespace _detail {
-
-    template <typename T>
-    struct has_get_allocator_impl<T,::odds_and_ends::use_default_policy> :
-        ::boost::mpl::if_<
-            ::odds_and_ends::static_introspection::nested_type::has_allocator_type<T>,
-            ::odds_and_ends::static_introspection::member_function::_detail
-            ::has_get_allocator_impl_default<T>,
-            ::boost::mpl::false_
-        >::type
-    {
-    };
-}  // namespace _detail
-}}}  // namespace odds_and_ends::static_introspection::member_function
-
 #include <boost/type_traits/detail/yes_no_type.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
@@ -98,6 +55,7 @@ namespace _detail {
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
+#include <odds_and_ends/static_introspection/nested_type/is_allocator_type_of.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 

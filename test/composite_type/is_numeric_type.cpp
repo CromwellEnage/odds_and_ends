@@ -76,16 +76,15 @@ void test_math_complex_type()
 }
 */
 
-#include <boost/assert.hpp>
 #include <boost/core/lightweight_test.hpp>
 
 int main(int argc, char** argv)
 {
     foo unit(1, 0, 1);
 
-    BOOST_ASSERT(1 == unit.integral_part());
-    BOOST_ASSERT(0 == numerator(unit.fractional_part()));
-    BOOST_ASSERT(1 == denominator(unit.fractional_part()));
+    BOOST_TEST(1 == unit.integral_part());
+    BOOST_TEST(0 == numerator(unit.fractional_part()));
+    BOOST_TEST(1 == denominator(unit.fractional_part()));
 
     foo shoe_size((
         ::odds_and_ends::composite_type::parameter
@@ -93,46 +92,46 @@ int main(int argc, char** argv)
         ::odds_and_ends::composite_type::parameter::integral_part = 4
     ));
 
-    BOOST_ASSERT(4 == shoe_size.integral_part());
-    BOOST_ASSERT(5 == numerator(shoe_size.fractional_part()));
-    BOOST_ASSERT(8 == denominator(shoe_size.fractional_part()));
+    BOOST_TEST(4 == shoe_size.integral_part());
+    BOOST_TEST(5 == numerator(shoe_size.fractional_part()));
+    BOOST_TEST(8 == denominator(shoe_size.fractional_part()));
 
     foo shoe_size_minus_1(3, 5, 8);
 
-    BOOST_ASSERT(3 == shoe_size_minus_1.integral_part());
-    BOOST_ASSERT(5 == numerator(shoe_size_minus_1.fractional_part()));
-    BOOST_ASSERT(8 == denominator(shoe_size_minus_1.fractional_part()));
+    BOOST_TEST(3 == shoe_size_minus_1.integral_part());
+    BOOST_TEST(5 == numerator(shoe_size_minus_1.fractional_part()));
+    BOOST_TEST(8 == denominator(shoe_size_minus_1.fractional_part()));
 
     foo m_0_8_37(0, 8, 37);
 
-    BOOST_ASSERT(0 == m_0_8_37.integral_part());
-    BOOST_ASSERT(8 == numerator(m_0_8_37.fractional_part()));
-    BOOST_ASSERT(37 == denominator(m_0_8_37.fractional_part()));
+    BOOST_TEST(0 == m_0_8_37.integral_part());
+    BOOST_TEST(8 == numerator(m_0_8_37.fractional_part()));
+    BOOST_TEST(37 == denominator(m_0_8_37.fractional_part()));
 
     foo shoe_size_inverse = unit;
 
     shoe_size_inverse /= shoe_size;
-    BOOST_ASSERT(0 == shoe_size_inverse.integral_part());
-    BOOST_ASSERT(37 == denominator(shoe_size_inverse.fractional_part()));
-    BOOST_ASSERT(8 == numerator(shoe_size_inverse.fractional_part()));
-    BOOST_ASSERT(shoe_size_inverse == m_0_8_37);
+    BOOST_TEST(0 == shoe_size_inverse.integral_part());
+    BOOST_TEST(37 == denominator(shoe_size_inverse.fractional_part()));
+    BOOST_TEST(8 == numerator(shoe_size_inverse.fractional_part()));
+    BOOST_TEST(shoe_size_inverse == m_0_8_37);
     --shoe_size;
-    BOOST_ASSERT(shoe_size == shoe_size_minus_1);
+    BOOST_TEST(shoe_size == shoe_size_minus_1);
     ++shoe_size;
-    BOOST_ASSERT(!(shoe_size == shoe_size_minus_1));
-    BOOST_ASSERT(shoe_size != shoe_size_minus_1);
-    BOOST_ASSERT(shoe_size == shoe_size_minus_1 + unit);
-    BOOST_ASSERT(shoe_size * shoe_size_inverse == unit);
-    BOOST_ASSERT(shoe_size / shoe_size == unit);
+    BOOST_TEST(!(shoe_size == shoe_size_minus_1));
+    BOOST_TEST(shoe_size != shoe_size_minus_1);
+    BOOST_TEST(shoe_size == shoe_size_minus_1 + unit);
+    BOOST_TEST(shoe_size * shoe_size_inverse == unit);
+    BOOST_TEST(shoe_size / shoe_size == unit);
 
     using ::std::swap;
     swap(shoe_size, shoe_size_inverse);
-    BOOST_ASSERT(0 == shoe_size.integral_part());
-    BOOST_ASSERT(37 == denominator(shoe_size.fractional_part()));
-    BOOST_ASSERT(8 == numerator(shoe_size.fractional_part()));
-    BOOST_ASSERT(4 == shoe_size_inverse.integral_part());
-    BOOST_ASSERT(5 == numerator(shoe_size_inverse.fractional_part()));
-    BOOST_ASSERT(8 == denominator(shoe_size_inverse.fractional_part()));
+    BOOST_TEST(0 == shoe_size.integral_part());
+    BOOST_TEST(37 == denominator(shoe_size.fractional_part()));
+    BOOST_TEST(8 == numerator(shoe_size.fractional_part()));
+    BOOST_TEST(4 == shoe_size_inverse.integral_part());
+    BOOST_TEST(5 == numerator(shoe_size_inverse.fractional_part()));
+    BOOST_TEST(8 == denominator(shoe_size_inverse.fractional_part()));
 
 //    test_math_real_type();
 //    test_math_rational_type();
@@ -140,3 +139,4 @@ int main(int argc, char** argv)
 //    test_math_complex_type();
     return ::boost::report_errors();
 }
+

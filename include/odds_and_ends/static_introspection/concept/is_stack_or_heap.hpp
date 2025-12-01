@@ -22,13 +22,13 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 
 #include <odds_and_ends/static_introspection/concept/_detail/is_std_container_adaptor.hpp>
 #include <boost/mpl/bool.hpp>
-#include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept {
 
     template <typename T>
     struct is_stack_or_heap :
-        ::boost::mpl::if_<
+        ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept::_detail::is_std_container_adaptor<T>,
             ::odds_and_ends::static_introspection::concept::_detail::has_stack_or_heap_top<T>,
             ::boost::mpl::false_

@@ -4,21 +4,15 @@
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_SIZE_HPP
 
 #include <odds_and_ends/static_introspection/member_function/_detail/has_size.hpp>
-#include <odds_and_ends/static_introspection/remove_cvref.hpp>
 #include <odds_and_ends/static_introspection/declref.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 namespace _detail {
 
-    template <
-        typename T,
-        typename Param,
-        typename ResultPlaceholderExpr,
-        typename _mutable_T = typename ::odds_and_ends::static_introspection::remove_cvref<T>::type
-    >
+    template <typename T, typename Param, typename ResultPlaceholderExpr>
     struct has_size_of_pointer_container :
         ::odds_and_ends::static_introspection::member_function::_detail::has_size<
-            decltype(::odds_and_ends::static_introspection::declmref<_mutable_T>().base()),
+            decltype(::odds_and_ends::static_introspection::declmref<T>().base()),
             Param,
             ResultPlaceholderExpr
         >
@@ -30,12 +24,14 @@ namespace _detail {
 #include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/nested_type/is_size_type_of.hpp>
 #include <odds_and_ends/static_introspection/concept/_detail/has_pointer_container_nested_types.hpp>
+#include <boost/mpl/placeholders.hpp>
+#include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 
     template <typename T, typename Param, typename ResultPlaceholderExpr>
     struct has_size :
-        ::boost::mpl::if_<
+        ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept
             ::_detail::has_pointer_container_nested_types<T>,
             ::odds_and_ends::static_introspection::member_function::_detail

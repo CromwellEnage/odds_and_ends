@@ -3226,347 +3226,411 @@ void test_contiguous_container()
     );
 }
 
-#include <odds_and_ends/static_introspection/concept/is_allocator_aware.hpp>
+#include <odds_and_ends/static_introspection/concept/is_allocator_aware_container.hpp>
+#include <boost/mpl/integral_c.hpp>
 
-void test_allocator_aware()
+void test_allocator_aware_container()
 {
     static_assert(
         !::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::pair<char,short> >::value,
-        "::std::pair is not Allocator-Awar."
+        ::is_allocator_aware_container< ::std::pair<char,short> >::value,
+        "::std::pair is not an Allocator-Aware Container."
     );
     static_assert(
         !::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::tuple<char,short> >::value,
-        "::std::tuple is not Allocator-Aware."
+        ::is_allocator_aware_container< ::std::tuple<char,short> >::value,
+        "::std::tuple is not an Allocator-Aware Container."
     );
     static_assert(
-        !::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::array<int,5> >::value,
-        "::std::array is not Allocator-Aware."
+        !::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::array<int,5>
+        >::value,
+        "::std::array is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::vector<int>,::boost::mpl::true_>::value,
-        "::std::vector is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::vector<int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::vector is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::deque<int>,::boost::mpl::true_>::value,
-        "::std::deque is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::deque<int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::deque is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::forward_list<int>,::boost::mpl::true_>::value,
-        "::std::forward_list is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::forward_list<int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::forward_list is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::list<int>,::boost::mpl::true_>::value,
-        "::std::list is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::list<int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::list is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::set<int>,::boost::mpl::true_>::value,
-        "::std::set is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::set<int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::set is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::multiset<int>,::boost::mpl::true_>::value,
-        "::std::multiset is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::multiset<int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::multiset is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::unordered_set<int>,::boost::mpl::true_>::value,
-        "::std::unordered_set is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::unordered_set<int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::unordered_set is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::std::unordered_multiset<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::std::unordered_multiset is Allocator-Aware with Legacy Forward Iterators."
+        "::std::unordered_multiset is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::map<int,int>,::boost::mpl::true_>::value,
-        "::std::map is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::map<int,int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::map is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::multimap<int,int>,::boost::mpl::true_>::value,
-        "::std::multimap is Allocator-Aware with Legacy Forward Iterators."
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::std::multimap<int,int>,
+            ::boost::mpl::integral_c<unsigned int,3>
+        >::value,
+        "::std::multimap is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::std::unordered_map<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::std::unordered_map is Allocator-Aware with Legacy Forward Iterators."
+        "::std::unordered_map is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::std::unordered_multimap<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::std::unordered_multimap is Allocator-Aware with Legacy Forward Iterators."
+        "::std::unordered_multimap is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
         !::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::stack<int> >::value,
-        "::std::stack is not Allocator-Aware."
+        ::is_allocator_aware_container< ::std::stack<int> >::value,
+        "::std::stack is not an Allocator-Aware Container."
     );
     static_assert(
         !::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::queue<int> >::value,
-        "::std::queue is not Allocator-Aware."
+        ::is_allocator_aware_container< ::std::queue<int> >::value,
+        "::std::queue is not an Allocator-Aware Container."
     );
     static_assert(
         !::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::std::priority_queue<int> >::value,
-        "::std::priority_queue is not Allocator-Aware."
+        ::is_allocator_aware_container< ::std::priority_queue<int> >::value,
+        "::std::priority_queue is not an Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::vector<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::vector is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::vector is a C++-Standard Container with an Allocator."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::stable_vector<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::stable_vector is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::stable_vector is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::static_vector<int,10>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,2>
         >::value,
-        "::boost::container::static_vector is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::static_vector is a C++-Standard Container with an Allocator."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::small_vector<int,5>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::small_vector is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::small_vector is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::devector<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::devector is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::devector is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::deque<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::deque is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::deque is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::slist<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::slist is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::slist is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::list<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::list is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::list is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::set<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::set is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::set is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::flat_set<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::flat_set is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::flat_set is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::unordered::unordered_set<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::unordered::unordered_set is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::unordered::unordered_set is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::multiset<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::multiset is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::multiset is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::flat_multiset<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::flat_multiset is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::flat_multiset is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::unordered::unordered_multiset<int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::unordered::unordered_multiset is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::unordered::unordered_multiset is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::map<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::map is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::map is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::flat_map<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::flat_map is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::flat_map is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::unordered::unordered_map<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::unordered::unordered_map is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::unordered::unordered_map is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::multimap<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::multimap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::multimap is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::container::flat_multimap<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::container::flat_multimap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::container::flat_multimap is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
             ::boost::unordered::unordered_multimap<int,int>,
-            ::boost::mpl::true_
+            ::boost::mpl::integral_c<unsigned int,3>
         >::value,
-        "::boost::unordered::unordered_multimap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::unordered::unordered_multimap is a C++-Standard Allocator-Aware Container."
     );
     static_assert(
         !::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_array<int,5> >::value,
-        "::boost::ptr_array is not Allocator-Aware."
+        ::is_allocator_aware_container< ::boost::ptr_array<int,5> >::value,
+        "::boost::ptr_array is not an Allocator-Aware Container."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_vector<int>,::boost::mpl::true_>::value,
-        "::boost::ptr_vector is Allocator-Aware with Legacy Forward Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_deque<int>,::boost::mpl::true_>::value,
-        "::boost::ptr_deque is Allocator-Aware with Legacy Forward Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_list<int>,::boost::mpl::true_>::value,
-        "::boost::ptr_list is Allocator-Aware with Legacy Forward Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_set<int>,::boost::mpl::true_>::value,
-        "::boost::ptr_set is Allocator-Aware with Legacy Forward Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_unordered_set<int> >::value,
-        "::boost::ptr_unordered_set is Allocator-Aware with Legacy Input Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_multiset<int>,::boost::mpl::true_>::value,
-        "::boost::ptr_multiset is Allocator-Aware with Legacy Forward Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_unordered_multiset<int> >::value,
-        "ptr_unordered_multiset is Allocator-Aware with Legacy Input Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_map<int,int> >::value,
-        "::boost::ptr_map is Allocator-Aware with Legacy Input Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_unordered_map<int,int> >::value,
-        "::boost::ptr_unordered_map is Allocator-Aware with Legacy Input Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_multimap<int,int> >::value,
-        "::boost::ptr_multimap is Allocator-Aware with Legacy Input Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept
-        ::is_allocator_aware< ::boost::ptr_unordered_multimap<int,int> >::value,
-        "ptr_unordered_multimap is Allocator-Aware with Legacy Input Iterators."
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
-            ::boost::heap::priority_queue<int>,
-            ::boost::mpl::true_
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::ptr_vector<int>,
+            ::boost::mpl::integral_c<unsigned int,1>
         >::value,
-        "::boost::heap::priority_queue is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::ptr_vector is a C++-Standard Container with get_allocator()."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
-            ::boost::heap::d_ary_heap<int,::boost::heap::arity<2> >,
-            ::boost::mpl::true_
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::ptr_deque<int>,
+            ::boost::mpl::integral_c<unsigned int,1>
         >::value,
-        "::boost::heap::d_ary_heap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::ptr_deque is a C++-Standard Container with get_allocator()."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
-            ::boost::heap::binomial_heap<int>,
-            ::boost::mpl::true_
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::ptr_list<int>,
+            ::boost::mpl::integral_c<unsigned int,1>
         >::value,
-        "::boost::heap::binomial_heap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::ptr_list is a C++-Standard Container with get_allocator()."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
-            ::boost::heap::fibonacci_heap<int>,
-            ::boost::mpl::true_
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::ptr_set<int>,
+            ::boost::mpl::integral_c<unsigned int,1>
         >::value,
-        "::boost::heap::fibonacci_heap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::ptr_set is a C++-Standard Container with get_allocator()."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
-            ::boost::heap::pairing_heap<int>,
-            ::boost::mpl::true_
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::ptr_unordered_set<int>,
+            ::boost::mpl::integral_c<unsigned int,1>
         >::value,
-        "::boost::heap::pairing_heap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::ptr_unordered_set is a C++-Standard Container with get_allocator()."
     );
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_allocator_aware<
-            ::boost::heap::skew_heap<int>,
-            ::boost::mpl::true_
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::ptr_multiset<int>,
+            ::boost::mpl::integral_c<unsigned int,1>
         >::value,
-        "::boost::heap::skew_heap is Allocator-Aware with Legacy Forward Iterators."
+        "::boost::ptr_multiset is a C++-Standard Container with get_allocator()."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::ptr_unordered_multiset<int>,
+            ::boost::mpl::integral_c<unsigned int,1>
+        >::value,
+        "ptr_unordered_multiset is a C++-Standard Container with get_allocator()."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_allocator_aware_container< ::boost::ptr_map<int,int> >::value,
+        "::boost::ptr_map is an Allocator-Aware Container with Legacy Input Iterators."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_allocator_aware_container< ::boost::ptr_unordered_map<int,int> >::value,
+        "::boost::ptr_unordered_map is an Allocator-Aware Container with Legacy Input Iterators."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_allocator_aware_container< ::boost::ptr_multimap<int,int> >::value,
+        "::boost::ptr_multimap is an Allocator-Aware Container with Legacy Input Iterators."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_allocator_aware_container< ::boost::ptr_unordered_multimap<int,int> >::value,
+        "ptr_unordered_multimap is an Allocator-Aware Container with Legacy Input Iterators."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::heap::priority_queue<int>
+        >::value,
+        "::boost::heap::priority_queue is not an Allocator-Aware Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
+            ::boost::heap::priority_queue<int>
+        >::value,
+        "::boost::heap::priority_queue has get_allocator()."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::heap::d_ary_heap<int,::boost::heap::arity<2> >
+        >::value,
+        "::boost::heap::d_ary_heap is not an Allocator-Aware Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
+            ::boost::heap::d_ary_heap<int,::boost::heap::arity<2> >
+        >::value,
+        "::boost::heap::d_ary_heap has get_allocator()."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::heap::binomial_heap<int>
+        >::value,
+        "::boost::heap::binomial_heap is not an Allocator-Aware Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
+            ::boost::heap::binomial_heap<int>
+        >::value,
+        "::boost::heap::binomial_heap has get_allocator()."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::heap::fibonacci_heap<int>
+        >::value,
+        "::boost::heap::fibonacci_heap is not an Allocator-Aware Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
+            ::boost::heap::fibonacci_heap<int>
+        >::value,
+        "::boost::heap::fibonacci_heap has get_allocator()."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::heap::pairing_heap<int>
+        >::value,
+        "::boost::heap::pairing_heap is not an Allocator-Aware Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
+            ::boost::heap::pairing_heap<int>
+        >::value,
+        "::boost::heap::pairing_heap has get_allocator()."
+    );
+    static_assert(
+        !::odds_and_ends::static_introspection::concept::is_allocator_aware_container<
+            ::boost::heap::skew_heap<int>
+        >::value,
+        "::boost::heap::skew_heap is not an Allocator-Aware Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
+            ::boost::heap::skew_heap<int>
+        >::value,
+        "::boost::heap::skew_heap has get_allocator()."
     );
 }
 
@@ -6228,7 +6292,7 @@ int main(int argc, char** argv)
     test_reversible_container();
     test_indexable_container();
     test_contiguous_container();
-    test_allocator_aware();
+    test_allocator_aware_container();
     test_pointer_container();
     test_legacy_associative_container();
     test_legacy_simple_associative_container();

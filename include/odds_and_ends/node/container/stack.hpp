@@ -8,13 +8,21 @@
 #include <odds_and_ends/node/data.hpp>
 #include <odds_and_ends/node/linked/base.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
-#include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
+#include <odds_and_ends/static_introspection/concept/is_stack_or_heap.hpp>
+#include <boost/core/enable_if.hpp>
+#include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/quote.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 
 namespace odds_and_ends { namespace node { namespace container {
 
-    template <typename T, typename Size = ::std::size_t>
+    template <
+        typename T,
+        typename Size = ::std::size_t,
+        typename AllocGen = ::boost::mpl::quote1< ::std::allocator>
+    >
     class stack
     {
         typedef ::odds_and_ends::composite_type::composite_type<
@@ -23,21 +31,87 @@ namespace odds_and_ends { namespace node { namespace container {
                 ::odds_and_ends::node::linked::base<>
             >
         > _node_t;
-        typedef ::std::allocator<_node_t> allocator_type;
+        typedef typename _node_t::traits::pointer _pointer;
 
-        typename _node_t::traits::pointer _top;
+        struct _enabler
+        {
+        };
+
+    public:
+        typedef ::odds_and_ends::node::container::stack<T,Size,AllocGen> type;
+        typedef typename ::boost::mpl::apply_wrap1<AllocGen,_node_t>::type allocator_type;
+
+    private:
+        allocator_type _alloc;
+        _pointer _top;
         Size _size;
 
     public:
         typedef T value_type;
+        typedef value_type& reference;
+        typedef value_type const& const_reference;
         typedef Size size_type;
 
+        template <typename A0, typename ...Args>
+        explicit stack(
+            A0&& a0,
+            Args&&... args,
+            typename ::boost::disable_if<
+                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<A0>,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename V, typename I, typename AG>
+        stack(
+            stack<V,I,AG> const& copy,
+            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+        );
+
+        template <typename Alloc>
+        stack(stack const& copy, Alloc const& alloc);
+
+        template <typename V, typename I, typename AG, typename Alloc>
+        stack(
+            stack<V,I,AG> const& copy,
+            Alloc const& alloc,
+            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+        );
+
+        template <typename V, typename I, typename AG>
+        stack(
+            stack<V,I,AG>&& source,
+            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+        );
+
+        template <typename Alloc>
+        stack(stack&& source, Alloc const& alloc);
+
+        template <typename V, typename I, typename AG, typename Alloc>
+        stack(
+            stack<V,I,AG>&& source,
+            Alloc const& alloc,
+            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+        );
+
+        stack(stack const& copy);
+        stack(stack&& source);
         stack();
         ~stack();
+        stack& operator=(stack const& copy);
+        stack& operator=(stack&& source);
+
+        template <typename V, typename I, typename AG>
+        stack& operator=(stack<V,I,AG> const& copy);
+
+        template <typename V, typename I, typename AG>
+        stack& operator=(stack<V,I,AG>&& source);
+
+        allocator_type get_allocator() const;
         bool empty() const;
         size_type const& size() const;
-        value_type const& top() const;
-        void push(value_type const& t);
+        const_reference top() const;
+        void push(const_reference t);
         void push(value_type&& t);
 
         template <typename ...Args>
@@ -45,7 +119,21 @@ namespace odds_and_ends { namespace node { namespace container {
 
         void pop();
         void clear();
-        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(stack)
+
+    private:
+        typedef typename _node_t::traits::const_pointer _const_pointer;
+
+        allocator_type const& _get_allocator_ref() const;
+        _const_pointer _get_top() const;
+
+        template <typename V, typename I, typename AG>
+        void _clone(stack<V,I,AG> const& copy);
+
+        template <typename V, typename I, typename AG>
+        void _move(stack<V,I,AG>&& source);
+
+        template <typename V, typename I, typename AG>
+        friend class stack;
     };
 }}}  // namespace odds_and_ends::node::container
 
@@ -54,71 +142,254 @@ namespace odds_and_ends { namespace node { namespace container {
 
 namespace odds_and_ends { namespace node { namespace container {
 
-    template <typename T, typename Size>
-    inline stack<T,Size>::stack() : _top(nullptr), _size(::boost::initialized_value)
+    template <typename T, typename Size, typename AllocGen>
+    template <typename A0, typename ...Args>
+    inline stack<T,Size,AllocGen>::stack(
+        A0&& a0,
+        Args&&... args,
+        typename ::boost::disable_if<
+            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<A0>,
+            _enabler
+        >::type
+    ) : _alloc(::std::forward<A0>(a0), ::std::forward<Args>(args)...),
+        _top(nullptr),
+        _size(::boost::initialized_value)
     {
     }
 
-    template <typename T, typename Size>
-    inline stack<T,Size>::~stack()
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG>
+    void stack<T,Size,AllocGen>::_clone(stack<V,I,AG> const& copy)
+    {
+        typename stack<V,I,AG>::_const_pointer o_p = copy._get_top();
+        _pointer q;
+
+        for (_pointer p; o_p; o_p = o_p->next())
+        {
+            p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+            ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, **o_p);
+
+            if (this->_top)
+            {
+                q->insert_next(p);
+            }
+            else
+            {
+                this->_top = p;
+            }
+
+            q = p;
+            ++this->_size;
+        }
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline stack<T,Size,AllocGen>::stack(stack const& copy) :
+        _alloc(copy._get_allocator_ref()), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_clone(copy);
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG>
+    inline stack<T,Size,AllocGen>::stack(
+        stack<V,I,AG> const& copy,
+        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+    ) : _alloc(copy._get_allocator_ref()), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_clone(copy);
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename Alloc>
+    inline stack<T,Size,AllocGen>::stack(stack const& copy, Alloc const& alloc) :
+        _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_clone(copy);
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG, typename Alloc>
+    inline stack<T,Size,AllocGen>::stack(
+        stack<V,I,AG> const& copy,
+        Alloc const& alloc,
+        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+    ) : _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_clone(copy);
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG>
+    void stack<T,Size,AllocGen>::_move(stack<V,I,AG>&& source)
+    {
+        this->_clone(static_cast<stack<V,I,AG> const&>(source));
+        source.clear();
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline stack<T,Size,AllocGen>::stack(stack&& source) :
+        _alloc(source._get_allocator_ref()), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_move(static_cast<stack&&>(source));
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG>
+    inline stack<T,Size,AllocGen>::stack(
+        stack<V,I,AG>&& source,
+        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+    ) : _alloc(source._get_allocator_ref()), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_move(static_cast<stack<V,I,AG>&&>(source));
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename Alloc>
+    inline stack<T,Size,AllocGen>::stack(stack&& source, Alloc const& alloc) :
+        _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_move(static_cast<stack&&>(source));
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG, typename Alloc>
+    inline stack<T,Size,AllocGen>::stack(
+        stack<V,I,AG>&& source,
+        Alloc const& alloc,
+        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+    ) : _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
+    {
+        this->_move(static_cast<stack<V,I,AG>&&>(source));
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline stack<T,Size,AllocGen>::stack() :
+        _alloc(), _top(nullptr), _size(::boost::initialized_value)
+    {
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline stack<T,Size,AllocGen>::~stack()
     {
         this->clear();
     }
 
-    template <typename T, typename Size>
-    inline bool stack<T,Size>::empty() const
+    template <typename T, typename Size, typename AllocGen>
+    inline stack<T,Size,AllocGen>& stack<T,Size,AllocGen>::operator=(stack const& copy)
+    {
+        if (this != &copy)
+        {
+            this->clear();
+            this->_clone(copy);
+        }
+
+        return *this;
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG>
+    inline stack<T,Size,AllocGen>& stack<T,Size,AllocGen>::operator=(stack<V,I,AG> const& copy)
+    {
+        if (this != &copy)
+        {
+            this->clear();
+            this->_clone(copy);
+        }
+
+        return *this;
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline stack<T,Size,AllocGen>& stack<T,Size,AllocGen>::operator=(stack&& source)
+    {
+        if (this != &static_cast<stack&>(source))
+        {
+            this->clear();
+            this->_move(static_cast<stack&&>(source));
+        }
+
+        return *this;
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename V, typename I, typename AG>
+    inline stack<T,Size,AllocGen>& stack<T,Size,AllocGen>::operator=(stack<V,I,AG>&& source)
+    {
+        if (this != &static_cast<stack<V,I,AG>&>(source))
+        {
+            this->clear();
+            this->_move(static_cast<stack<V,I,AG>&&>(source));
+        }
+
+        return *this;
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline typename stack<T,Size,AllocGen>::allocator_type stack<T,Size,AllocGen>::get_allocator() const
+    {
+        return this->_alloc;
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline typename stack<T,Size,AllocGen>::allocator_type const&
+        stack<T,Size,AllocGen>::_get_allocator_ref() const
+    {
+        return this->_alloc;
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline typename stack<T,Size,AllocGen>::_const_pointer stack<T,Size,AllocGen>::_get_top() const
+    {
+        return this->_top;
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    inline bool stack<T,Size,AllocGen>::empty() const
     {
         return !this->_top;
     }
 
-    template <typename T, typename Size>
-    inline typename stack<T,Size>::size_type const& stack<T,Size>::size() const
+    template <typename T, typename Size, typename AllocGen>
+    inline typename stack<T,Size,AllocGen>::size_type const& stack<T,Size,AllocGen>::size() const
     {
         return this->_size;
     }
 
-    template <typename T, typename Size>
-    inline typename stack<T,Size>::value_type const& stack<T,Size>::top() const
+    template <typename T, typename Size, typename AllocGen>
+    inline typename stack<T,Size,AllocGen>::const_reference stack<T,Size,AllocGen>::top() const
     {
         return **this->_top;
     }
 
-    template <typename T, typename Size>
-    inline void stack<T,Size>::push(value_type const& t)
+    template <typename T, typename Size, typename AllocGen>
+    inline void stack<T,Size,AllocGen>::push(const_reference t)
     {
-        allocator_type alloc;
-        typename _node_t::traits::pointer p = (
-            ::std::allocator_traits<allocator_type>::allocate(alloc, 1)
-        );
-        ::std::allocator_traits<allocator_type>::construct(alloc, p, t);
+        _pointer p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+        ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, t);
         if (this->_top) p->insert_next(this->_top);
         this->_top = p;
         ++this->_size;
     }
 
-    template <typename T, typename Size>
-    inline void stack<T,Size>::push(value_type&& t)
+    template <typename T, typename Size, typename AllocGen>
+    inline void stack<T,Size,AllocGen>::push(value_type&& t)
     {
-        allocator_type alloc;
-        typename _node_t::traits::pointer p = (
-            ::std::allocator_traits<allocator_type>::allocate(alloc, 1)
-        );
-        ::std::allocator_traits<allocator_type>::construct(alloc, p, ::std::move(t));
+        _pointer p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+        ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, ::std::move(t));
         if (this->_top) p->insert_next(this->_top);
         this->_top = p;
         ++this->_size;
     }
 
-    template <typename T, typename Size>
+    template <typename T, typename Size, typename AllocGen>
     template <typename ...Args>
-    inline typename stack<T,Size>::value_type const& stack<T,Size>::emplace(Args&&... args)
+    inline typename stack<T,Size,AllocGen>::value_type const&
+        stack<T,Size,AllocGen>::emplace(Args&&... args)
     {
-        allocator_type alloc;
-        typename _node_t::traits::pointer p = (
-            ::std::allocator_traits<allocator_type>::allocate(alloc, 1)
-        );
+        _pointer p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
         ::std::allocator_traits<allocator_type>::construct(
-            alloc,
+            this->_alloc,
             p,
             ::std::forward<Args>(args)...
         );
@@ -128,27 +399,24 @@ namespace odds_and_ends { namespace node { namespace container {
         return **this->_top;
     }
 
-    template <typename T, typename Size>
-    inline void stack<T,Size>::pop()
+    template <typename T, typename Size, typename AllocGen>
+    inline void stack<T,Size,AllocGen>::pop()
     {
-        allocator_type alloc;
-        typename _node_t::traits::pointer p = this->_top;
+        _pointer p = this->_top;
         this->_top = this->_top->next();
-        ::std::allocator_traits<allocator_type>::destroy(alloc, p);
-        ::std::allocator_traits<allocator_type>::deallocate(alloc, p, 1);
+        ::std::allocator_traits<allocator_type>::destroy(this->_alloc, p);
+        ::std::allocator_traits<allocator_type>::deallocate(this->_alloc, p, 1);
         --this->_size;
     }
 
-    template <typename T, typename Size>
-    void stack<T,Size>::clear()
+    template <typename T, typename Size, typename AllocGen>
+    void stack<T,Size,AllocGen>::clear()
     {
-        allocator_type alloc;
-
-        for (typename _node_t::traits::pointer p = this->_top; p; p = this->_top)
+        for (_pointer p = this->_top; p; p = this->_top)
         {
             this->_top = this->_top->next();
-            ::std::allocator_traits<allocator_type>::destroy(alloc, p);
-            ::std::allocator_traits<allocator_type>::deallocate(alloc, p, 1);
+            ::std::allocator_traits<allocator_type>::destroy(this->_alloc, p);
+            ::std::allocator_traits<allocator_type>::deallocate(this->_alloc, p, 1);
         }
 
         this->_size = ::boost::initialized_value;

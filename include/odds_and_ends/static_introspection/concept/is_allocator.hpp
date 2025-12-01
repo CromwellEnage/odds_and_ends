@@ -4,27 +4,26 @@
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_ALLOCATOR_HPP
 
 #include <odds_and_ends/static_introspection/concept/is_nullable_pointer.hpp>
+#include <odds_and_ends/static_introspection/concept/is_legacy_random_access_iterator.hpp>
 #include <odds_and_ends/static_introspection/allocator_pointer_of.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
 
-#include <odds_and_ends/static_introspection/concept/is_legacy_random_access_iterator.hpp>
-
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
-    template <
-        typename T,
-        typename _T_ptr = typename ::odds_and_ends
-        ::static_introspection::allocator_pointer_of<T>::type
-    >
-    struct is_allocator_with_pointer :
-        ::boost::mpl::if_<
+    template <typename T>
+    class is_allocator_with_pointer
+    {
+        typedef typename ::odds_and_ends::static_introspection
+        ::allocator_pointer_of<T>::type _T_ptr;
+
+    public:
+        typedef typename ::boost::mpl::if_<
             ::odds_and_ends::static_introspection::concept::is_nullable_pointer<_T_ptr>,
             ::odds_and_ends::static_introspection::concept
             ::is_legacy_random_access_iterator<_T_ptr>,
             ::boost::mpl::false_
-        >::type
-    {
+        >::type type;
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
@@ -38,23 +37,23 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
         typename T,
         typename _u_T = typename ::odds_and_ends::static_introspection::remove_cvref<T>::type
     >
-    struct has_allocator_pointer :
-        ::boost::mpl::eval_if<
-            ::odds_and_ends::static_introspection::nested_type::has_pointer<_u_T>,
-            ::boost::mpl::eval_if<
+    struct has_allocator_pointer
+    {
+        typedef typename ::boost::mpl::eval_if<
+            typename ::boost::mpl::eval_if<
+                ::odds_and_ends::static_introspection::nested_type::has_pointer<_u_T>,
                 ::odds_and_ends::static_introspection::concept
                 ::_detail::is_allocator_with_pointer<_u_T>,
-                ::boost::mpl::if_<
-                    ::odds_and_ends::static_introspection::nested_type::has_pointer<T>,
-                    ::odds_and_ends::static_introspection::concept
-                    ::_detail::is_allocator_with_pointer<T>,
-                    ::boost::mpl::true_
-                >,
-                ::boost::mpl::false_
+                ::boost::mpl::true_
+            >::type,
+            ::boost::mpl::eval_if<
+                ::odds_and_ends::static_introspection::nested_type::has_pointer<T>,
+                ::odds_and_ends::static_introspection::concept
+                ::_detail::is_allocator_with_pointer<T>,
+                ::boost::mpl::true_
             >,
-            ::boost::mpl::true_
-        >::type
-    {
+            ::boost::mpl::false_
+        >::type type;
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
@@ -71,7 +70,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
             ::odds_and_ends::static_introspection::nested_type::has_value_type<T>,
             ::boost::mpl::eval_if<
                 ::odds_and_ends::static_introspection::member_function::has_allocate<T>,
-                ::boost::mpl::if_<
+                ::boost::mpl::eval_if<
                     ::odds_and_ends::static_introspection::member_function::has_deallocate<T>,
                     ::odds_and_ends::static_introspection
                     ::concept::_detail::has_allocator_pointer<T>,

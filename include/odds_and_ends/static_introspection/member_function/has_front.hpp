@@ -54,13 +54,13 @@ namespace _detail {
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/nested_type/is_reference_of.hpp>
-#include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 
     template <typename T, typename ResultPlaceholderExpr>
     struct has_front :
-        ::boost::mpl::if_<
+        ::boost::mpl::eval_if<
             typename ::odds_and_ends::static_introspection
             ::member_function::_detail::has_front_expr<T>::type,
             ::odds_and_ends::static_introspection::member_function

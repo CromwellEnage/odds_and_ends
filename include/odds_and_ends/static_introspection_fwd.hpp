@@ -530,6 +530,9 @@ namespace odds_and_ends { namespace static_introspection { namespace nested_type
     using allocator_type_of_t = typename ::odds_and_ends
     ::static_introspection::nested_type::allocator_type_of<T>::type;
 
+    template <typename T1, typename T2>
+    struct is_allocator_type_of;
+
     template <typename T>
     struct has_object_type;
 
@@ -845,16 +848,6 @@ namespace odds_and_ends { namespace static_introspection { namespace nested_type
 
     template <typename T1, typename T2>
     struct is_expression_type_of;
-
-    template <typename T>
-    struct allocator_pointer_of;
-
-    template <typename T>
-    using allocator_pointer_of_t = typename ::odds_and_ends
-    ::static_introspection::nested_type::allocator_pointer_of<T>::type;
-
-    template <typename T1, typename T2>
-    struct is_allocator_pointer_of;
 
     template <typename T>
     struct allocator_difference_of;
@@ -1488,6 +1481,34 @@ namespace odds_and_ends { namespace static_introspection { namespace member_data
         ::odds_and_ends::static_introspection::nested_type::is_value_type_of< ::boost::mpl::_,T>
     >
     struct has_value;
+
+    template <
+        typename T,
+        typename PlaceholderExpr =
+        ::odds_and_ends::static_introspection::nested_type::is_first_type_of< ::boost::mpl::_,T>
+    >
+    struct has_first;
+
+    template <
+        typename T,
+        typename PlaceholderExpr =
+        ::odds_and_ends::static_introspection::nested_type::is_second_type_of< ::boost::mpl::_,T>
+    >
+    struct has_second;
+
+    template <
+        typename T,
+        typename PlaceholderExpr =
+        ::odds_and_ends::static_introspection::nested_type::is_size_type_of< ::boost::mpl::_,T>
+    >
+    struct has_max_size_static_const;
+
+    template <
+        typename T,
+        typename PlaceholderExpr =
+        ::odds_and_ends::static_introspection::nested_type::is_size_type_of< ::boost::mpl::_,T>
+    >
+    struct has_dimensionality_static_const;
 }}}  // namespace odds_and_ends::static_introspection::member_data
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
@@ -1516,8 +1537,8 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
 
     template <
         typename T,
-        typename ResultPlaceholderExpr = ::odds_and_ends
-        ::static_introspection::is_allocator_pointer_of< ::boost::mpl::_,T>
+        typename ResultPlaceholderExpr =
+        ::odds_and_ends::static_introspection::is_allocator_pointer_of< ::boost::mpl::_,T>
     >
     struct has_data;
 
@@ -1738,6 +1759,13 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
         ::odds_and_ends::static_introspection::nested_type::is_size_type_of< ::boost::mpl::_,T>
     >
     struct has_bucket_count;
+
+    template <
+        typename T,
+        typename ResultPlaceholderExpr = ::odds_and_ends::static_introspection
+        ::nested_type::is_allocator_type_of< ::boost::mpl::_,T>
+    >
+    struct has_get_allocator;
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 namespace odds_and_ends { namespace static_introspection { namespace concept {
@@ -1858,34 +1886,6 @@ namespace odds_and_ends { namespace static_introspection { namespace member_data
 
     template <typename T, typename PlaceholderExpr = ::odds_and_ends::use_default_policy>
     struct has_right;
-
-    template <
-        typename T,
-        typename PlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_first_type_of< ::boost::mpl::_,T>
-    >
-    struct has_first;
-
-    template <
-        typename T,
-        typename PlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_second_type_of< ::boost::mpl::_,T>
-    >
-    struct has_second;
-
-    template <
-        typename T,
-        typename PlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_size_type_of< ::boost::mpl::_,T>
-    >
-    struct has_max_size_static_const;
-
-    template <
-        typename T,
-        typename PlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_size_type_of< ::boost::mpl::_,T>
-    >
-    struct has_dimensionality_static_const;
 }}}  // namespace odds_and_ends::static_introspection::member_data
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
@@ -1913,9 +1913,6 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
 
     template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
     struct has_compressed_pair_second;
-
-    template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
-    struct has_get_allocator;
 
     template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
     struct has_value;
@@ -2052,8 +2049,8 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
     template <
         typename T,
         typename U = ::odds_and_ends::use_default_policy,
-        typename ResultPlaceholderExpr = ::odds_and_ends::static_introspection
-        ::nested_type::is_allocator_pointer_of< ::boost::mpl::_,T>
+        typename ResultPlaceholderExpr =
+        ::odds_and_ends::static_introspection::is_allocator_pointer_of< ::boost::mpl::_,T>
     >
     struct has_allocate;
 
@@ -2426,13 +2423,18 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_reversible_container;
 
     template <typename T, typename IsStrict = ::boost::mpl::false_>
-    struct is_allocator_aware;
-
-    template <typename T, typename IsStrict = ::boost::mpl::false_>
     struct is_ublas_matrix;
 
     template <typename T, typename IsStrict = ::boost::mpl::false_>
     struct is_math_complex_type;
+}}}  // namespace odds_and_ends::static_introspection::concept
+
+#include <boost/mpl/integral_c.hpp>
+
+namespace odds_and_ends { namespace static_introspection { namespace concept {
+
+    template <typename T, typename StrictnessLevel = ::boost::mpl::integral_c<unsigned int,0> >
+    struct is_allocator_aware_container;
 }}}  // namespace odds_and_ends::static_introspection::concept
 
 #include <boost/mpl/if.hpp>

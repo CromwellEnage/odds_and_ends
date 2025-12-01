@@ -52,23 +52,18 @@ namespace _detail {
 }  // namespace _detail
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
-#include <odds_and_ends/static_introspection/remove_cvref.hpp>
-#include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 namespace _detail {
 
-    template <
-        typename T,
-        typename ResultPlaceholderExpr,
-        typename _u_T = typename ::odds_and_ends::static_introspection::remove_cvref<T>::type
-    >
+    template <typename T, typename ResultPlaceholderExpr>
     struct has_empty :
-        ::boost::mpl::if_<
+        ::boost::mpl::eval_if<
             typename ::odds_and_ends::static_introspection
-            ::member_function::_detail::has_empty_expr<_u_T>::type,
+            ::member_function::_detail::has_empty_expr<T>::type,
             ::odds_and_ends::static_introspection::member_function
-            ::_detail::has_empty_impl<_u_T,ResultPlaceholderExpr>,
+            ::_detail::has_empty_impl<T,ResultPlaceholderExpr>,
             ::boost::mpl::false_
         >::type
     {
