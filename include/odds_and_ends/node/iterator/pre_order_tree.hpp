@@ -81,15 +81,19 @@ namespace odds_and_ends { namespace node {
         );
 
         template <typename ...Args>
-        explicit pre_order_tree_iterator(Node& node, Args&&... args);
+        explicit pre_order_tree_iterator(reference node, Args&&... args);
 
         template <typename N, typename I, typename SG>
         pre_order_tree_iterator(
             pre_order_tree_iterator<N,I,SG> const& other,
             typename ::boost::enable_if<
-                typename ::boost::mpl::if_<
-                    ::std::is_convertible<N,Node>,
+                typename ::boost::mpl::eval_if<
                     ::boost::mpl::equal_to<I,IsReverse>,
+                    ::boost::mpl::if_<
+                        ::std::is_same<N,Node>,
+                        ::boost::mpl::false_,
+                        ::std::is_convertible<N,Node>
+                    >,
                     ::boost::mpl::false_
                 >::type,
                 _enabler
@@ -100,9 +104,13 @@ namespace odds_and_ends { namespace node {
         pre_order_tree_iterator(
             pre_order_tree_iterator<N,I,SG>&& other,
             typename ::boost::enable_if<
-                typename ::boost::mpl::if_<
-                    ::std::is_convertible<N,Node>,
+                typename ::boost::mpl::eval_if<
                     ::boost::mpl::equal_to<I,IsReverse>,
+                    ::boost::mpl::if_<
+                        ::std::is_same<N,Node>,
+                        ::boost::mpl::false_,
+                        ::std::is_convertible<N,Node>
+                    >,
                     ::boost::mpl::false_
                 >::type,
                 _enabler
@@ -118,9 +126,13 @@ namespace odds_and_ends { namespace node {
 
         template <typename N, typename I, typename SG>
         typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_convertible<N,Node>,
+            typename ::boost::mpl::eval_if<
                 ::boost::mpl::equal_to<I,IsReverse>,
+                ::boost::mpl::if_<
+                    ::std::is_same<N,Node>,
+                    ::boost::mpl::false_,
+                    ::std::is_convertible<N,Node>
+                >,
                 ::boost::mpl::false_
             >::type,
             pre_order_tree_iterator&
@@ -129,9 +141,13 @@ namespace odds_and_ends { namespace node {
 
         template <typename N, typename I, typename SG>
         typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_convertible<N,Node>,
+            typename ::boost::mpl::eval_if<
                 ::boost::mpl::equal_to<I,IsReverse>,
+                ::boost::mpl::if_<
+                    ::std::is_same<N,Node>,
+                    ::boost::mpl::false_,
+                    ::std::is_convertible<N,Node>
+                >,
                 ::boost::mpl::false_
             >::type,
             pre_order_tree_iterator&
@@ -144,14 +160,6 @@ namespace odds_and_ends { namespace node {
         pre_order_tree_iterator& operator++();
         pre_order_tree_iterator operator++(int);
 
-        template <typename N, typename I, typename SG>
-        typename ::boost::enable_if< ::boost::mpl::equal_to<I,IsReverse>,bool>::type
-            operator==(pre_order_tree_iterator<N,I,SG> const& other) const;
-
-        template <typename N, typename I, typename SG>
-        typename ::boost::enable_if< ::boost::mpl::equal_to<I,IsReverse>,bool>::type
-            operator!=(pre_order_tree_iterator<N,I,SG> const& other) const;
-
     private:
         void _push(::boost::mpl::false_);
         void _push(::boost::mpl::true_);
@@ -159,10 +167,28 @@ namespace odds_and_ends { namespace node {
         void _clear_itr_stack(::boost::mpl::true_);
         _child_iterator _end(::boost::mpl::false_);
         _child_iterator _end(::boost::mpl::true_);
+
+        template <typename N, typename I, typename SG>
+        friend class pre_order_tree_iterator;
+
+        template <typename N1, typename I1, typename SG1, typename N2, typename I2, typename SG2>
+        friend typename ::boost::enable_if< ::boost::mpl::equal_to<I1,I2>,bool>::type
+            operator==(
+                pre_order_tree_iterator<N1,I1,SG1> const& lhs,
+                pre_order_tree_iterator<N2,I2,SG2> const& rhs
+            );
+
+        template <typename N1, typename I1, typename SG1, typename N2, typename I2, typename SG2>
+        friend typename ::boost::enable_if< ::boost::mpl::equal_to<I1,I2>,bool>::type
+            operator!=(
+                pre_order_tree_iterator<N1,I1,SG1> const& lhs,
+                pre_order_tree_iterator<N2,I2,SG2> const& rhs
+            );
     };
 }}  // namespace odds_and_ends::node
 
 #include <utility>
+#include <memory>
 #include <odds_and_ends/static_introspection/member_function/has_clear.hpp>
 
 namespace odds_and_ends { namespace node {
@@ -201,7 +227,7 @@ namespace odds_and_ends { namespace node {
     template <typename Node, typename IsReverse, typename StackGen>
     template <typename ...Args>
     inline pre_order_tree_iterator<Node,IsReverse,StackGen>::pre_order_tree_iterator(
-        Node& node,
+        reference node,
         Args&&... args
     ) : _node_stack(::std::forward<Args>(args)...),
         _itr_stack(::std::forward<Args>(args)...),
@@ -217,9 +243,13 @@ namespace odds_and_ends { namespace node {
     inline pre_order_tree_iterator<Node,IsReverse,StackGen>::pre_order_tree_iterator(
         pre_order_tree_iterator<N,I,SG> const& other,
         typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_convertible<N,Node>,
+            typename ::boost::mpl::eval_if<
                 ::boost::mpl::equal_to<I,IsReverse>,
+                ::boost::mpl::if_<
+                    ::std::is_same<N,Node>,
+                    ::boost::mpl::false_,
+                    ::std::is_convertible<N,Node>
+                >,
                 ::boost::mpl::false_
             >::type,
             _enabler
@@ -237,9 +267,13 @@ namespace odds_and_ends { namespace node {
     inline pre_order_tree_iterator<Node,IsReverse,StackGen>::pre_order_tree_iterator(
         pre_order_tree_iterator<N,I,SG>&& other,
         typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_convertible<N,Node>,
+            typename ::boost::mpl::eval_if<
                 ::boost::mpl::equal_to<I,IsReverse>,
+                ::boost::mpl::if_<
+                    ::std::is_same<N,Node>,
+                    ::boost::mpl::false_,
+                    ::std::is_convertible<N,Node>
+                >,
                 ::boost::mpl::false_
             >::type,
             _enabler
@@ -318,9 +352,13 @@ namespace odds_and_ends { namespace node {
     template <typename Node, typename IsReverse, typename StackGen>
     template <typename N, typename I, typename SG>
     inline typename ::boost::enable_if<
-        typename ::boost::mpl::if_<
-            ::std::is_convertible<N,Node>,
+        typename ::boost::mpl::eval_if<
             ::boost::mpl::equal_to<I,IsReverse>,
+            ::boost::mpl::if_<
+                ::std::is_same<N,Node>,
+                ::boost::mpl::false_,
+                ::std::is_convertible<N,Node>
+            >,
             ::boost::mpl::false_
         >::type,
         pre_order_tree_iterator<Node,IsReverse,StackGen>&
@@ -344,9 +382,13 @@ namespace odds_and_ends { namespace node {
     template <typename Node, typename IsReverse, typename StackGen>
     template <typename N, typename I, typename SG>
     inline typename ::boost::enable_if<
-        typename ::boost::mpl::if_<
-            ::std::is_convertible<N,Node>,
+        typename ::boost::mpl::eval_if<
             ::boost::mpl::equal_to<I,IsReverse>,
+            ::boost::mpl::if_<
+                ::std::is_same<N,Node>,
+                ::boost::mpl::false_,
+                ::std::is_convertible<N,Node>
+            >,
             ::boost::mpl::false_
         >::type,
         pre_order_tree_iterator<Node,IsReverse,StackGen>&
@@ -461,16 +503,16 @@ namespace odds_and_ends { namespace node {
         return itr;
     }
 
-    template <typename Node, typename IsReverse, typename StackGen>
-    template <typename N, typename I, typename SG>
-    inline typename ::boost::enable_if< ::boost::mpl::equal_to<I,IsReverse>,bool>::type
-        pre_order_tree_iterator<Node,IsReverse,StackGen>::operator==(
-            pre_order_tree_iterator<N,I,SG> const& other
-        ) const
+    template <typename N1, typename I1, typename SG1, typename N2, typename I2, typename SG2>
+    inline typename ::boost::enable_if< ::boost::mpl::equal_to<I1,I2>,bool>::type
+        operator==(
+            pre_order_tree_iterator<N1,I1,SG1> const& lhs,
+            pre_order_tree_iterator<N2,I2,SG2> const& rhs
+        )
     {
-        if (this->_state == other._state)
+        if (lhs._state == rhs._state)
         {
-            return this->_state ? (this->_current_ptr == other._current_ptr) : !other._state;
+            return lhs._state ? (lhs._current_ptr == rhs._current_ptr) : !rhs._state;
         }
         else
         {
@@ -478,14 +520,14 @@ namespace odds_and_ends { namespace node {
         }
     }
 
-    template <typename Node, typename IsReverse, typename StackGen>
-    template <typename N, typename I, typename SG>
-    inline typename ::boost::enable_if< ::boost::mpl::equal_to<I,IsReverse>,bool>::type
-        pre_order_tree_iterator<Node,IsReverse,StackGen>::operator!=(
-            pre_order_tree_iterator<N,I,SG> const& other
-        ) const
+    template <typename N1, typename I1, typename SG1, typename N2, typename I2, typename SG2>
+    inline typename ::boost::enable_if< ::boost::mpl::equal_to<I1,I2>,bool>::type
+        operator!=(
+            pre_order_tree_iterator<N1,I1,SG1> const& lhs,
+            pre_order_tree_iterator<N2,I2,SG2> const& rhs
+        )
     {
-        return !(*this == other);
+        return !(lhs == rhs);
     }
 
     template <typename Node, typename IsReverse, typename StackGen>

@@ -127,9 +127,7 @@ namespace odds_and_ends { namespace node {
         binary_tree_child_iterator& operator--();
         binary_tree_child_iterator operator--(int);
         binary_tree_child_iterator& operator+=(difference_type const& n);
-        binary_tree_child_iterator operator+(difference_type const& n) const;
         binary_tree_child_iterator& operator-=(difference_type const& n);
-        binary_tree_child_iterator operator-(difference_type const& n) const;
 
     private:
         void _iterate(pointer const& sibling);
@@ -151,7 +149,7 @@ namespace odds_and_ends { namespace node {
             );
 
         template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
-        friend typename ::boost::enable_if<
+        friend typename ::boost::lazy_enable_if<
             typename ::boost::mpl::if_<
                 ::std::is_integral<D1>,
                 ::std::is_integral<D2>,
@@ -165,7 +163,7 @@ namespace odds_and_ends { namespace node {
             );
 
         template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
-        friend typename ::boost::disable_if<
+        friend typename ::boost::lazy_disable_if<
             typename ::boost::mpl::if_<
                 ::std::is_integral<D1>,
                 ::std::is_integral<D2>,
@@ -465,11 +463,32 @@ namespace odds_and_ends { namespace node {
 
     template <typename Node, typename IsReverse, typename Difference>
     binary_tree_child_iterator<Node,IsReverse,Difference>
-        binary_tree_child_iterator<Node,IsReverse,Difference>::operator+(
-            difference_type const& n
-        ) const
+        operator+(
+            binary_tree_child_iterator<Node,IsReverse,Difference> const& operand,
+            typename binary_tree_child_iterator<
+                Node,
+                IsReverse,
+                Difference
+            >::difference_type const& n
+        )
     {
-        binary_tree_child_iterator itr(*this);
+        binary_tree_child_iterator<Node,IsReverse,Difference> itr(operand);
+        itr += n;
+        return itr;
+    }
+
+    template <typename Node, typename IsReverse, typename Difference>
+    binary_tree_child_iterator<Node,IsReverse,Difference>
+        operator+(
+            typename binary_tree_child_iterator<
+                Node,
+                IsReverse,
+                Difference
+            >::difference_type const& n,
+            binary_tree_child_iterator<Node,IsReverse,Difference> const& operand
+        )
+    {
+        binary_tree_child_iterator<Node,IsReverse,Difference> itr(operand);
         itr += n;
         return itr;
     }
@@ -484,11 +503,16 @@ namespace odds_and_ends { namespace node {
 
     template <typename Node, typename IsReverse, typename Difference>
     binary_tree_child_iterator<Node,IsReverse,Difference>
-        binary_tree_child_iterator<Node,IsReverse,Difference>::operator-(
-            difference_type const& n
-        ) const
+        operator-(
+            binary_tree_child_iterator<Node,IsReverse,Difference> const& operand,
+            typename binary_tree_child_iterator<
+                Node,
+                IsReverse,
+                Difference
+            >::difference_type const& n
+        )
     {
-        binary_tree_child_iterator itr(*this);
+        binary_tree_child_iterator<Node,IsReverse,Difference> itr(operand);
         itr -= n;
         return itr;
     }
@@ -539,22 +563,40 @@ namespace odds_and_ends { namespace node {
         {
             case -2:
             {
-                BOOST_ASSERT_MSG(
-                    (
-                        IsReverse::value ? (
-                            (
-                                this->_current == this->_parent->left()
-                            ) && this->_parent->right()
-                        ) : (
-                            (
-                                this->_current == this->_parent->right()
-                            ) && this->_parent->left()
-                        )
-                    ),
-                    "n must be greater than -2."
-                );
+                if (this->_current)
+                {
+                    BOOST_ASSERT_MSG(
+                        (
+                            IsReverse::value ? (
+                                (
+                                    this->_current == this->_parent->left()
+                                ) && this->_parent->right()
+                            ) : (
+                                (
+                                    this->_current == this->_parent->right()
+                                ) && this->_parent->left()
+                            )
+                        ),
+                        "n must be greater than -2."
+                    );
 
-                this->_current = nullptr;
+                    this->_current = nullptr;
+                }
+                else
+                {
+                    this->_current = (
+                        IsReverse::value ? (
+                            this->_parent->right() ?
+                            this->_parent->right() :
+                            this->_parent->left()
+                        ) : (
+                            this->_parent->left() ?
+                            this->_parent->left() :
+                            this->_parent->right()
+                        )
+                    );
+                }
+
                 break;
             }
 
@@ -618,22 +660,39 @@ namespace odds_and_ends { namespace node {
             }
             else if (-2 == n)
             {
-                BOOST_ASSERT_MSG(
-                    (
-                        IsReverse::value ? (
-                            (
-                                this->_current == this->_parent->left()
-                            ) && this->_parent->right()
-                        ) : (
-                            (
-                                this->_current == this->_parent->right()
-                            ) && this->_parent->left()
-                        )
-                    ),
-                    "n must be greater than -2."
-                );
+                if (this->_current)
+                {
+                    BOOST_ASSERT_MSG(
+                        (
+                            IsReverse::value ? (
+                                (
+                                    this->_current == this->_parent->left()
+                                ) && this->_parent->right()
+                            ) : (
+                                (
+                                    this->_current == this->_parent->right()
+                                ) && this->_parent->left()
+                            )
+                        ),
+                        "n must be greater than -2."
+                    );
 
-                this->_current = nullptr;
+                    this->_current = nullptr;
+                }
+                else
+                {
+                    this->_current = (
+                        IsReverse::value ? (
+                            this->_parent->right() ?
+                            this->_parent->right() :
+                            this->_parent->left()
+                        ) : (
+                            this->_parent->left() ?
+                            this->_parent->left() :
+                            this->_parent->right()
+                        )
+                    );
+                }
             }
             else
             {
@@ -707,7 +766,7 @@ namespace odds_and_ends { namespace node {
         {
             if (rhs._current)
             {
-                return rhs._current == lhs._parent->right();
+                return rhs._current == (I1::value ? lhs._parent->left() : lhs._parent->right());
             }
             else
             {
@@ -750,19 +809,8 @@ namespace odds_and_ends { namespace node {
         return !(lhs < rhs);
     }
 
-    template <typename Node, typename IsReverse, typename Difference>
-    inline binary_tree_child_iterator<Node,IsReverse,Difference>
-        operator+(
-            typename binary_tree_child_iterator<Node,IsReverse,Difference>
-            ::difference_type const& n,
-            binary_tree_child_iterator<Node,IsReverse,Difference> const& itr
-        )
-    {
-        return itr + n;
-    }
-
     template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
-    inline typename ::boost::enable_if<
+    inline typename ::boost::lazy_enable_if<
         typename ::boost::mpl::if_<
             ::std::is_integral<D1>,
             ::std::is_integral<D2>,
@@ -804,7 +852,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
-    inline typename ::boost::disable_if<
+    inline typename ::boost::lazy_disable_if<
         typename ::boost::mpl::if_<
             ::std::is_integral<D1>,
             ::std::is_integral<D2>,

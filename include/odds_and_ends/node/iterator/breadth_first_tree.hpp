@@ -63,7 +63,7 @@ namespace odds_and_ends { namespace node {
         );
 
         template <typename ...Args>
-        explicit breadth_first_tree_iterator(Node& node, Args&&... args);
+        explicit breadth_first_tree_iterator(reference node, Args&&... args);
 
         template <typename N, typename Q>
         breadth_first_tree_iterator(
@@ -272,22 +272,11 @@ namespace odds_and_ends { namespace node {
         breadth_first_tree_iterator& operator++();
         breadth_first_tree_iterator operator++(int);
 
-        template <typename N, typename Q>
-        bool operator==(breadth_first_tree_iterator<N,Q> const& other) const;
-
-        template <typename N, typename Q>
-        bool operator!=(breadth_first_tree_iterator<N,Q> const& other) const;
-
-    protected:
+    private:
         _queue_t const& queue() const;
         _queue_t& queue();
         pointer const& current() const;
         pointer& current();
-
-    private:
-        template <typename Itr>
-        void _push_all(Itr itr_begin, Itr itr_end);
-
         void _pop(::boost::mpl::true_);
         void _pop(::boost::mpl::false_);
         void _clear_queue(::boost::mpl::true_);
@@ -296,6 +285,9 @@ namespace odds_and_ends { namespace node {
         void _clone(breadth_first_tree_iterator const& other, ::boost::mpl::false_);
         void _move(breadth_first_tree_iterator&& other, ::boost::mpl::true_);
         void _move(breadth_first_tree_iterator&& other, ::boost::mpl::false_);
+
+        template <typename Itr>
+        void _push_all(Itr itr_begin, Itr itr_end);
 
         template <typename OtherQueue>
         static void
@@ -330,6 +322,23 @@ namespace odds_and_ends { namespace node {
 
 //        breadth_first_tree_iterator(breadth_first_tree_iterator const&) = delete;
 //        breadth_first_tree_iterator(breadth_first_tree_iterator&&) = delete;
+
+        template <typename N, typename Q>
+        friend class breadth_first_tree_iterator;
+
+        template <typename N1, typename Q1, typename N2, typename Q2>
+        friend bool
+            operator==(
+                breadth_first_tree_iterator<N1,Q1> const& lhs,
+                breadth_first_tree_iterator<N2,Q2> const& rhs
+            );
+
+        template <typename N1, typename Q1, typename N2, typename Q2>
+        friend bool
+            operator!=(
+                breadth_first_tree_iterator<N1,Q1> const& lhs,
+                breadth_first_tree_iterator<N2,Q2> const& rhs
+            );
     };
 }}  // namespace odds_and_ends::node
 
@@ -368,7 +377,7 @@ namespace odds_and_ends { namespace node {
     template <typename Node, typename QGen>
     template <typename ...Args>
     inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        Node& node,
+        reference node,
         Args&&... args
     ) : _queue(::std::forward<Args>(args)...),
         _current(::std::pointer_traits<pointer>::pointer_to(node)),
@@ -1086,26 +1095,24 @@ namespace odds_and_ends { namespace node {
         return itr;
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
+    template <typename N1, typename Q1, typename N2, typename Q2>
     inline bool
-        breadth_first_tree_iterator<Node,QGen>::operator==(
-            breadth_first_tree_iterator<N,Q> const& other
-        ) const
+        operator==(
+            breadth_first_tree_iterator<N1,Q1> const& lhs,
+            breadth_first_tree_iterator<N2,Q2> const& rhs
+        )
     {
-        return (
-            this->_state == ::odds_and_ends::node::traversal_state(other)
-        ) && (this->_current == other.current());
+        return (lhs._state == rhs._state) && (lhs._current == rhs._current);
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
+    template <typename N1, typename Q1, typename N2, typename Q2>
     inline bool
-        breadth_first_tree_iterator<Node,QGen>::operator!=(
-            breadth_first_tree_iterator<N,Q> const& other
-        ) const
+        operator!=(
+            breadth_first_tree_iterator<N1,Q1> const& lhs,
+            breadth_first_tree_iterator<N2,Q2> const& rhs
+        )
     {
-        return !(*this == other);
+        return (lhs._state != rhs._state) || (lhs._current != rhs._current);
     }
 
     template <
