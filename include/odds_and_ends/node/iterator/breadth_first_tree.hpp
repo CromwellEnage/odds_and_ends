@@ -343,6 +343,7 @@ namespace odds_and_ends { namespace node {
 }}  // namespace odds_and_ends::node
 
 #include <utility>
+#include <memory>
 #include <odds_and_ends/static_introspection/concept/is_mergeable_heap.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_clear.hpp>
 #include <boost/heap/heap_merge.hpp>

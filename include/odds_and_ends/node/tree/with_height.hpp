@@ -337,6 +337,16 @@ namespace odds_and_ends { namespace node { namespace tree {
                             bool const result = _composite_parent_t::listen_to(e);
                             typename traits::height_type h = ::boost::initialized_value;
 
+                            if (this->derived().left())
+                            {
+                                h = this->derived().left()->height();
+                            }
+
+                            if (this->derived().right() && (h < this->derived().right()->height()))
+                            {
+                                h = this->derived().right()->height();
+                            }
+
                             for (
                                 typename traits::pointer p = (
                                     ::std::pointer_traits<typename traits::pointer>::pointer_to(

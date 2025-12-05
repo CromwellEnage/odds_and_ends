@@ -14,6 +14,7 @@
 #include <odds_and_ends/node/event/pre_erase.hpp>
 #include <odds_and_ends/node/event/post_erase_left_tree.hpp>
 #include <odds_and_ends/node/event/post_erase_right_tree.hpp>
+#include <odds_and_ends/node/algorithm/is_ancestor_of.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/allocator_ctor_2nd_stage.hpp>
@@ -474,6 +475,12 @@ namespace odds_and_ends { namespace node { namespace tree {
 
                         inline void set_left(Derived& n)
                         {
+                            BOOST_ASSERT(&this->derived() != &n);
+                            BOOST_ASSERT(
+                                !::odds_and_ends::node::algorithm
+                                ::is_ancestor_of(&n, &this->derived())
+                            );
+
                             if (this->_left)
                             {
                                 this->unset_left();
@@ -498,6 +505,12 @@ namespace odds_and_ends { namespace node { namespace tree {
 
                         inline void set_right(Derived& n)
                         {
+                            BOOST_ASSERT(&this->derived() != &n);
+                            BOOST_ASSERT(
+                                !::odds_and_ends::node::algorithm
+                                ::is_ancestor_of(&n, &this->derived())
+                            );
+
                             if (this->_right)
                             {
                                 this->unset_right();
@@ -514,7 +527,15 @@ namespace odds_and_ends { namespace node { namespace tree {
                             typename traits::pointer p = this->_right;
 
                             BOOST_ASSERT_MSG(p, "This node has no right child to rotate to.");
-                            this->_set_right(p->left());
+
+                            if (p->left())
+                            {
+                                this->_set_right(p->left());
+                            }
+                            else
+                            {
+                                this->_right = nullptr;
+                            }
 
                             typename traits::pointer t = (
                                 ::std::pointer_traits<typename traits::pointer>::pointer_to(
@@ -548,7 +569,15 @@ namespace odds_and_ends { namespace node { namespace tree {
                             typename traits::pointer p = this->_left;
 
                             BOOST_ASSERT_MSG(p, "This node has no left child to rotate to.");
-                            this->_set_left(p->right());
+
+                            if (p->right())
+                            {
+                                this->_set_left(p->right());
+                            }
+                            else
+                            {
+                                this->_left = nullptr;
+                            }
 
                             typename traits::pointer t = (
                                 ::std::pointer_traits<typename traits::pointer>::pointer_to(

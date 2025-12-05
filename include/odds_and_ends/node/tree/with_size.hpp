@@ -354,6 +354,18 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 p = p->parent()
                             )
                             {
+                                p->_size_reference() = ::boost::initialized_value;
+
+                                if (p->left())
+                                {
+                                    p->_size_reference() += p->left()->size();
+                                }
+
+                                if (p->right())
+                                {
+                                    p->_size_reference() += p->right()->size();
+                                }
+
                                 ++p->_size_reference();
                             }
 
@@ -365,11 +377,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             bool const result = _composite_parent_t::listen_to(e);
 
                             for (
-                                typename traits::pointer p = (
-                                    ::std::pointer_traits<typename traits::pointer>::pointer_to(
-                                        this->derived()
-                                    )
-                                );
+                                typename traits::pointer p = this->derived().parent();
                                 p;
                                 p = p->parent()
                             )

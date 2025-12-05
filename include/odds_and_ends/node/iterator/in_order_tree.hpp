@@ -138,6 +138,7 @@ namespace odds_and_ends { namespace node {
 }}  // namespace odds_and_ends::node
 
 #include <utility>
+#include <memory>
 #include <odds_and_ends/node/algorithm/is_ancestor_of.hpp>
 #include <odds_and_ends/node/algorithm/advance_binary_tree.hpp>
 #include <odds_and_ends/node/algorithm/binary_tree_index_of.hpp>
