@@ -1,7 +1,7 @@
 // Copyright (C) 2013-2025 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__NODE__ALGORITHM__ADVANCE_BINARY_TREE_HPP
-#define ODDS_AND_ENDS__NODE__ALGORITHM__ADVANCE_BINARY_TREE_HPP
+#ifndef ODDS_AND_ENDS__NODE__ALGORITHM__ADVANCE_IN_BINARY_TREE_HPP
+#define ODDS_AND_ENDS__NODE__ALGORITHM__ADVANCE_IN_BINARY_TREE_HPP
 
 #include <boost/utility/value_init.hpp>
 #include <boost/assert.hpp>
@@ -10,7 +10,7 @@ namespace odds_and_ends { namespace node { namespace algorithm {
 
     template <typename NodePointer, typename Difference>
     NodePointer
-        advance_binary_tree(
+        advance_in_binary_tree(
             NodePointer node_ptr,
             Difference difference,
             NodePointer const& root_ptr
@@ -159,5 +159,5 @@ namespace odds_and_ends { namespace node { namespace algorithm {
     }
 }}}  // namespace odds_and_ends::node::algorithm
 
-#endif  // ODDS_AND_ENDS__NODE__ALGORITHM__ADVANCE_BINARY_TREE_HPP
+#endif  // ODDS_AND_ENDS__NODE__ALGORITHM__ADVANCE_IN_BINARY_TREE_HPP
 

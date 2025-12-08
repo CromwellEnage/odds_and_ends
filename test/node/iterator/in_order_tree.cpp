@@ -50,7 +50,7 @@ void test_00()
     BOOST_TEST(!n76.left());
     BOOST_TEST(!n76.right());
 
-    ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node> in_ord_fwd_itr(n50);
+    ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node> in_ord_fwd_itr(n50, false);
 
     BOOST_TEST(9 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
@@ -87,7 +87,7 @@ void test_00()
     ::odds_and_ends::node::in_order_tree_iterator<
         binary_tree_node,
         ::boost::mpl::true_
-    > in_ord_rev_itr(n50);
+    > in_ord_rev_itr(n50, false);
 
     BOOST_TEST(76 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
@@ -429,7 +429,7 @@ void test_01()
     BOOST_TEST(22 == **(n25.rbegin() + 1));
     BOOST_TEST(n25.rbegin() + 2 == n25.rend());
 
-    ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node> in_ord_fwd_itr(n13);
+    ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node> in_ord_fwd_itr(n13, false);
 
     BOOST_TEST(1 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
@@ -496,7 +496,7 @@ void test_01()
     ::odds_and_ends::node::in_order_tree_iterator<
         binary_tree_node,
         ::boost::mpl::true_
-    > in_ord_rev_itr(n13);
+    > in_ord_rev_itr(n13, false);
 
     BOOST_TEST(27 == **in_ord_rev_itr);
     ++in_ord_rev_itr;

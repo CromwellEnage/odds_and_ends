@@ -3,17 +3,6 @@
 #ifndef ODDS_AND_ENDS__NODE__ALGORITHM__RED_BLACK_TREE_TEST_HPP
 #define ODDS_AND_ENDS__NODE__ALGORITHM__RED_BLACK_TREE_TEST_HPP
 
-namespace odds_and_ends { namespace node { namespace algorithm { namespace _detail {
-
-    struct binary_noop
-    {
-        template <typename T0, typename T1>
-        inline void operator()(T0 const&, T1 const&) const
-        {
-        }
-    };
-}}}}  // namespace odds_and_ends::node::algorithm::_detail
-
 namespace odds_and_ends { namespace node { namespace algorithm {
 
     enum red_black_tree_test_bit
@@ -100,7 +89,7 @@ namespace odds_and_ends { namespace node { namespace algorithm {
     {
         static typename Node::traits::size_type const zero_v = ::boost::initialized_value;
         ::std::vector<typename Node::traits::size_type> result(node.size(), zero_v);
-        ::odds_and_ends::node::in_order_tree_iterator<Node const> itr(node);
+        ::odds_and_ends::node::in_order_tree_iterator<Node const> itr(node, false);
 
         for (
             typename Node::traits::size_type index = ::boost::initialized_value;
@@ -135,7 +124,7 @@ namespace odds_and_ends { namespace node { namespace algorithm {
         ::std::vector<
             ::std::bitset< ::odds_and_ends::node::algorithm::red_black_tree_test_bit_count>
         > result(node.size());
-        ::odds_and_ends::node::in_order_tree_iterator<Node const> itr(node);
+        ::odds_and_ends::node::in_order_tree_iterator<Node const> itr(node, false);
 
         for (
             typename Node::traits::size_type index = ::boost::initialized_value;
@@ -189,8 +178,8 @@ namespace odds_and_ends { namespace node { namespace algorithm { namespace _deta
         red_black_tree_test(
             TestResult test_result,
             TestDepthsResult test_depths_result,
-            F0 const& f0,
-            F1 const& f1
+            F0 f0,
+            F1 f1
         )
     {
         bool test_flag = true;
@@ -209,11 +198,15 @@ namespace odds_and_ends { namespace node { namespace algorithm { namespace _deta
             )
             {
                 test_flag = false;
-                f0(
-                    index,
-                    ::odds_and_ends::node::algorithm
-                    ::red_black_tree_test_bit_for_red_node_with_red_parent
-                );
+
+                if (f0)
+                {
+                    f0(
+                        index,
+                        ::odds_and_ends::node::algorithm
+                        ::red_black_tree_test_bit_for_red_node_with_red_parent
+                    );
+                }
             }
 
             if (
@@ -224,11 +217,15 @@ namespace odds_and_ends { namespace node { namespace algorithm { namespace _deta
             )
             {
                 test_flag = false;
-                f0(
-                    index,
-                    ::odds_and_ends::node::algorithm
-                    ::red_black_tree_test_bit_for_black_node_with_single_left_black_child
-                );
+
+                if (f0)
+                {
+                    f0(
+                        index,
+                        ::odds_and_ends::node::algorithm
+                        ::red_black_tree_test_bit_for_black_node_with_single_left_black_child
+                    );
+                }
             }
 
             if (
@@ -239,11 +236,15 @@ namespace odds_and_ends { namespace node { namespace algorithm { namespace _deta
             )
             {
                 test_flag = false;
-                f0(
-                    index,
-                    ::odds_and_ends::node::algorithm
-                    ::red_black_tree_test_bit_for_black_node_with_single_right_black_child
-                );
+
+                if (f0)
+                {
+                    f0(
+                        index,
+                        ::odds_and_ends::node::algorithm
+                        ::red_black_tree_test_bit_for_black_node_with_single_right_black_child
+                    );
+                }
             }
         }
 
@@ -257,7 +258,10 @@ namespace odds_and_ends { namespace node { namespace algorithm { namespace _deta
         {
             if (test_depths_result[index])
             {
-                f1(index, test_depths_result[index]);
+                if (f1)
+                {
+                    f1(index, test_depths_result[index]);
+                }
 
                 if (depth)
                 {
@@ -280,7 +284,7 @@ namespace odds_and_ends { namespace node { namespace algorithm { namespace _deta
 namespace odds_and_ends { namespace node { namespace algorithm {
 
     template <typename Node, typename F0, typename F1>
-    inline bool red_black_tree_test(Node const& node, F0 const& f0, F1 const& f1)
+    inline bool red_black_tree_test(Node const& node, F0 f0, F1 f1)
     {
         return ::odds_and_ends::node::algorithm::_detail::red_black_tree_test(
             ::odds_and_ends::node::algorithm::red_black_tree_test_invariants(node),
@@ -289,14 +293,26 @@ namespace odds_and_ends { namespace node { namespace algorithm {
             f1
         );
     }
+}}}  // namespace odds_and_ends::node::algorithm
+
+#include <functional>
+
+namespace odds_and_ends { namespace node { namespace algorithm {
 
     template <typename Node>
     inline bool red_black_tree_test(Node const& node)
     {
         return ::odds_and_ends::node::algorithm::red_black_tree_test(
             node,
-            ::odds_and_ends::node::algorithm::_detail::binary_noop(),
-            ::odds_and_ends::node::algorithm::_detail::binary_noop()
+            ::std::function<
+                void(
+                    typename Node::traits::size_type const&,
+                    ::odds_and_ends::node::algorithm::red_black_tree_test_bit
+                )
+            >(),
+            ::std::function<
+                void(::std::size_t const&, typename Node::traits::size_type const&)
+            >()
         );
     }
 }}}  // namespace odds_and_ends::node::algorithm

@@ -15,8 +15,8 @@ namespace odds_and_ends { namespace node {
         template <typename Node>
         static void post_fill(Node& root);
 
-        template <typename NodePointer>
-        static NodePointer post_insert(NodePointer node_ptr);
+        template <typename Node>
+        static typename Node::traits::pointer post_insert(Node& node);
 
         template <typename Node>
         static ::std::tuple<
@@ -28,13 +28,17 @@ namespace odds_and_ends { namespace node {
     };
 }}  // namespace odds_and_ends::node
 
+#include <memory>
 #include <boost/assert.hpp>
 
 namespace odds_and_ends { namespace node {
 
-    template <typename NodePointer>
-    NodePointer left_leaning_red_black_tree_balancer::post_insert(NodePointer node_ptr)
+    template <typename Node>
+    typename Node::traits::pointer left_leaning_red_black_tree_balancer::post_insert(Node& node)
     {
+        typedef typename Node::traits::pointer NodePointer;
+
+        NodePointer node_ptr = ::std::pointer_traits<NodePointer>::pointer_to(node);
         NodePointer parent_ptr;
         NodePointer grandparent_ptr;
         NodePointer uncle_ptr;
@@ -194,8 +198,7 @@ namespace odds_and_ends { namespace node {
     }
 }}  // namespace odds_and_ends::node
 
-#include <iostream>
-#include <memory>
+#include <utility>
 
 namespace odds_and_ends { namespace node {
 
@@ -210,6 +213,7 @@ namespace odds_and_ends { namespace node {
         using ::std::swap;
         typedef typename Node::traits::pointer NodePointer;
         typedef ::std::tuple<NodePointer,NodePointer,NodePointer> Result;
+
         NodePointer succ_ptr = ::std::pointer_traits<NodePointer>::pointer_to(node);
         NodePointer root_ptr = succ_ptr;
 
@@ -217,7 +221,7 @@ namespace odds_and_ends { namespace node {
         {
         }
 
-        NodePointer node_ptr;
+        NodePointer node_ptr = nullptr;
 
         if (succ_ptr->left())
         {
@@ -297,10 +301,12 @@ namespace odds_and_ends { namespace node {
         else  // if (!succ_ptr->left())
         {
             BOOST_ASSERT_MSG(!succ_ptr->right(), "The node to be removed is not left-leaning.");
-            BOOST_ASSERT_MSG(
-                root_ptr != succ_ptr,
-                "The node to be removed is the only node in the tree."
-            );
+
+            if (root_ptr == succ_ptr)
+            {
+                // The node to be removed is the only node in the tree.
+                return Result(succ_ptr, node_ptr, nullptr);
+            }
 
             if (succ_ptr->red())
             {

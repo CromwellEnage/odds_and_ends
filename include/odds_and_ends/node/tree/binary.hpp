@@ -473,12 +473,21 @@ namespace odds_and_ends { namespace node { namespace tree {
                             this->handle(::odds_and_ends::node::post_erase_left_tree_event());
                         }
 
-                        inline void set_left(Derived& n)
+                        inline void set_left_ptr(typename traits::pointer p)
                         {
-                            BOOST_ASSERT(&this->derived() != &n);
+                            BOOST_ASSERT(!!p);
                             BOOST_ASSERT(
-                                !::odds_and_ends::node::algorithm
-                                ::is_ancestor_of(&n, &this->derived())
+                                ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                    this->derived()
+                                ) != p
+                            );
+                            BOOST_ASSERT(
+                                !::odds_and_ends::node::algorithm::is_ancestor_of(
+                                    p,
+                                    ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                        this->derived()
+                                    )
+                                )
                             );
 
                             if (this->_left)
@@ -486,10 +495,15 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 this->unset_left();
                             }
 
-                            this->_set_left(
+                            this->_set_left(p);
+                            this->handle(::odds_and_ends::node::post_insert_left_tree_event());
+                        }
+
+                        inline void set_left(Derived& n)
+                        {
+                            this->set_left_ptr(
                                 ::std::pointer_traits<typename traits::pointer>::pointer_to(n)
                             );
-                            this->handle(::odds_and_ends::node::post_insert_left_tree_event());
                         }
 
                         inline void unset_right()
@@ -503,12 +517,21 @@ namespace odds_and_ends { namespace node { namespace tree {
                             this->handle(::odds_and_ends::node::post_erase_right_tree_event());
                         }
 
-                        inline void set_right(Derived& n)
+                        inline void set_right_ptr(typename traits::pointer p)
                         {
-                            BOOST_ASSERT(&this->derived() != &n);
+                            BOOST_ASSERT(!!p);
                             BOOST_ASSERT(
-                                !::odds_and_ends::node::algorithm
-                                ::is_ancestor_of(&n, &this->derived())
+                                ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                    this->derived()
+                                ) != p
+                            );
+                            BOOST_ASSERT(
+                                !::odds_and_ends::node::algorithm::is_ancestor_of(
+                                    p,
+                                    ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                        this->derived()
+                                    )
+                                )
                             );
 
                             if (this->_right)
@@ -516,10 +539,15 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 this->unset_right();
                             }
 
-                            this->_set_right(
+                            this->_set_right(p);
+                            this->handle(::odds_and_ends::node::post_insert_right_tree_event());
+                        }
+
+                        inline void set_right(Derived& n)
+                        {
+                            this->set_right_ptr(
                                 ::std::pointer_traits<typename traits::pointer>::pointer_to(n)
                             );
-                            this->handle(::odds_and_ends::node::post_insert_right_tree_event());
                         }
 
                         inline typename traits::pointer rotate_left()

@@ -3,11 +3,12 @@
 #ifndef ODDS_AND_ENDS__NODE__EVENT__POST_ROTATE_LEFT_TREE_HPP
 #define ODDS_AND_ENDS__NODE__EVENT__POST_ROTATE_LEFT_TREE_HPP
 
-#include <odds_and_ends/node/event/post_rotate.hpp>
+#include <odds_and_ends/composite_type/event/function_call_broadcast.hpp>
 
 namespace odds_and_ends { namespace node {
 
-    struct post_rotate_left_tree_event : ::odds_and_ends::node::post_rotate_event
+    struct post_rotate_left_tree_event :
+        ::odds_and_ends::composite_type::function_call_broadcast_event
     {
     };
 }}  // namespace odds_and_ends::node

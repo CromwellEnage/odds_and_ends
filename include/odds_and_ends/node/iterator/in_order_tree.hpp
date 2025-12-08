@@ -8,7 +8,6 @@
 #include <odds_and_ends/node/traversal_state.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
-#include <boost/mpl/not.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/equal_to.hpp>
 
@@ -52,7 +51,9 @@ namespace odds_and_ends { namespace node {
         ::odds_and_ends::node::traversal_state _state;
 
     public:
-        explicit in_order_tree_iterator(reference node, bool is_end = false);
+        in_order_tree_iterator();
+        in_order_tree_iterator(reference node);
+        in_order_tree_iterator(reference node, bool is_end);
 
         template <typename N, typename I, typename D>
         in_order_tree_iterator(
@@ -140,8 +141,10 @@ namespace odds_and_ends { namespace node {
 #include <utility>
 #include <memory>
 #include <odds_and_ends/node/algorithm/is_ancestor_of.hpp>
-#include <odds_and_ends/node/algorithm/advance_binary_tree.hpp>
+#include <odds_and_ends/node/algorithm/increment_in_binary_tree.hpp>
+#include <odds_and_ends/node/algorithm/advance_in_binary_tree.hpp>
 #include <odds_and_ends/node/algorithm/binary_tree_index_of.hpp>
+#include <boost/mpl/not.hpp>
 #include <boost/utility/value_init.hpp>
 #include <boost/assert.hpp>
 
@@ -164,7 +167,25 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename Difference>
+    in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator() :
+        _root(nullptr), _current(nullptr), _state(::odds_and_ends::node::no_traversal)
+    {
+    }
+
+    template <typename Node, typename IsReverse, typename Difference>
     in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
+        reference node
+    ) : _root(::std::pointer_traits<pointer>::pointer_to(node)),
+        _current(::std::pointer_traits<pointer>::pointer_to(node)),
+        _state(::odds_and_ends::node::in_order_traversal)
+    {
+        for (; this->_root->parent(); this->_root = this->_root->parent())
+        {
+        }
+    }
+
+    template <typename Node, typename IsReverse, typename Difference>
+    inline in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
         reference node,
         bool is_end
     ) : _root(::std::pointer_traits<pointer>::pointer_to(node)),
@@ -182,7 +203,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename Difference>
-    in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
+    inline in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
         in_order_tree_iterator const& other
     ) : _root(other._root), _current(other._current), _state(other._state)
     {
@@ -190,7 +211,7 @@ namespace odds_and_ends { namespace node {
 
     template <typename Node, typename IsReverse, typename Difference>
     template <typename N, typename I, typename D>
-    in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
+    inline in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
         in_order_tree_iterator<N,I,D> const& other,
         typename ::boost::enable_if<
             typename ::boost::mpl::eval_if<
@@ -209,7 +230,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename Difference>
-    in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
+    inline in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
         in_order_tree_iterator&& other
     ) : _root(::std::move(other._root)),
         _current(::std::move(other._current)),
@@ -219,7 +240,7 @@ namespace odds_and_ends { namespace node {
 
     template <typename Node, typename IsReverse, typename Difference>
     template <typename N, typename I, typename D>
-    in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
+    inline in_order_tree_iterator<Node,IsReverse,Difference>::in_order_tree_iterator(
         in_order_tree_iterator<N,I,D>&& other,
         typename ::boost::enable_if<
             typename ::boost::mpl::eval_if<
@@ -286,17 +307,19 @@ namespace odds_and_ends { namespace node {
     template <typename Node, typename IsReverse, typename Difference>
     void in_order_tree_iterator<Node,IsReverse,Difference>::_initialize(::boost::mpl::false_)
     {
-        for (; this->_current->left(); this->_current = this->_current->left())
-        {
-        }
+        this->_current = ::odds_and_ends::node::algorithm::increment_in_binary_tree(
+            static_cast<pointer>(nullptr),
+            this->_root
+        );
     }
 
     template <typename Node, typename IsReverse, typename Difference>
     void in_order_tree_iterator<Node,IsReverse,Difference>::_initialize(::boost::mpl::true_)
     {
-        for (; this->_current->right(); this->_current = this->_current->right())
-        {
-        }
+        this->_current = ::odds_and_ends::node::algorithm::decrement_in_binary_tree(
+            static_cast<pointer>(nullptr),
+            this->_root
+        );
     }
 
     template <typename Node, typename IsReverse, typename Difference>
@@ -323,45 +346,22 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename Difference>
-    void in_order_tree_iterator<Node,IsReverse,Difference>::_increment(::boost::mpl::false_ tag)
+    inline void
+        in_order_tree_iterator<Node,IsReverse,Difference>::_increment(::boost::mpl::false_ tag)
     {
-        pointer node_ptr = this->_current;
-
-        if (node_ptr)
+        if (this->_current)
         {
-            pointer other_ptr = node_ptr->right();
+            this->_current = ::odds_and_ends::node::algorithm::increment_in_binary_tree(
+                this->_current,
+                this->_root
+            );
 
-            if (other_ptr)
+            if (!this->_current)
             {
-                for (; other_ptr->left(); other_ptr = other_ptr->left())
-                {
-                }
-
-                this->_current = other_ptr;
-                return;
+                this->_state = ::odds_and_ends::node::no_traversal;
             }
-
-            other_ptr = _root->parent();
-
-            for (
-                pointer next_ptr = node_ptr->parent();
-                next_ptr != other_ptr;
-                next_ptr = next_ptr->parent()
-            )
-            {
-                if (node_ptr == next_ptr->left())
-                {
-                    this->_current = next_ptr;
-                    return;
-                }
-
-                node_ptr = next_ptr;
-            }
-
-            this->_current = nullptr;
-            this->_state = ::odds_and_ends::node::no_traversal;
         }
-        else
+        else  // if (!this->_current)
         {
             this->_current = this->_root;
             this->_state = ::odds_and_ends::node::in_order_traversal;
@@ -370,45 +370,22 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename Difference>
-    void in_order_tree_iterator<Node,IsReverse,Difference>::_increment(::boost::mpl::true_ tag)
+    inline void
+        in_order_tree_iterator<Node,IsReverse,Difference>::_increment(::boost::mpl::true_ tag)
     {
-        pointer node_ptr = this->_current;
-
-        if (node_ptr)
+        if (this->_current)
         {
-            pointer other_ptr = node_ptr->left();
+            this->_current = ::odds_and_ends::node::algorithm::decrement_in_binary_tree(
+                this->_current,
+                this->_root
+            );
 
-            if (other_ptr)
+            if (!this->_current)
             {
-                for (; other_ptr->right(); other_ptr = other_ptr->right())
-                {
-                }
-
-                this->_current = other_ptr;
-                return;
+                this->_state = ::odds_and_ends::node::no_traversal;
             }
-
-            other_ptr = _root->parent();
-
-            for (
-                pointer next_ptr = node_ptr->parent();
-                next_ptr != other_ptr;
-                next_ptr = next_ptr->parent()
-            )
-            {
-                if (node_ptr == next_ptr->right())
-                {
-                    this->_current = next_ptr;
-                    return;
-                }
-
-                node_ptr = next_ptr;
-            }
-
-            this->_current = nullptr;
-            this->_state = ::odds_and_ends::node::no_traversal;
         }
-        else
+        else  // if (!this->_current)
         {
             this->_current = this->_root;
             this->_state = ::odds_and_ends::node::in_order_traversal;
@@ -496,7 +473,7 @@ namespace odds_and_ends { namespace node {
 
         if (
             !(
-                this->_current = ::odds_and_ends::node::algorithm::advance_binary_tree(
+                this->_current = ::odds_and_ends::node::algorithm::advance_in_binary_tree(
                     this->_current,
                     IsReverse::value ? -n : n,
                     this->_root
@@ -724,7 +701,14 @@ namespace odds_and_ends { namespace node {
     inline in_order_tree_iterator<Node,::boost::mpl::false_,Difference>
         make_in_order_tree_iterator(Node& node)
     {
-        return in_order_tree_iterator<Node,::boost::mpl::false_,Difference>(node);
+        return in_order_tree_iterator<Node,::boost::mpl::false_,Difference>(node, false);
+    }
+
+    template <typename Difference = ::std::ptrdiff_t, typename Node>
+    inline in_order_tree_iterator<Node,::boost::mpl::false_,Difference>
+        make_in_order_tree_iterator_begin(Node& node)
+    {
+        return in_order_tree_iterator<Node,::boost::mpl::false_,Difference>(node, false);
     }
 
     template <typename Difference = ::std::ptrdiff_t, typename Node>
@@ -738,7 +722,14 @@ namespace odds_and_ends { namespace node {
     inline in_order_tree_iterator<Node,::boost::mpl::true_,Difference>
         make_in_order_tree_reverse_iterator(Node& node)
     {
-        return in_order_tree_iterator<Node,::boost::mpl::true_,Difference>(node);
+        return in_order_tree_iterator<Node,::boost::mpl::true_,Difference>(node, false);
+    }
+
+    template <typename Difference = ::std::ptrdiff_t, typename Node>
+    inline in_order_tree_iterator<Node,::boost::mpl::true_,Difference>
+        make_in_order_tree_reverse_iterator_begin(Node& node)
+    {
+        return in_order_tree_iterator<Node,::boost::mpl::true_,Difference>(node, false);
     }
 
     template <typename Difference = ::std::ptrdiff_t, typename Node>
@@ -746,6 +737,13 @@ namespace odds_and_ends { namespace node {
         make_in_order_tree_reverse_iterator_end(Node& node)
     {
         return in_order_tree_iterator<Node,::boost::mpl::true_,Difference>(node, true);
+    }
+
+    template <typename Difference = ::std::ptrdiff_t, typename Node>
+    inline in_order_tree_iterator<Node,::boost::mpl::false_,Difference>
+        make_in_order_tree_iterator_position(Node& node)
+    {
+        return in_order_tree_iterator<Node,::boost::mpl::false_,Difference>(node);
     }
 }}  // namespace odds_and_ends::node
 

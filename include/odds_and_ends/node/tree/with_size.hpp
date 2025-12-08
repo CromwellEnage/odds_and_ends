@@ -7,8 +7,13 @@
 #include <utility>
 #include <memory>
 #include <odds_and_ends/node/event/post_insert.hpp>
-#include <odds_and_ends/node/event/post_rotate.hpp>
+#include <odds_and_ends/node/event/post_insert_left_tree.hpp>
+#include <odds_and_ends/node/event/post_insert_right_tree.hpp>
+#include <odds_and_ends/node/event/post_rotate_left_tree.hpp>
+#include <odds_and_ends/node/event/post_rotate_right_tree.hpp>
 #include <odds_and_ends/node/event/post_erase.hpp>
+#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
+#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
 #include <odds_and_ends/node/event/pre_erase.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
@@ -249,7 +254,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             ::coercive_move_constructor_event const& e,
                             Source&& source
                         ) : _composite_parent_t(e, static_cast<Source&&>(source)),
-                            _size(::std::move(source._size_reference()))
+                            _size(::std::move(source._size))
                         {
                         }
 
@@ -260,7 +265,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             Source&& source,
                             Alloc const& alloc
                         ) : _composite_parent_t(e, static_cast<Source&&>(source), alloc),
-                            _size(::std::move(source._size_reference()))
+                            _size(::std::move(source._size))
                         {
                         }
 
@@ -275,7 +280,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 e,
                                 static_cast<Source&&>(source)
                             );
-                            this->_size = ::std::move(source._size_reference());
+                            this->_size = ::std::move(source._size);
                             return result;
                         }
 
@@ -292,7 +297,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 static_cast<Source&&>(source),
                                 alloc
                             );
-                            this->_size = ::std::move(source._size_reference());
+                            this->_size = ::std::move(source._size);
                             return result;
                         }
 
@@ -343,6 +348,79 @@ namespace odds_and_ends { namespace node { namespace tree {
                         bool listen_to(::odds_and_ends::node::post_insert_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
+                            this->_post_insert_update_size();
+                            return result;
+                        }
+
+                        bool
+                            listen_to(::odds_and_ends::node::post_insert_left_tree_event const& e)
+                        {
+                            bool const result = _composite_parent_t::listen_to(e);
+                            this->_post_insert_update_size();
+                            return result;
+                        }
+
+                        bool
+                            listen_to(::odds_and_ends::node::post_insert_right_tree_event const& e)
+                        {
+                            bool const result = _composite_parent_t::listen_to(e);
+                            this->_post_insert_update_size();
+                            return result;
+                        }
+
+                        bool listen_to(::odds_and_ends::node::pre_erase_event const& e)
+                        {
+                            bool const result = _composite_parent_t::listen_to(e);
+
+                            for (
+                                typename traits::pointer p = this->parent();
+                                p;
+                                p = p->parent()
+                            )
+                            {
+                                p->_size -= this->size();
+                            }
+
+                            return result;
+                        }
+
+                        bool listen_to(::odds_and_ends::node::post_erase_event const& e)
+                        {
+                            return _composite_parent_t::listen_to(e);
+                        }
+
+                        bool listen_to(::odds_and_ends::node::post_erase_left_tree_event const& e)
+                        {
+                            return _composite_parent_t::listen_to(e);
+                        }
+
+                        bool listen_to(::odds_and_ends::node::post_erase_right_tree_event const& e)
+                        {
+                            return _composite_parent_t::listen_to(e);
+                        }
+
+                        inline bool
+                            listen_to(::odds_and_ends::node::post_rotate_left_tree_event const& e)
+                        {
+                            bool const result = _composite_parent_t::listen_to(e);
+                            this->_post_rotate_update_size();
+                            return result;
+                        }
+
+                        inline bool
+                            listen_to(::odds_and_ends::node::post_rotate_right_tree_event const& e)
+                        {
+                            bool const result = _composite_parent_t::listen_to(e);
+                            this->_post_rotate_update_size();
+                            return result;
+                        }
+
+                        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
+
+                    private:
+                        inline void _post_insert_update_size()
+                        {
+                            typename traits::child_iterator itr;
 
                             for (
                                 typename traits::pointer p = (
@@ -354,67 +432,26 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 p = p->parent()
                             )
                             {
-                                p->_size_reference() = ::boost::initialized_value;
+                                p->_size = ::boost::initialized_value;
 
-                                if (p->left())
+                                for (itr = p->begin(); itr != p->end(); ++itr)
                                 {
-                                    p->_size_reference() += p->left()->size();
+                                    p->_size += itr->size();
                                 }
 
-                                if (p->right())
-                                {
-                                    p->_size_reference() += p->right()->size();
-                                }
-
-                                ++p->_size_reference();
+                                ++p->_size;
                             }
-
-                            return result;
                         }
 
-                        bool listen_to(::odds_and_ends::node::pre_erase_event const& e)
+                        inline void _post_rotate_update_size()
                         {
-                            bool const result = _composite_parent_t::listen_to(e);
-
-                            for (
-                                typename traits::pointer p = this->derived().parent();
-                                p;
-                                p = p->parent()
-                            )
-                            {
-                                p->_size_reference() -= this->size();
-                            }
-
-                            return result;
-                        }
-
-                        bool listen_to(::odds_and_ends::node::post_erase_event const& e)
-                        {
-                            return _composite_parent_t::listen_to(e);
-                        }
-
-                        inline bool
-                            listen_to(::odds_and_ends::node::post_rotate_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-
-                            this->derived().parent()->_size_reference() = this->_size;
+                            this->parent()->_size = this->_size;
                             this->_size = (
                                 this->left() ? this->left()->size() : ::boost::initialized_value
                             ) + (
                                 this->right() ? this->right()->size() : ::boost::initialized_value
                             );
                             ++this->_size;
-
-                            return result;
-                        }
-
-                        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
-
-                    private:
-                        inline typename traits::size_type& _size_reference()
-                        {
-                            return this->_size;
                         }
 
                         friend class _result;

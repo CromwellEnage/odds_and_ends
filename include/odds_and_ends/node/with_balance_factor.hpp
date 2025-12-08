@@ -1,20 +1,10 @@
-// Copyright (C) 2011-2025 Cromwell D. Enage
+// Copyright (C) 2025 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__NODE__TREE__WITH_HEIGHT_HPP
-#define ODDS_AND_ENDS__NODE__TREE__WITH_HEIGHT_HPP
+#ifndef ODDS_AND_ENDS__NODE__WITH_BALANCE_FACTOR_HPP
+#define ODDS_AND_ENDS__NODE__WITH_BALANCE_FACTOR_HPP
 
-#include <cstddef>
 #include <utility>
 #include <memory>
-#include <odds_and_ends/node/event/post_insert.hpp>
-#include <odds_and_ends/node/event/post_insert_left_tree.hpp>
-#include <odds_and_ends/node/event/post_insert_right_tree.hpp>
-#include <odds_and_ends/node/event/post_rotate_left_tree.hpp>
-#include <odds_and_ends/node/event/post_rotate_right_tree.hpp>
-#include <odds_and_ends/node/event/post_erase.hpp>
-#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
-#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
-#include <odds_and_ends/node/event/pre_erase.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/allocator_ctor_2nd_stage.hpp>
@@ -32,12 +22,10 @@
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
 #include <boost/mpl/apply_wrap.hpp>
-#include <boost/utility/value_init.hpp>
 
-namespace odds_and_ends { namespace node { namespace tree {
+namespace odds_and_ends { namespace node {
 
-    template <typename IntType = ::std::size_t>
-    struct with_height
+    struct with_balance_factor
     {
         template <typename CompositeParentGenerator>
         struct apply
@@ -54,13 +42,13 @@ namespace odds_and_ends { namespace node { namespace tree {
 
                     class _result : public _composite_parent_t
                     {
-                        IntType _height;
+                        char _balance_factor;
 
                     protected:
                         inline explicit _result(
                             ::odds_and_ends::composite_type
                             ::default_constructor_1st_stage_event const& e
-                        ) : _composite_parent_t(e), _height(::boost::initialized_value)
+                        ) : _composite_parent_t(e), _balance_factor(0)
                         {
                         }
 
@@ -79,7 +67,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             Alloc const& alloc,
                             Args&& ...args
                         ) : _composite_parent_t(o, alloc, ::std::forward<Args>(args)...),
-                            _height(::boost::initialized_value)
+                            _balance_factor(0)
                         {
                         }
 
@@ -110,7 +98,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 ::std::forward<A0>(a0),
                                 ::std::forward<Args>(args)...
                             ),
-                            _height(::boost::initialized_value)
+                            _balance_factor(0)
                         {
                         }
 
@@ -135,7 +123,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             ::odds_and_ends::composite_type
                             ::arg_pack_constructor_1st_stage_event const& e,
                             ArgumentPack const& arg_pack
-                        ) : _composite_parent_t(e, arg_pack), _height(::boost::initialized_value)
+                        ) : _composite_parent_t(e, arg_pack), _balance_factor(false)
                         {
                         }
 
@@ -155,7 +143,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             ::odds_and_ends::composite_type
                             ::conversion_constructor_1st_stage_event const& e,
                             Arg const& arg
-                        ) : _composite_parent_t(e, arg), _height(::boost::initialized_value)
+                        ) : _composite_parent_t(e, arg), _balance_factor(false)
                         {
                         }
 
@@ -176,7 +164,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             ::odds_and_ends::composite_type
                             ::coercive_copy_constructor_event const& e,
                             Copy const& copy
-                        ) : _composite_parent_t(e, copy), _height(copy.height())
+                        ) : _composite_parent_t(e, copy), _balance_factor(copy.balance_factor())
                         {
                         }
 
@@ -186,7 +174,8 @@ namespace odds_and_ends { namespace node { namespace tree {
                             ::coercive_copy_constructor_event const& e,
                             Copy const& copy,
                             Alloc const& alloc
-                        ) : _composite_parent_t(e, copy, alloc), _height(copy.height())
+                        ) : _composite_parent_t(e, copy, alloc),
+                            _balance_factor(copy.balance_factor())
                         {
                         }
 
@@ -198,7 +187,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             )
                         {
                             bool const result = _composite_parent_t::post_construct(e, copy);
-                            this->_height = copy.height();
+                            this->_balance_factor = copy.balance_factor();
                             return result;
                         }
 
@@ -213,7 +202,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             bool const result = (
                                 _composite_parent_t::post_construct(e, copy, alloc)
                             );
-                            this->_height = copy.height();
+                            this->_balance_factor = copy.balance_factor();
                             return result;
                         }
 
@@ -244,7 +233,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             ::coercive_move_constructor_event const& e,
                             Source&& source
                         ) : _composite_parent_t(e, static_cast<Source&&>(source)),
-                            _height(::std::move(source._height))
+                            _balance_factor(source.balance_factor())
                         {
                         }
 
@@ -255,7 +244,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             Source&& source,
                             Alloc const& alloc
                         ) : _composite_parent_t(e, static_cast<Source&&>(source), alloc),
-                            _height(::std::move(source._height))
+                            _balance_factor(source.balance_factor())
                         {
                         }
 
@@ -270,7 +259,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 e,
                                 static_cast<Source&&>(source)
                             );
-                            this->_height = ::std::move(source._height);
+                            this->_balance_factor = source.balance_factor();
                             return result;
                         }
 
@@ -287,7 +276,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 static_cast<Source&&>(source),
                                 alloc
                             );
-                            this->_height = ::std::move(source._height);
+                            this->_balance_factor = source.balance_factor();
                             return result;
                         }
 
@@ -326,117 +315,20 @@ namespace odds_and_ends { namespace node { namespace tree {
 
                         struct traits : _composite_parent_t::traits
                         {
-                            typedef IntType height_type;
+                            typedef char balance_factor_type;
                         };
 
-                        inline typename traits::height_type const& height() const
+                        inline typename traits::balance_factor_type const& balance_factor() const
                         {
-                            return this->_height;
+                            return this->_balance_factor;
                         }
 
-                    protected:
-                        inline bool listen_to(::odds_and_ends::node::post_insert_event const& e)
+                        inline typename traits::balance_factor_type& balance_factor()
                         {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
-                        }
-
-                        inline bool
-                            listen_to(::odds_and_ends::node::post_insert_left_tree_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
-                        }
-
-                        inline bool
-                            listen_to(::odds_and_ends::node::post_insert_right_tree_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
-                        }
-
-                        inline bool listen_to(::odds_and_ends::node::pre_erase_event const& e)
-                        {
-                            return _composite_parent_t::listen_to(e);
-                        }
-
-                        inline bool listen_to(::odds_and_ends::node::post_erase_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
-                        }
-
-                        inline bool
-                            listen_to(::odds_and_ends::node::post_erase_left_tree_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
-                        }
-
-                        inline bool
-                            listen_to(::odds_and_ends::node::post_erase_right_tree_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
-                        }
-
-                        inline bool
-                            listen_to(::odds_and_ends::node::post_rotate_left_tree_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
-                        }
-
-                        inline bool
-                            listen_to(::odds_and_ends::node::post_rotate_right_tree_event const& e)
-                        {
-                            bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
-                            return result;
+                            return this->_balance_factor;
                         }
 
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
-
-                    private:
-                        void _update_height()
-                        {
-                            typename traits::child_iterator itr;
-
-                            for (
-                                typename traits::pointer p = (
-                                    ::std::pointer_traits<typename traits::pointer>::pointer_to(
-                                        this->derived()
-                                    )
-                                );
-                                p;
-                                p = p->parent()
-                            )
-                            {
-                                p->_height = ::boost::initialized_value;
-
-                                for (itr = p->begin(); itr != p->end(); ++itr)
-                                {
-                                    if (p->_height < itr->height())
-                                    {
-                                        p->_height = itr->height();
-                                    }
-                                }
-
-                                if (p->begin() != p->end())
-                                {
-                                    ++p->_height;
-                                }
-                            }
-                        }
-
-                        friend class _result;
                     };
 
                 public:
@@ -445,7 +337,7 @@ namespace odds_and_ends { namespace node { namespace tree {
             };
         };
     };
-}}}  // namespace odds_and_ends::node::tree
+}}  // namespace odds_and_ends::node
 
-#endif  // ODDS_AND_ENDS__NODE__TREE__WITH_HEIGHT_HPP
+#endif  // ODDS_AND_ENDS__NODE__WITH_BALANCE_FACTOR_HPP
 
