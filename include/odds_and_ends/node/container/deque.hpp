@@ -351,7 +351,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
         for (
             ::odds_and_ends::node::breadth_first_tree_iterator<node> itr(*root_ptr);
-            n && itr;
+            n && !(!itr);
             ++itr
         )
         {
@@ -396,7 +396,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
         for (
             ::odds_and_ends::node::breadth_first_tree_iterator<node> itr(*root_ptr);
-            n && itr;
+            n && !(!itr);
             ++itr
         )
         {
@@ -480,7 +480,7 @@ namespace odds_and_ends { namespace node { namespace container {
         {
             _self::_fill_construct(alloc, root_ptr, n, *itr);
 
-            for (_itr_t out_itr(*root_ptr, false); out_itr; ++out_itr)
+            for (_itr_t out_itr(*root_ptr, false); !(!out_itr); ++out_itr)
             {
                 **out_itr = *itr;
                 ++itr;
@@ -688,7 +688,7 @@ namespace odds_and_ends { namespace node { namespace container {
         {
             for (
                 ::odds_and_ends::node::post_order_tree_iterator<node> itr(*this->_root_ptr);
-                itr;
+                !(!itr);
                 ++itr
             )
             {
@@ -1488,7 +1488,14 @@ namespace odds_and_ends { namespace node { namespace container {
             const_reference t
         )
     {
-        if (pos.base())
+        if (!pos.base())
+        {
+            this->push_back(t);
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
+            );
+        }
+        else
         {
             BOOST_ASSERT_MSG(
                 this->_root_ptr && ::odds_and_ends::node::algorithm::is_ancestor_of(
@@ -1530,13 +1537,6 @@ namespace odds_and_ends { namespace node { namespace container {
                 ::odds_and_ends::node::make_in_order_tree_iterator_position(*node_ptr)
             );
         }
-        else  // if (!pos.base())
-        {
-            this->push_back(t);
-            return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
-            );
-        }
     }
 
     template <
@@ -1554,7 +1554,14 @@ namespace odds_and_ends { namespace node { namespace container {
             value_type&& t
         )
     {
-        if (pos.base())
+        if (!pos.base())
+        {
+            this->push_back(static_cast<value_type&&>(t));
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
+            );
+        }
+        else
         {
             BOOST_ASSERT_MSG(
                 this->_root_ptr && ::odds_and_ends::node::algorithm::is_ancestor_of(
@@ -1602,13 +1609,6 @@ namespace odds_and_ends { namespace node { namespace container {
 
             return iterator(
                 ::odds_and_ends::node::make_in_order_tree_iterator_position(*node_ptr)
-            );
-        }
-        else  // if (!pos.base())
-        {
-            this->push_back(static_cast<value_type&&>(t));
-            return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
             );
         }
     }
@@ -1629,7 +1629,14 @@ namespace odds_and_ends { namespace node { namespace container {
             Args&& ...args
         )
     {
-        if (pos.base())
+        if (!pos.base())
+        {
+            this->emplace_back(::std::forward<Args>(args)...);
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
+            );
+        }
+        else
         {
             BOOST_ASSERT_MSG(
                 this->_root_ptr && ::odds_and_ends::node::algorithm::is_ancestor_of(
@@ -1677,13 +1684,6 @@ namespace odds_and_ends { namespace node { namespace container {
 
             return iterator(
                 ::odds_and_ends::node::make_in_order_tree_iterator_position(*node_ptr)
-            );
-        }
-        else  // if (!pos.base())
-        {
-            this->emplace_back(::std::forward<Args>(args)...);
-            return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
             );
         }
     }
@@ -1723,7 +1723,12 @@ namespace odds_and_ends { namespace node { namespace container {
                 return this->begin();
             }
         }
-        else if (pos.base())
+        else if (!pos.base())
+        {
+            BOOST_ASSERT(this->cend() == pos);
+            return this->end();
+        }
+        else
         {
             BOOST_ASSERT_MSG(
                 this->_root_ptr && ::odds_and_ends::node::algorithm::is_ancestor_of(
@@ -1739,11 +1744,6 @@ namespace odds_and_ends { namespace node { namespace container {
             );
             BOOST_ASSERT(result == pos);
             return result;
-        }
-        else
-        {
-            BOOST_ASSERT(this->cend() == pos);
-            return this->end();
         }
     }
 
@@ -1766,7 +1766,12 @@ namespace odds_and_ends { namespace node { namespace container {
     {
         if (itr == itr_end)
         {
-            if (pos.base())
+            if (!pos.base())
+            {
+                BOOST_ASSERT(this->cend() == pos);
+                return this->end();
+            }
+            else
             {
                 BOOST_ASSERT_MSG(
                     this->_root_ptr && ::odds_and_ends::node::algorithm::is_ancestor_of(
@@ -1782,11 +1787,6 @@ namespace odds_and_ends { namespace node { namespace container {
                 );
                 BOOST_ASSERT(result == pos);
                 return result;
-            }
-            else
-            {
-                BOOST_ASSERT(this->cend() == pos);
-                return this->end();
             }
         }
         else if (this->_root_ptr)

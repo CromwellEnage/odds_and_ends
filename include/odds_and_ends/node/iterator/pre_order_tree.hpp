@@ -155,6 +155,7 @@ namespace odds_and_ends { namespace node {
             operator=(pre_order_tree_iterator<N,I,SG>&& other);
 
         operator ::odds_and_ends::node::traversal_state() const;
+        bool operator!() const;
         reference operator*() const;
         pointer operator->() const;
         pre_order_tree_iterator& operator++();
@@ -414,6 +415,12 @@ namespace odds_and_ends { namespace node {
         ::odds_and_ends::node::traversal_state() const
     {
         return this->_state;
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
+    inline bool pre_order_tree_iterator<Node,IsReverse,StackGen>::operator!() const
+    {
+        return !this->_state.get();
     }
 
     template <typename Node, typename IsReverse, typename StackGen>

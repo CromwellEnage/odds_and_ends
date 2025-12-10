@@ -164,10 +164,8 @@ void test_char_deque_00()
     BOOST_TEST('k' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST(c_r_itr == char_deque.rend());
-    c_itr = char_deque.begin();
-    c_itr += 5;
 
-    CharDeque::iterator itr = char_deque.insert(c_itr, 'p');
+    CharDeque::iterator itr = char_deque.insert(char_deque.begin() + 5, 'p');
 
     BOOST_TEST('k' == char_deque[0]);
     BOOST_TEST('l' == char_deque[1]);
@@ -254,9 +252,7 @@ void test_char_deque_00()
     BOOST_TEST('h' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST(c_r_itr == char_deque.rend());
-    c_itr = char_deque.begin();
-    ++c_itr;
-    itr = char_deque.insert(c_itr, 'i');
+    itr = char_deque.insert(char_deque.begin() + 1, 'i');
     BOOST_TEST('h' == char_deque[0]);
     BOOST_TEST('i' == char_deque[1]);
     BOOST_TEST('k' == char_deque[2]);

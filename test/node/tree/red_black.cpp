@@ -75,7 +75,7 @@ typedef ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node const> It
 
 void output_tree(Itr itr)
 {
-    for (; itr; ++itr)
+    for (; !(!itr); ++itr)
     {
         ::std::cout << "    Node " << **itr << " is " << (itr->red() ? "red" : "black");
 

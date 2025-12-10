@@ -95,6 +95,7 @@ namespace odds_and_ends { namespace node {
         in_order_tree_iterator& operator=(in_order_tree_iterator const& other);
         in_order_tree_iterator& operator=(in_order_tree_iterator&& other);
         operator ::odds_and_ends::node::traversal_state() const;
+        bool operator!() const;
         reference operator*() const;
         pointer operator->() const;
         _proxy operator[](difference_type const& n) const;
@@ -305,6 +306,12 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename Difference>
+    inline bool in_order_tree_iterator<Node,IsReverse,Difference>::operator!() const
+    {
+        return !this->_state.get();
+    }
+
+    template <typename Node, typename IsReverse, typename Difference>
     void in_order_tree_iterator<Node,IsReverse,Difference>::_initialize(::boost::mpl::false_)
     {
         this->_current = ::odds_and_ends::node::algorithm::increment_in_binary_tree(
@@ -397,7 +404,7 @@ namespace odds_and_ends { namespace node {
     inline in_order_tree_iterator<Node,IsReverse,Difference>&
         in_order_tree_iterator<Node,IsReverse,Difference>::operator++()
     {
-        BOOST_ASSERT_MSG(this->_state, "Do not increment past-the-end!");
+        BOOST_ASSERT_MSG(this->_state.get(), "Do not increment past-the-end!");
         this->_increment(IsReverse());
         return *this;
     }
@@ -440,7 +447,7 @@ namespace odds_and_ends { namespace node {
 
         if (n < z)
         {
-            if (this->_state)
+            if (this->_state.get())
             {
                 BOOST_ASSERT_MSG(
                     IsReverse::value ? !(
@@ -571,9 +578,9 @@ namespace odds_and_ends { namespace node {
 
         static typename ::std::common_type<D1,D2>::type const zero_d = ::boost::initialized_value;
 
-        if (::odds_and_ends::node::traversal_state(lhs))
+        if (lhs._state.get())
         {
-            if (::odds_and_ends::node::traversal_state(rhs))
+            if (rhs._state.get())
             {
                 return I1::value ? (
                     ::odds_and_ends::node::algorithm
@@ -594,7 +601,7 @@ namespace odds_and_ends { namespace node {
         }
         else
         {
-            return !::odds_and_ends::node::traversal_state(rhs);
+            return !rhs._state.get();
         }
     }
 
@@ -639,9 +646,9 @@ namespace odds_and_ends { namespace node {
 
         typename ::std::common_type<D1,D2>::type v = ::boost::initialized_value;
 
-        if (::odds_and_ends::node::traversal_state(lhs))
+        if (lhs._state.get())
         {
-            if (::odds_and_ends::node::traversal_state(rhs))
+            if (rhs._state.get())
             {
                 return I1::value ? (
                     ::odds_and_ends::node::algorithm
@@ -672,7 +679,7 @@ namespace odds_and_ends { namespace node {
                 return (v += lhs._root->size());
             }
         }
-        else if (::odds_and_ends::node::traversal_state(rhs))
+        else if (rhs._state.get())
         {
             if (I1::value)
             {

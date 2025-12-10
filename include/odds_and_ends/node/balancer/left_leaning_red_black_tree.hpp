@@ -183,7 +183,7 @@ namespace odds_and_ends { namespace node {
                     ++itr;
                 }
 
-                for (; itr; ++itr)
+                for (; !(!itr); ++itr)
                 {
                     itr->red(true);
                 }

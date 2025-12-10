@@ -7,6 +7,7 @@
 #include <odds_and_ends/node/iterator/breadth_first_tree.hpp>
 #include <odds_and_ends/node/iterator/in_order_tree.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
+#include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/core/lightweight_test.hpp>
 
@@ -55,6 +56,11 @@ void test_00()
     ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node> in_ord_fwd_itr(n50, false);
 
     BOOST_TEST(9 == **in_ord_fwd_itr);
+    BOOST_TEST(17 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(23 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 3));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 4));
+    BOOST_TEST(!(in_ord_fwd_itr + 5));
     in_ord_fwd_itr += 1;
     BOOST_TEST(17 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -72,7 +78,12 @@ void test_00()
     in_ord_fwd_itr -= 4;
     BOOST_TEST(9 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(17 == **in_ord_fwd_itr);
+    BOOST_TEST(23 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 3));
+    BOOST_TEST(!(in_ord_fwd_itr + 4));
     in_ord_fwd_itr += 1;
     BOOST_TEST(23 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -90,7 +101,12 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(17 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(23 == **in_ord_fwd_itr);
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(!(in_ord_fwd_itr + 3));
     in_ord_fwd_itr += 1;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -104,7 +120,12 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(23 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(50 == **in_ord_fwd_itr);
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(!(in_ord_fwd_itr + 2));
     in_ord_fwd_itr += 1;
     BOOST_TEST(76 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -114,12 +135,22 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 4));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(50 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(76 == **in_ord_fwd_itr);
+    BOOST_TEST(!(in_ord_fwd_itr + 1));
     --in_ord_fwd_itr;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
     BOOST_TEST(76 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 5));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 4));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(50 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(76 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(!in_ord_fwd_itr);
     --in_ord_fwd_itr;
     BOOST_TEST(76 == **in_ord_fwd_itr);
@@ -132,6 +163,11 @@ void test_00()
     > in_ord_rev_itr(n50, false);
 
     BOOST_TEST(76 == **in_ord_rev_itr);
+    BOOST_TEST(50 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(23 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(17 == **(in_ord_rev_itr + 3));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 4));
+    BOOST_TEST(!(in_ord_rev_itr + 5));
     in_ord_rev_itr += 1;
     BOOST_TEST(50 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -149,7 +185,12 @@ void test_00()
     in_ord_rev_itr -= 4;
     BOOST_TEST(76 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 1));
     BOOST_TEST(50 == **in_ord_rev_itr);
+    BOOST_TEST(23 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(17 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 3));
+    BOOST_TEST(!(in_ord_rev_itr + 4));
     in_ord_rev_itr += 1;
     BOOST_TEST(23 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -167,7 +208,12 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(50 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 1));
     BOOST_TEST(23 == **in_ord_rev_itr);
+    BOOST_TEST(17 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(!(in_ord_rev_itr + 3));
     in_ord_rev_itr += 1;
     BOOST_TEST(17 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -181,7 +227,12 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(23 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 1));
     BOOST_TEST(17 == **in_ord_rev_itr);
+    BOOST_TEST(9 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(!(in_ord_rev_itr + 2));
     in_ord_rev_itr += 1;
     BOOST_TEST(9 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -191,12 +242,22 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(17 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 4));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(17 == **(in_ord_rev_itr - 1));
     BOOST_TEST(9 == **in_ord_rev_itr);
+    BOOST_TEST(!(in_ord_rev_itr + 1));
     --in_ord_rev_itr;
     BOOST_TEST(17 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
     BOOST_TEST(9 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 5));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 4));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(17 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(9 == **(in_ord_rev_itr - 1));
     BOOST_TEST(!in_ord_rev_itr);
     --in_ord_rev_itr;
     BOOST_TEST(9 == **in_ord_rev_itr);
@@ -223,6 +284,11 @@ void test_00()
     BOOST_TEST(!n76.right());
     in_ord_fwd_itr = ::odds_and_ends::node::make_in_order_tree_iterator(n17);
     BOOST_TEST(9 == **in_ord_fwd_itr);
+    BOOST_TEST(17 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(23 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 3));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 4));
+    BOOST_TEST(!(in_ord_fwd_itr + 5));
     in_ord_fwd_itr += 1;
     BOOST_TEST(17 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -240,7 +306,12 @@ void test_00()
     in_ord_fwd_itr -= 4;
     BOOST_TEST(9 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(17 == **in_ord_fwd_itr);
+    BOOST_TEST(23 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 3));
+    BOOST_TEST(!(in_ord_fwd_itr + 4));
     in_ord_fwd_itr += 1;
     BOOST_TEST(23 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -258,7 +329,12 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(17 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(23 == **in_ord_fwd_itr);
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(!(in_ord_fwd_itr + 3));
     in_ord_fwd_itr += 1;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -272,7 +348,12 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(23 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(50 == **in_ord_fwd_itr);
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(!(in_ord_fwd_itr + 2));
     in_ord_fwd_itr += 1;
     BOOST_TEST(76 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -282,12 +363,22 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 4));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(50 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(76 == **in_ord_fwd_itr);
+    BOOST_TEST(!(in_ord_fwd_itr + 1));
     --in_ord_fwd_itr;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
     BOOST_TEST(76 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 5));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 4));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(50 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(76 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(!in_ord_fwd_itr);
     --in_ord_fwd_itr;
     BOOST_TEST(76 == **in_ord_fwd_itr);
@@ -295,6 +386,11 @@ void test_00()
     BOOST_TEST(!in_ord_fwd_itr);
     in_ord_rev_itr = ::odds_and_ends::node::make_in_order_tree_reverse_iterator(n17);
     BOOST_TEST(76 == **in_ord_rev_itr);
+    BOOST_TEST(50 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(23 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(17 == **(in_ord_rev_itr + 3));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 4));
+    BOOST_TEST(!(in_ord_rev_itr + 5));
     in_ord_rev_itr += 1;
     BOOST_TEST(50 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -312,7 +408,12 @@ void test_00()
     in_ord_rev_itr -= 4;
     BOOST_TEST(76 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 1));
     BOOST_TEST(50 == **in_ord_rev_itr);
+    BOOST_TEST(23 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(17 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 3));
+    BOOST_TEST(!(in_ord_rev_itr + 4));
     in_ord_rev_itr += 1;
     BOOST_TEST(23 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -330,7 +431,12 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(50 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 1));
     BOOST_TEST(23 == **in_ord_rev_itr);
+    BOOST_TEST(17 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(!(in_ord_rev_itr + 3));
     in_ord_rev_itr += 1;
     BOOST_TEST(17 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -344,7 +450,12 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(23 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 1));
     BOOST_TEST(17 == **in_ord_rev_itr);
+    BOOST_TEST(9 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(!(in_ord_rev_itr + 2));
     in_ord_rev_itr += 1;
     BOOST_TEST(9 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -354,12 +465,22 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(17 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 4));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(17 == **(in_ord_rev_itr - 1));
     BOOST_TEST(9 == **in_ord_rev_itr);
+    BOOST_TEST(!(in_ord_rev_itr + 1));
     --in_ord_rev_itr;
     BOOST_TEST(17 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
     BOOST_TEST(9 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 5));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 4));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(17 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(9 == **(in_ord_rev_itr - 1));
     BOOST_TEST(!in_ord_rev_itr);
     --in_ord_rev_itr;
     BOOST_TEST(9 == **in_ord_rev_itr);
@@ -384,6 +505,11 @@ void test_00()
     BOOST_TEST(!n76.right());
     in_ord_fwd_itr = ::odds_and_ends::node::make_in_order_tree_iterator(n50);
     BOOST_TEST(9 == **in_ord_fwd_itr);
+    BOOST_TEST(17 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(23 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 3));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 4));
+    BOOST_TEST(!(in_ord_fwd_itr + 5));
     in_ord_fwd_itr += 1;
     BOOST_TEST(17 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -401,7 +527,12 @@ void test_00()
     in_ord_fwd_itr -= 4;
     BOOST_TEST(9 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(17 == **in_ord_fwd_itr);
+    BOOST_TEST(23 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 3));
+    BOOST_TEST(!(in_ord_fwd_itr + 4));
     in_ord_fwd_itr += 1;
     BOOST_TEST(23 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -419,7 +550,12 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(17 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(23 == **in_ord_fwd_itr);
+    BOOST_TEST(50 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 2));
+    BOOST_TEST(!(in_ord_fwd_itr + 3));
     in_ord_fwd_itr += 1;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -433,7 +569,12 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(23 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(50 == **in_ord_fwd_itr);
+    BOOST_TEST(76 == **(in_ord_fwd_itr + 1));
+    BOOST_TEST(!(in_ord_fwd_itr + 2));
     in_ord_fwd_itr += 1;
     BOOST_TEST(76 == **in_ord_fwd_itr);
     in_ord_fwd_itr -= 1;
@@ -443,12 +584,22 @@ void test_00()
     ++in_ord_fwd_itr;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 4));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(50 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(76 == **in_ord_fwd_itr);
+    BOOST_TEST(!(in_ord_fwd_itr + 1));
     --in_ord_fwd_itr;
     BOOST_TEST(50 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
     BOOST_TEST(76 == **in_ord_fwd_itr);
     ++in_ord_fwd_itr;
+    BOOST_TEST(9 == **(in_ord_fwd_itr - 5));
+    BOOST_TEST(17 == **(in_ord_fwd_itr - 4));
+    BOOST_TEST(23 == **(in_ord_fwd_itr - 3));
+    BOOST_TEST(50 == **(in_ord_fwd_itr - 2));
+    BOOST_TEST(76 == **(in_ord_fwd_itr - 1));
     BOOST_TEST(!in_ord_fwd_itr);
     --in_ord_fwd_itr;
     BOOST_TEST(76 == **in_ord_fwd_itr);
@@ -456,6 +607,11 @@ void test_00()
     BOOST_TEST(!in_ord_fwd_itr);
     in_ord_rev_itr = ::odds_and_ends::node::make_in_order_tree_reverse_iterator(n50);
     BOOST_TEST(76 == **in_ord_rev_itr);
+    BOOST_TEST(50 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(23 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(17 == **(in_ord_rev_itr + 3));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 4));
+    BOOST_TEST(!(in_ord_rev_itr + 5));
     in_ord_rev_itr += 1;
     BOOST_TEST(50 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -473,7 +629,12 @@ void test_00()
     in_ord_rev_itr -= 4;
     BOOST_TEST(76 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 1));
     BOOST_TEST(50 == **in_ord_rev_itr);
+    BOOST_TEST(23 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(17 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 3));
+    BOOST_TEST(!(in_ord_rev_itr + 4));
     in_ord_rev_itr += 1;
     BOOST_TEST(23 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -491,7 +652,12 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(50 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 1));
     BOOST_TEST(23 == **in_ord_rev_itr);
+    BOOST_TEST(17 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(9 == **(in_ord_rev_itr + 2));
+    BOOST_TEST(!(in_ord_rev_itr + 3));
     in_ord_rev_itr += 1;
     BOOST_TEST(17 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -505,7 +671,12 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(23 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 1));
     BOOST_TEST(17 == **in_ord_rev_itr);
+    BOOST_TEST(9 == **(in_ord_rev_itr + 1));
+    BOOST_TEST(!(in_ord_rev_itr + 2));
     in_ord_rev_itr += 1;
     BOOST_TEST(9 == **in_ord_rev_itr);
     in_ord_rev_itr -= 1;
@@ -515,12 +686,22 @@ void test_00()
     ++in_ord_rev_itr;
     BOOST_TEST(17 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 4));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(17 == **(in_ord_rev_itr - 1));
     BOOST_TEST(9 == **in_ord_rev_itr);
+    BOOST_TEST(!(in_ord_rev_itr + 1));
     --in_ord_rev_itr;
     BOOST_TEST(17 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
     BOOST_TEST(9 == **in_ord_rev_itr);
     ++in_ord_rev_itr;
+    BOOST_TEST(76 == **(in_ord_rev_itr - 5));
+    BOOST_TEST(50 == **(in_ord_rev_itr - 4));
+    BOOST_TEST(23 == **(in_ord_rev_itr - 3));
+    BOOST_TEST(17 == **(in_ord_rev_itr - 2));
+    BOOST_TEST(9 == **(in_ord_rev_itr - 1));
     BOOST_TEST(!in_ord_rev_itr);
     --in_ord_rev_itr;
     BOOST_TEST(9 == **in_ord_rev_itr);
@@ -673,6 +854,7 @@ void test_01()
 
     ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node> in_ord_fwd_itr(n13, false);
 
+    BOOST_TEST(!(in_ord_fwd_itr + 10));
     BOOST_TEST(1 == **in_ord_fwd_itr);
     in_ord_fwd_itr += 1;
     BOOST_TEST(6 == **in_ord_fwd_itr);
@@ -920,6 +1102,7 @@ void test_01()
         ::boost::mpl::true_
     > in_ord_rev_itr(n13, false);
 
+    BOOST_TEST(!(in_ord_rev_itr + 10));
     BOOST_TEST(27 == **in_ord_rev_itr);
     in_ord_rev_itr += 1;
     BOOST_TEST(25 == **in_ord_rev_itr);

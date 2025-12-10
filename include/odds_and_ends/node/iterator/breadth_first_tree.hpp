@@ -15,12 +15,14 @@
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/eval_if.hpp>
+#include <boost/mpl/equal_to.hpp>
 #include <boost/mpl/apply.hpp>
 
 namespace odds_and_ends { namespace node {
 
     template <
         typename Node,
+        typename IsReverse = ::boost::mpl::false_,
         typename QGen = ::odds_and_ends::node::container::queue< ::boost::mpl::_>
     >
     class breadth_first_tree_iterator
@@ -65,17 +67,21 @@ namespace odds_and_ends { namespace node {
         template <typename ...Args>
         explicit breadth_first_tree_iterator(reference node, Args&&... args);
 
-        template <typename N, typename Q>
+        template <typename N, typename I, typename Q>
         breadth_first_tree_iterator(
-            breadth_first_tree_iterator<N,Q> const& other,
+            breadth_first_tree_iterator<N,I,Q> const& other,
             typename ::boost::enable_if<
                 typename ::boost::mpl::eval_if<
                     ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
                     ::boost::mpl::false_,
-                    ::boost::mpl::if_<
-                        ::std::is_convertible<N,Node>,
+                    ::boost::mpl::eval_if<
                         ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                            typename breadth_first_tree_iterator<N,Q>::_queue_t
+                            typename breadth_first_tree_iterator<N,I,Q>::_queue_t
+                        >,
+                        ::boost::mpl::if_<
+                            ::std::is_convertible<N,Node>,
+                            ::boost::mpl::equal_to<I,IsReverse>,
+                            ::boost::mpl::false_
                         >,
                         ::boost::mpl::false_
                     >
@@ -84,35 +90,45 @@ namespace odds_and_ends { namespace node {
             >::type = _enabler()
         );
 
-        template <typename N, typename Q>
+        template <typename N, typename I, typename Q>
         breadth_first_tree_iterator(
-            breadth_first_tree_iterator<N,Q> const& other,
+            breadth_first_tree_iterator<N,I,Q> const& other,
             typename ::boost::enable_if<
                 typename ::boost::mpl::eval_if<
                     ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
                     ::boost::mpl::false_,
                     ::boost::mpl::if_<
                         ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                            typename breadth_first_tree_iterator<N,Q>::_queue_t
+                            typename breadth_first_tree_iterator<N,I,Q>::_queue_t
                         >,
                         ::boost::mpl::false_,
-                        ::std::is_convertible<N,Node>
+                        ::boost::mpl::if_<
+                            ::std::is_convertible<N,Node>,
+                            ::boost::mpl::equal_to<I,IsReverse>,
+                            ::boost::mpl::false_
+                        >
                     >
                 >::type,
                 _enabler
             >::type = _enabler()
         );
 
-        template <typename N, typename Q>
+        template <typename N, typename I, typename Q>
         breadth_first_tree_iterator(
-            breadth_first_tree_iterator<N,Q> const& other,
+            breadth_first_tree_iterator<N,I,Q> const& other,
             typename ::boost::enable_if<
                 typename ::boost::mpl::eval_if<
                     ::std::is_convertible<N,Node>,
-                    ::boost::mpl::if_<
-                        ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                            typename breadth_first_tree_iterator<N,Q>::_queue_t
+                    ::boost::mpl::eval_if<
+                    ::boost::mpl::equal_to<I,IsReverse>,
+                        ::boost::mpl::if_<
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_stack_or_heap<_queue_t>,
+                            ::odds_and_ends::static_introspection
+                            ::member_function::has_get_allocator<
+                                typename breadth_first_tree_iterator<N,I,Q>::_queue_t
+                            >,
+                            ::boost::mpl::false_
                         >,
                         ::boost::mpl::false_
                     >,
@@ -122,18 +138,24 @@ namespace odds_and_ends { namespace node {
             >::type = _enabler()
         );
 
-        template <typename N, typename Q>
+        template <typename N, typename I, typename Q>
         breadth_first_tree_iterator(
-            breadth_first_tree_iterator<N,Q> const& other,
+            breadth_first_tree_iterator<N,I,Q> const& other,
             typename ::boost::enable_if<
                 typename ::boost::mpl::eval_if<
                     ::std::is_convertible<N,Node>,
-                    ::boost::mpl::if_<
-                        ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                            typename breadth_first_tree_iterator<N,Q>::_queue_t
+                    ::boost::mpl::eval_if<
+                        ::boost::mpl::equal_to<I,IsReverse>,
+                        ::boost::mpl::if_<
+                            ::odds_and_ends::static_introspection
+                            ::member_function::has_get_allocator<
+                                typename breadth_first_tree_iterator<N,I,Q>::_queue_t
+                            >,
+                            ::boost::mpl::false_,
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_stack_or_heap<_queue_t>
                         >,
-                        ::boost::mpl::false_,
-                        ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>
+                        ::boost::mpl::false_
                     >,
                     ::boost::mpl::false_
                 >::type,
@@ -218,55 +240,13 @@ namespace odds_and_ends { namespace node {
         );
 
         breadth_first_tree_iterator();
+        breadth_first_tree_iterator(breadth_first_tree_iterator const& other);
+        breadth_first_tree_iterator(breadth_first_tree_iterator&& other);
         ~breadth_first_tree_iterator();
         breadth_first_tree_iterator& operator=(breadth_first_tree_iterator const& other);
         breadth_first_tree_iterator& operator=(breadth_first_tree_iterator&& other);
-
-        template <typename N, typename Q>
-        typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                ::boost::mpl::false_,
-                ::std::is_convertible<N,Node>
-            >::type,
-            breadth_first_tree_iterator&
-        >::type
-            operator=(breadth_first_tree_iterator<N,Q> const& other);
-
-        template <typename N, typename Q>
-        typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_convertible<N,Node>,
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                ::boost::mpl::false_
-            >::type,
-            breadth_first_tree_iterator&
-        >::type
-            operator=(breadth_first_tree_iterator<N,Q> const& other);
-
-        template <typename N, typename Q>
-        typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                ::boost::mpl::false_,
-                ::std::is_convertible<N,Node>
-            >::type,
-            breadth_first_tree_iterator&
-        >::type
-            operator=(breadth_first_tree_iterator<N,Q>&& other);
-
-        template <typename N, typename Q>
-        typename ::boost::enable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_convertible<N,Node>,
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                ::boost::mpl::false_
-            >::type,
-            breadth_first_tree_iterator&
-        >::type
-            operator=(breadth_first_tree_iterator<N,Q>&& other);
-
         operator ::odds_and_ends::node::traversal_state() const;
+        bool operator!() const;
         reference operator*() const;
         pointer operator->() const;
         breadth_first_tree_iterator& operator++();
@@ -285,6 +265,8 @@ namespace odds_and_ends { namespace node {
         void _clone(breadth_first_tree_iterator const& other, ::boost::mpl::false_);
         void _move(breadth_first_tree_iterator&& other, ::boost::mpl::true_);
         void _move(breadth_first_tree_iterator&& other, ::boost::mpl::false_);
+        void _increment(::boost::mpl::true_);
+        void _increment(::boost::mpl::false_);
 
         template <typename Itr>
         void _push_all(Itr itr_begin, Itr itr_end);
@@ -320,24 +302,21 @@ namespace odds_and_ends { namespace node {
                 ::boost::mpl::false_
             );
 
-//        breadth_first_tree_iterator(breadth_first_tree_iterator const&) = delete;
-//        breadth_first_tree_iterator(breadth_first_tree_iterator&&) = delete;
-
-        template <typename N, typename Q>
+        template <typename N, typename I, typename Q>
         friend class breadth_first_tree_iterator;
 
-        template <typename N1, typename Q1, typename N2, typename Q2>
+        template <typename N1, typename I1, typename Q1, typename N2, typename I2, typename Q2>
         friend bool
             operator==(
-                breadth_first_tree_iterator<N1,Q1> const& lhs,
-                breadth_first_tree_iterator<N2,Q2> const& rhs
+                breadth_first_tree_iterator<N1,I1,Q1> const& lhs,
+                breadth_first_tree_iterator<N2,I2,Q2> const& rhs
             );
 
-        template <typename N1, typename Q1, typename N2, typename Q2>
+        template <typename N1, typename I1, typename Q1, typename N2, typename I2, typename Q2>
         friend bool
             operator!=(
-                breadth_first_tree_iterator<N1,Q1> const& lhs,
-                breadth_first_tree_iterator<N2,Q2> const& rhs
+                breadth_first_tree_iterator<N1,I1,Q1> const& lhs,
+                breadth_first_tree_iterator<N2,I2,Q2> const& rhs
             );
     };
 }}  // namespace odds_and_ends::node
@@ -350,15 +329,15 @@ namespace odds_and_ends { namespace node {
 
 namespace odds_and_ends { namespace node {
 
-    template <typename Node, typename QGen>
-    inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator() :
+    template <typename Node, typename IsReverse, typename QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator() :
         _queue(), _current(nullptr), _state(::odds_and_ends::node::no_traversal)
     {
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     template <typename A0, typename ...Args>
-    inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
         A0&& a0,
         Args&&... args,
         typename ::boost::disable_if<
@@ -375,9 +354,9 @@ namespace odds_and_ends { namespace node {
     {
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     template <typename ...Args>
-    inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
         reference node,
         Args&&... args
     ) : _queue(::std::forward<Args>(args)...),
@@ -386,10 +365,10 @@ namespace odds_and_ends { namespace node {
     {
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     template <typename OtherQueue>
     void
-        breadth_first_tree_iterator<Node,QGen>::_merge_queue(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_merge_queue(
             _queue_t& this_queue,
             OtherQueue& other_queue,
             ::boost::mpl::true_
@@ -401,10 +380,10 @@ namespace odds_and_ends { namespace node {
         }
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     template <typename OtherQueue>
     void
-        breadth_first_tree_iterator<Node,QGen>::_merge_queue(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_merge_queue(
             _queue_t& this_queue,
             OtherQueue& other_queue,
             ::boost::mpl::false_
@@ -416,9 +395,9 @@ namespace odds_and_ends { namespace node {
         }
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     inline void
-        breadth_first_tree_iterator<Node,QGen>::_merge_heap(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_merge_heap(
             _queue_t& this_queue,
             _queue_t& other_queue,
             ::boost::mpl::true_
@@ -427,10 +406,10 @@ namespace odds_and_ends { namespace node {
         this_queue.merge(other_queue);
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     template <typename OtherQueue>
     inline void
-        breadth_first_tree_iterator<Node,QGen>::_merge_heap(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_merge_heap(
             _queue_t& this_queue,
             OtherQueue& other_queue,
             ::boost::mpl::false_
@@ -439,18 +418,38 @@ namespace odds_and_ends { namespace node {
         ::boost::heap::heap_merge(this_queue, other_queue);
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q> const& other,
+    template <typename Node, typename IsReverse, typename QGen>
+    breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
+        breadth_first_tree_iterator const& other
+    ) : _queue(other.queue().get_allocator()),
+        _current(other.current()),
+        _state(other._state)
+    {
+        _queue_t other_queue(other.queue());
+
+        type::_merge_queue(
+            this->_queue,
+            other_queue,
+            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>()
+        );
+    }
+
+    template <typename Node, typename IsReverse, typename QGen>
+    template <typename N, typename I, typename Q>
+    breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
+        breadth_first_tree_iterator<N,I,Q> const& other,
         typename ::boost::enable_if<
             typename ::boost::mpl::eval_if<
                 ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
                 ::boost::mpl::false_,
-                ::boost::mpl::if_<
-                    ::std::is_convertible<N,Node>,
+                ::boost::mpl::eval_if<
                     ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
+                        typename breadth_first_tree_iterator<N,I,Q>::_queue_t
+                    >,
+                    ::boost::mpl::if_<
+                        ::std::is_convertible<N,Node>,
+                        ::boost::mpl::equal_to<I,IsReverse>,
+                        ::boost::mpl::false_
                     >,
                     ::boost::mpl::false_
                 >
@@ -459,9 +458,9 @@ namespace odds_and_ends { namespace node {
         >::type
     ) : _queue(other.queue().get_allocator()),
         _current(other.current()),
-        _state(::odds_and_ends::node::traversal_state(other))
+        _state(other._state)
     {
-        typedef typename breadth_first_tree_iterator<N,Q>::_queue_t other_queue_t;
+        typedef typename breadth_first_tree_iterator<N,I,Q>::_queue_t other_queue_t;
         other_queue_t other_queue(other.queue());
 
         type::_merge_queue(
@@ -471,27 +470,31 @@ namespace odds_and_ends { namespace node {
         );
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q> const& other,
+    template <typename Node, typename IsReverse, typename QGen>
+    template <typename N, typename I, typename Q>
+    breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
+        breadth_first_tree_iterator<N,I,Q> const& other,
         typename ::boost::enable_if<
             typename ::boost::mpl::eval_if<
                 ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
                 ::boost::mpl::false_,
                 ::boost::mpl::if_<
                     ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
+                        typename breadth_first_tree_iterator<N,I,Q>::_queue_t
                     >,
                     ::boost::mpl::false_,
-                    ::std::is_convertible<N,Node>
+                    ::boost::mpl::if_<
+                        ::std::is_convertible<N,Node>,
+                        ::boost::mpl::equal_to<I,IsReverse>,
+                        ::boost::mpl::false_
+                    >
                 >
             >::type,
             _enabler
         >::type
-    ) : _queue(), _current(other.current()), _state(::odds_and_ends::node::traversal_state(other))
+    ) : _queue(), _current(other.current()), _state(other._state)
     {
-        typedef typename breadth_first_tree_iterator<N,Q>::_queue_t other_queue_t;
+        typedef typename breadth_first_tree_iterator<N,I,Q>::_queue_t other_queue_t;
         other_queue_t other_queue(other.queue());
 
         type::_merge_queue(
@@ -501,17 +504,23 @@ namespace odds_and_ends { namespace node {
         );
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q> const& other,
+    template <typename Node, typename IsReverse, typename QGen>
+    template <typename N, typename I, typename Q>
+    breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
+        breadth_first_tree_iterator<N,I,Q> const& other,
         typename ::boost::enable_if<
             typename ::boost::mpl::eval_if<
                 ::std::is_convertible<N,Node>,
-                ::boost::mpl::if_<
-                    ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                    ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
+                ::boost::mpl::eval_if<
+                ::boost::mpl::equal_to<I,IsReverse>,
+                    ::boost::mpl::if_<
+                        ::odds_and_ends::static_introspection
+                        ::concept::is_stack_or_heap<_queue_t>,
+                        ::odds_and_ends::static_introspection
+                        ::member_function::has_get_allocator<
+                            typename breadth_first_tree_iterator<N,I,Q>::_queue_t
+                        >,
+                        ::boost::mpl::false_
                     >,
                     ::boost::mpl::false_
                 >,
@@ -521,9 +530,9 @@ namespace odds_and_ends { namespace node {
         >::type
     ) : _queue(other.queue().get_allocator()),
         _current(other.current()),
-        _state(::odds_and_ends::node::traversal_state(other))
+        _state(other._state)
     {
-        typedef typename breadth_first_tree_iterator<N,Q>::_queue_t other_queue_t;
+        typedef typename breadth_first_tree_iterator<N,I,Q>::_queue_t other_queue_t;
         other_queue_t other_queue(other.queue());
 
         type::_merge_heap(
@@ -541,27 +550,33 @@ namespace odds_and_ends { namespace node {
         );
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q> const& other,
+    template <typename Node, typename IsReverse, typename QGen>
+    template <typename N, typename I, typename Q>
+    breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
+        breadth_first_tree_iterator<N,I,Q> const& other,
         typename ::boost::enable_if<
             typename ::boost::mpl::eval_if<
                 ::std::is_convertible<N,Node>,
-                ::boost::mpl::if_<
-                    ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
+                ::boost::mpl::eval_if<
+                    ::boost::mpl::equal_to<I,IsReverse>,
+                    ::boost::mpl::if_<
+                        ::odds_and_ends::static_introspection
+                        ::member_function::has_get_allocator<
+                            typename breadth_first_tree_iterator<N,I,Q>::_queue_t
+                        >,
+                        ::boost::mpl::false_,
+                        ::odds_and_ends::static_introspection
+                        ::concept::is_stack_or_heap<_queue_t>
                     >,
-                    ::boost::mpl::false_,
-                    ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>
+                    ::boost::mpl::false_
                 >,
                 ::boost::mpl::false_
             >::type,
             _enabler
         >::type
-    ) : _queue(), _current(other.current()), _state(::odds_and_ends::node::traversal_state(other))
+    ) : _queue(), _current(other.current()), _state(other._state)
     {
-        typedef typename breadth_first_tree_iterator<N,Q>::_queue_t other_queue_t;
+        typedef typename breadth_first_tree_iterator<N,I,Q>::_queue_t other_queue_t;
         other_queue_t other_queue(other.queue());
 
         type::_merge_heap(
@@ -579,155 +594,35 @@ namespace odds_and_ends { namespace node {
         );
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q>&& other,
-        typename ::boost::enable_if<
-            typename ::boost::mpl::eval_if<
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                ::boost::mpl::false_,
-                ::boost::mpl::if_<
-                    ::std::is_convertible<N,Node>,
-                    ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
-                    >,
-                    ::boost::mpl::false_
-                >
-            >::type,
-            _enabler
-        >::type
+    template <typename Node, typename IsReverse, typename QGen>
+    breadth_first_tree_iterator<Node,IsReverse,QGen>::breadth_first_tree_iterator(
+        breadth_first_tree_iterator&& other
     ) : _queue(other.queue().get_allocator()),
         _current(::std::move(other.current())),
-        _state(::odds_and_ends::node::traversal_state(other))
+        _state(other._state)
     {
         type::_merge_queue(
             this->_queue,
             other.queue(),
-            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<
-                typename breadth_first_tree_iterator<N,Q>::_queue_t
-            >()
+            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>()
         );
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q>&& other,
-        typename ::boost::enable_if<
-            typename ::boost::mpl::eval_if<
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                ::boost::mpl::false_,
-                ::boost::mpl::if_<
-                    ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
-                    >,
-                    ::boost::mpl::false_,
-                    ::std::is_convertible<N,Node>
-                >
-            >::type,
-            _enabler
-        >::type
-    ) : _queue(),
-        _current(::std::move(other.current())),
-        _state(::odds_and_ends::node::traversal_state(other))
-    {
-        type::_merge_queue(
-            this->_queue,
-            other.queue(),
-            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<
-                typename breadth_first_tree_iterator<N,Q>::_queue_t
-            >()
-        );
-    }
-
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q>&& other,
-        typename ::boost::enable_if<
-            typename ::boost::mpl::eval_if<
-                ::std::is_convertible<N,Node>,
-                ::boost::mpl::if_<
-                    ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>,
-                    ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
-                    >,
-                    ::boost::mpl::false_
-                >,
-                ::boost::mpl::false_
-            >::type,
-            _enabler
-        >::type
-    ) : _queue(other.queue().get_allocator()),
-        _current(::std::move(other.current())),
-        _state(::odds_and_ends::node::traversal_state(other))
-    {
-        type::_merge_heap(
-            this->_queue,
-            other.queue(),
-            typename ::boost::mpl::eval_if<
-                ::odds_and_ends::static_introspection::concept::is_mergeable_heap<_queue_t>,
-                ::boost::mpl::if_<
-                    ::std::is_same<_queue_t,typename breadth_first_tree_iterator<N,Q>::_queue_t>,
-                    ::boost::mpl::true_,
-                    ::boost::mpl::false_
-                >,
-                ::boost::mpl::false_
-            >::type()
-        );
-    }
-
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    inline breadth_first_tree_iterator<Node,QGen>::breadth_first_tree_iterator(
-        breadth_first_tree_iterator<N,Q>&& other,
-        typename ::boost::enable_if<
-            typename ::boost::mpl::eval_if<
-                ::std::is_convertible<N,Node>,
-                ::boost::mpl::if_<
-                    ::odds_and_ends::static_introspection::member_function::has_get_allocator<
-                        typename breadth_first_tree_iterator<N,Q>::_queue_t
-                    >,
-                    ::boost::mpl::false_,
-                    ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>
-                >,
-                ::boost::mpl::false_
-            >::type,
-            _enabler
-        >::type
-    ) : _queue(),
-        _current(::std::move(other.current())),
-        _state(::odds_and_ends::node::traversal_state(other))
-    {
-        type::_merge_heap(
-            this->_queue,
-            other.queue(),
-            typename ::boost::mpl::eval_if<
-                ::odds_and_ends::static_introspection::concept::is_mergeable_heap<_queue_t>,
-                ::boost::mpl::if_<
-                    ::std::is_same<_queue_t,typename breadth_first_tree_iterator<N,Q>::_queue_t>,
-                    ::boost::mpl::true_,
-                    ::boost::mpl::false_
-                >,
-                ::boost::mpl::false_
-            >::type()
-        );
-    }
-
-    template <typename Node, typename QGen>
-    inline breadth_first_tree_iterator<Node,QGen>::~breadth_first_tree_iterator()
+    template <typename Node, typename IsReverse, typename QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>::~breadth_first_tree_iterator()
     {
     }
 
-    template <typename Node, typename QGen>
-    inline void breadth_first_tree_iterator<Node,QGen>::_clear_queue(::boost::mpl::true_)
+    template <typename Node, typename IsReverse, typename QGen>
+    inline void
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_clear_queue(::boost::mpl::true_)
     {
         this->_queue.clear();
     }
 
-    template <typename Node, typename QGen>
-    inline void breadth_first_tree_iterator<Node,QGen>::_clear_queue(::boost::mpl::false_)
+    template <typename Node, typename IsReverse, typename QGen>
+    inline void
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_clear_queue(::boost::mpl::false_)
     {
         for (; !this->_queue.empty(); )
         {
@@ -735,9 +630,9 @@ namespace odds_and_ends { namespace node {
         }
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     void
-        breadth_first_tree_iterator<Node,QGen>::_clone(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_clone(
             breadth_first_tree_iterator const& other,
             ::boost::mpl::true_
         )
@@ -751,9 +646,9 @@ namespace odds_and_ends { namespace node {
         );
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     void
-        breadth_first_tree_iterator<Node,QGen>::_clone(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_clone(
             breadth_first_tree_iterator const& other,
             ::boost::mpl::false_ f
         )
@@ -763,9 +658,11 @@ namespace odds_and_ends { namespace node {
         type::_merge_queue(this->_queue, other_queue, f);
     }
 
-    template <typename Node, typename QGen>
-    inline breadth_first_tree_iterator<Node,QGen>&
-        breadth_first_tree_iterator<Node,QGen>::operator=(breadth_first_tree_iterator const& other)
+    template <typename Node, typename IsReverse, typename QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>&
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::operator=(
+            breadth_first_tree_iterator const& other
+        )
     {
         if (this != &other)
         {
@@ -783,9 +680,9 @@ namespace odds_and_ends { namespace node {
         return *this;
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     inline void
-        breadth_first_tree_iterator<Node,QGen>::_move(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_move(
             breadth_first_tree_iterator&& other,
             ::boost::mpl::true_
         )
@@ -797,9 +694,9 @@ namespace odds_and_ends { namespace node {
         );
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     inline void
-        breadth_first_tree_iterator<Node,QGen>::_move(
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_move(
             breadth_first_tree_iterator&& other,
             ::boost::mpl::false_ f
         )
@@ -807,9 +704,11 @@ namespace odds_and_ends { namespace node {
         type::_merge_queue(this->_queue, other.queue(), f);
     }
 
-    template <typename Node, typename QGen>
-    inline breadth_first_tree_iterator<Node,QGen>&
-        breadth_first_tree_iterator<Node,QGen>::operator=(breadth_first_tree_iterator&& other)
+    template <typename Node, typename IsReverse, typename QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>&
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::operator=(
+            breadth_first_tree_iterator&& other
+        )
     {
         if (this != &static_cast<breadth_first_tree_iterator&>(other))
         {
@@ -817,7 +716,7 @@ namespace odds_and_ends { namespace node {
                 ::odds_and_ends::static_introspection::member_function::has_clear<_queue_t>()
             );
             this->_current = other.current();
-            this->_state = ::odds_and_ends::node::traversal_state(other);
+            this->_state = other._state;
             this->_move(
                 static_cast<breadth_first_tree_iterator&&>(other),
                 ::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>()
@@ -827,219 +726,64 @@ namespace odds_and_ends { namespace node {
         return *this;
     }
 
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    typename ::boost::enable_if<
-        typename ::boost::mpl::if_<
-            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<
-                typename breadth_first_tree_iterator<Node,QGen>::_queue_t
-            >,
-            ::boost::mpl::false_,
-            ::std::is_convertible<N,Node>
-        >::type,
-        breadth_first_tree_iterator<Node,QGen>&
-    >::type
-        breadth_first_tree_iterator<Node,QGen>::operator=(
-            breadth_first_tree_iterator<N,Q> const& other
-        )
-    {
-        if (this != &other)
-        {
-            this->_clear_queue(
-                ::odds_and_ends::static_introspection::member_function::has_clear<_queue_t>()
-            );
-            this->_current = other.current();
-            this->_state = ::odds_and_ends::node::traversal_state(other);
-
-            typedef typename breadth_first_tree_iterator<N,Q>::_queue_t other_queue_t;
-            other_queue_t other_queue(other.queue());
-
-            type::_merge_queue(
-                this->_queue,
-                other_queue,
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<other_queue_t>()
-            );
-        }
-
-        return *this;
-    }
-
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    typename ::boost::enable_if<
-        typename ::boost::mpl::if_<
-            ::std::is_convertible<N,Node>,
-            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<
-                typename breadth_first_tree_iterator<Node,QGen>::_queue_t
-            >,
-            ::boost::mpl::false_
-        >::type,
-        breadth_first_tree_iterator<Node,QGen>&
-    >::type
-        breadth_first_tree_iterator<Node,QGen>::operator=(
-            breadth_first_tree_iterator<N,Q> const& other
-        )
-    {
-        if (this != &other)
-        {
-            this->_clear_queue(
-                ::odds_and_ends::static_introspection::member_function::has_clear<_queue_t>()
-            );
-            this->_current = other.current();
-            this->_state = ::odds_and_ends::node::traversal_state(other);
-
-            typedef typename breadth_first_tree_iterator<N,Q>::_queue_t other_queue_t;
-            other_queue_t other_queue(other.queue());
-
-            type::_merge_heap(
-                this->_queue,
-                other_queue,
-                typename ::boost::mpl::eval_if<
-                    ::odds_and_ends::static_introspection::concept::is_mergeable_heap<_queue_t>,
-                    ::boost::mpl::if_<
-                        ::std::is_same<_queue_t,other_queue_t>,
-                        ::boost::mpl::true_,
-                        ::boost::mpl::false_
-                    >,
-                    ::boost::mpl::false_
-                >::type()
-            );
-        }
-
-        return *this;
-    }
-
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    inline typename ::boost::enable_if<
-        typename ::boost::mpl::if_<
-            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<
-                typename breadth_first_tree_iterator<Node,QGen>::_queue_t
-            >,
-            ::boost::mpl::false_,
-            ::std::is_convertible<N,Node>
-        >::type,
-        breadth_first_tree_iterator<Node,QGen>&
-    >::type
-        breadth_first_tree_iterator<Node,QGen>::operator=(
-            breadth_first_tree_iterator<N,Q>&& other
-        )
-    {
-        if (this != &static_cast<breadth_first_tree_iterator<N,Q>&>(other))
-        {
-            this->_clear_queue(
-                ::odds_and_ends::static_introspection::member_function::has_clear<_queue_t>()
-            );
-            this->_current = other.current();
-            this->_state = ::odds_and_ends::node::traversal_state(other);
-            type::_merge_queue(
-                this->_queue,
-                other.queue(),
-                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<
-                    typename breadth_first_tree_iterator<N,Q>::_queue_t
-                >()
-            );
-        }
-
-        return *this;
-    }
-
-    template <typename Node, typename QGen>
-    template <typename N, typename Q>
-    inline typename ::boost::enable_if<
-        typename ::boost::mpl::if_<
-            ::std::is_convertible<N,Node>,
-            ::odds_and_ends::static_introspection::concept::is_stack_or_heap<
-                typename breadth_first_tree_iterator<Node,QGen>::_queue_t
-            >,
-            ::boost::mpl::false_
-        >::type,
-        breadth_first_tree_iterator<Node,QGen>&
-    >::type
-        breadth_first_tree_iterator<Node,QGen>::operator=(
-            breadth_first_tree_iterator<N,Q>&& other
-        )
-    {
-        if (this != &static_cast<breadth_first_tree_iterator<N,Q>&>(other))
-        {
-            this->_clear_queue(
-                ::odds_and_ends::static_introspection::member_function::has_clear<_queue_t>()
-            );
-            this->_current = other.current();
-            this->_state = ::odds_and_ends::node::traversal_state(other);
-            type::_merge_heap(
-                this->_queue,
-                other.queue(),
-                typename ::boost::mpl::eval_if<
-                    ::odds_and_ends::static_introspection::concept::is_mergeable_heap<_queue_t>,
-                    ::boost::mpl::if_<
-                        ::std::is_same<
-                            _queue_t,
-                            typename breadth_first_tree_iterator<N,Q>::_queue_t
-                        >,
-                        ::boost::mpl::true_,
-                        ::boost::mpl::false_
-                    >,
-                    ::boost::mpl::false_
-                >::type()
-            );
-        }
-
-        return *this;
-    }
-
-    template <typename Node, typename QGen>
-    inline breadth_first_tree_iterator<Node,QGen>::operator
+    template <typename Node, typename IsReverse, typename QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>::operator
         ::odds_and_ends::node::traversal_state() const
     {
         return this->_state;
     }
 
-    template <typename Node, typename QGen>
-    inline typename breadth_first_tree_iterator<Node,QGen>::reference
-        breadth_first_tree_iterator<Node,QGen>::operator*() const
+    template <typename Node, typename IsReverse, typename QGen>
+    inline bool breadth_first_tree_iterator<Node,IsReverse,QGen>::operator!() const
+    {
+        return !this->_state.get();
+    }
+
+    template <typename Node, typename IsReverse, typename QGen>
+    inline typename breadth_first_tree_iterator<Node,IsReverse,QGen>::reference
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::operator*() const
     {
         return *this->_current;
     }
 
-    template <typename Node, typename QGen>
-    inline typename breadth_first_tree_iterator<Node,QGen>::pointer
-        breadth_first_tree_iterator<Node,QGen>::operator->() const
+    template <typename Node, typename IsReverse, typename QGen>
+    inline typename breadth_first_tree_iterator<Node,IsReverse,QGen>::pointer
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::operator->() const
     {
         return this->_current;
     }
 
-    template <typename Node, typename QGen>
-    inline typename breadth_first_tree_iterator<Node,QGen>::pointer const&
-        breadth_first_tree_iterator<Node,QGen>::current() const
+    template <typename Node, typename IsReverse, typename QGen>
+    inline typename breadth_first_tree_iterator<Node,IsReverse,QGen>::pointer const&
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::current() const
     {
         return this->_current;
     }
 
-    template <typename Node, typename QGen>
-    inline typename breadth_first_tree_iterator<Node,QGen>::pointer&
-        breadth_first_tree_iterator<Node,QGen>::current()
+    template <typename Node, typename IsReverse, typename QGen>
+    inline typename breadth_first_tree_iterator<Node,IsReverse,QGen>::pointer&
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::current()
     {
         return this->_current;
     }
 
-    template <typename Node, typename QGen>
-    inline typename breadth_first_tree_iterator<Node,QGen>::_queue_t const&
-        breadth_first_tree_iterator<Node,QGen>::queue() const
+    template <typename Node, typename IsReverse, typename QGen>
+    inline typename breadth_first_tree_iterator<Node,IsReverse,QGen>::_queue_t const&
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::queue() const
     {
         return this->_queue;
     }
 
-    template <typename Node, typename QGen>
-    inline typename breadth_first_tree_iterator<Node,QGen>::_queue_t&
-        breadth_first_tree_iterator<Node,QGen>::queue()
+    template <typename Node, typename IsReverse, typename QGen>
+    inline typename breadth_first_tree_iterator<Node,IsReverse,QGen>::_queue_t&
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::queue()
     {
         return this->_queue;
     }
 
-    template <typename Node, typename QGen>
+    template <typename Node, typename IsReverse, typename QGen>
     template <typename Itr>
-    void breadth_first_tree_iterator<Node,QGen>::_push_all(Itr itr, Itr itr_end)
+    void breadth_first_tree_iterator<Node,IsReverse,QGen>::_push_all(Itr itr, Itr itr_end)
     {
         for (; itr != itr_end; ++itr)
         {
@@ -1047,8 +791,8 @@ namespace odds_and_ends { namespace node {
         }
     }
 
-    template <typename Node, typename QGen>
-    inline void breadth_first_tree_iterator<Node,QGen>::_pop(::boost::mpl::true_)
+    template <typename Node, typename IsReverse, typename QGen>
+    inline void breadth_first_tree_iterator<Node,IsReverse,QGen>::_pop(::boost::mpl::true_)
     {
         if (this->_queue.empty())
         {
@@ -1062,8 +806,8 @@ namespace odds_and_ends { namespace node {
         }
     }
 
-    template <typename Node, typename QGen>
-    inline void breadth_first_tree_iterator<Node,QGen>::_pop(::boost::mpl::false_)
+    template <typename Node, typename IsReverse, typename QGen>
+    inline void breadth_first_tree_iterator<Node,IsReverse,QGen>::_pop(::boost::mpl::false_)
     {
         if (this->_queue.empty())
         {
@@ -1077,54 +821,70 @@ namespace odds_and_ends { namespace node {
         }
     }
 
-    template <typename Node, typename QGen>
-    inline breadth_first_tree_iterator<Node,QGen>&
-        breadth_first_tree_iterator<Node,QGen>::operator++()
+    template <typename Node, typename IsReverse, typename QGen>
+    inline void breadth_first_tree_iterator<Node,IsReverse,QGen>::_increment(::boost::mpl::false_)
     {
-        BOOST_ASSERT_MSG(this->_state, "Do not increment past-the-end!");
         this->_push_all(this->_current->begin(), this->_current->end());
+    }
+
+    template <typename Node, typename IsReverse, typename QGen>
+    inline void breadth_first_tree_iterator<Node,IsReverse,QGen>::_increment(::boost::mpl::true_)
+    {
+        this->_push_all(this->_current->rbegin(), this->_current->rend());
+    }
+
+    template <typename Node, typename IsReverse, typename QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>&
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::operator++()
+    {
+        BOOST_ASSERT_MSG(this->_state.get(), "Do not increment past-the-end!");
+        this->_increment(IsReverse());
         this->_pop(::odds_and_ends::static_introspection::concept::is_stack_or_heap<_queue_t>());
         return *this;
     }
 
-    template <typename Node, typename QGen>
-    inline breadth_first_tree_iterator<Node,QGen>
-        breadth_first_tree_iterator<Node,QGen>::operator++(int)
+    template <typename Node, typename IsReverse, typename QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::operator++(int)
     {
         breadth_first_tree_iterator itr(*this);
         ++(*this);
         return itr;
     }
 
-    template <typename N1, typename Q1, typename N2, typename Q2>
+    template <typename N1, typename I1, typename Q1, typename N2, typename I2, typename Q2>
     inline bool
         operator==(
-            breadth_first_tree_iterator<N1,Q1> const& lhs,
-            breadth_first_tree_iterator<N2,Q2> const& rhs
+            breadth_first_tree_iterator<N1,I1,Q1> const& lhs,
+            breadth_first_tree_iterator<N2,I2,Q2> const& rhs
         )
     {
         return (lhs._state == rhs._state) && (lhs._current == rhs._current);
     }
 
-    template <typename N1, typename Q1, typename N2, typename Q2>
+    template <typename N1, typename I1, typename Q1, typename N2, typename I2, typename Q2>
     inline bool
         operator!=(
-            breadth_first_tree_iterator<N1,Q1> const& lhs,
-            breadth_first_tree_iterator<N2,Q2> const& rhs
+            breadth_first_tree_iterator<N1,I1,Q1> const& lhs,
+            breadth_first_tree_iterator<N2,I2,Q2> const& rhs
         )
     {
         return (lhs._state != rhs._state) || (lhs._current != rhs._current);
     }
 
     template <
+        typename IsReverse = ::boost::mpl::false_,
         typename QGen = ::odds_and_ends::node::container::queue< ::boost::mpl::_>,
         typename Node,
         typename ...Args
     >
-    inline breadth_first_tree_iterator<Node,QGen>
+    inline breadth_first_tree_iterator<Node,IsReverse,QGen>
         make_breadth_first_tree_iterator(Node& node, Args&&... args)
     {
-        return breadth_first_tree_iterator<Node,QGen>(node, ::std::forward<Args>(args)...);
+        return breadth_first_tree_iterator<Node,IsReverse,QGen>(
+            node,
+            ::std::forward<Args>(args)...
+        );
     }
 }}  // namespace odds_and_ends::node
 

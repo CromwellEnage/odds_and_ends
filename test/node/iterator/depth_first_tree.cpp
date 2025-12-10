@@ -5,6 +5,7 @@
 #include <odds_and_ends/node/tree/binary.hpp>
 #include <odds_and_ends/node/iterator/depth_first_tree.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
+#include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/core/lightweight_test.hpp>
 

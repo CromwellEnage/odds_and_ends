@@ -5,6 +5,7 @@
 #include <odds_and_ends/node/tree/binary.hpp>
 #include <odds_and_ends/node/iterator/breadth_first_tree.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
+#include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/core/lightweight_test.hpp>
 
@@ -49,19 +50,36 @@ void test_00()
     BOOST_TEST(!n76.left());
     BOOST_TEST(!n76.right());
 
-    ::odds_and_ends::node::breadth_first_tree_iterator<binary_tree_node> bft_itr(n50);
+    ::odds_and_ends::node::breadth_first_tree_iterator<binary_tree_node> bft_fwd_itr(n50);
 
-    BOOST_TEST(50 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(76 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(9 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(23 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    BOOST_TEST(50 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(76 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(9 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(23 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+
+    ::odds_and_ends::node::breadth_first_tree_iterator<
+        binary_tree_node,
+        ::boost::mpl::true_
+    > bft_bkd_itr(n50);
+
+    BOOST_TEST(50 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(76 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(23 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(9 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
 
     binary_tree_node::traits::pointer rotate_result = n50.rotate_right();
 
@@ -81,18 +99,32 @@ void test_00()
     BOOST_TEST(!n23.right());
     BOOST_TEST(!n76.left());
     BOOST_TEST(!n76.right());
-    bft_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n17);
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(9 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(50 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(23 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(76 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    bft_fwd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n17);
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(9 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(50 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(23 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(76 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+    bft_bkd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator<
+        ::boost::mpl::true_
+    >(n17);
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(50 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(9 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(76 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(23 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
     rotate_result = n17.rotate_left();
     BOOST_TEST(50 == **rotate_result);
     BOOST_TEST(!n50.parent());
@@ -110,18 +142,32 @@ void test_00()
     BOOST_TEST(!n23.right());
     BOOST_TEST(!n76.left());
     BOOST_TEST(!n76.right());
-    bft_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n50);
-    BOOST_TEST(50 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(76 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(9 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(23 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    bft_fwd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n50);
+    BOOST_TEST(50 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(76 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(9 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(23 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+    bft_bkd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator<
+        ::boost::mpl::true_
+    >(n50);
+    BOOST_TEST(50 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(76 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(23 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(9 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
 }
 
 void test_01()
@@ -267,29 +313,56 @@ void test_01()
     BOOST_TEST(22 == **(n25.rbegin() + 1));
     BOOST_TEST(n25.rbegin() + 2 == n25.rend());
 
-    ::odds_and_ends::node::breadth_first_tree_iterator<binary_tree_node> bft_itr(n13);
+    ::odds_and_ends::node::breadth_first_tree_iterator<binary_tree_node> bft_fwd_itr(n13);
 
-    BOOST_TEST(13 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(8 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(6 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(11 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(15 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(25 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(1 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(22 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(27 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    BOOST_TEST(13 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(8 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(6 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(11 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(15 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(25 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(1 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(22 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(27 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+
+    ::odds_and_ends::node::breadth_first_tree_iterator<
+        binary_tree_node,
+        ::boost::mpl::true_
+    > bft_bkd_itr(n13);
+
+    BOOST_TEST(13 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(8 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(25 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(15 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(11 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(6 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(27 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(22 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(1 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
 
     binary_tree_node::traits::pointer rotate_result = n08.rotate_right();
 
@@ -362,28 +435,52 @@ void test_01()
     BOOST_TEST(!n27.right());
     BOOST_TEST(n27.begin() == n27.end());
     BOOST_TEST(n27.rbegin() == n27.rend());
-    bft_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
-    BOOST_TEST(13 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(6 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(1 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(8 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(15 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(25 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(11 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(22 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(27 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    bft_fwd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
+    BOOST_TEST(13 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(6 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(1 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(8 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(15 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(25 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(11 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(22 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(27 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+    bft_bkd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator<
+        ::boost::mpl::true_
+    >(n13);
+    BOOST_TEST(13 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(6 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(25 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(15 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(8 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(1 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(27 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(22 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(11 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
     rotate_result = n17.rotate_left();
     BOOST_TEST(25 == **rotate_result);
     BOOST_TEST(6 == **n01.parent());
@@ -454,28 +551,52 @@ void test_01()
     BOOST_TEST(!n27.right());
     BOOST_TEST(n27.begin() == n27.end());
     BOOST_TEST(n27.rbegin() == n27.rend());
-    bft_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
-    BOOST_TEST(13 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(6 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(25 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(1 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(8 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(27 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(11 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(15 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(22 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    bft_fwd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
+    BOOST_TEST(13 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(6 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(25 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(1 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(8 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(27 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(11 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(15 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(22 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+    bft_bkd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator<
+        ::boost::mpl::true_
+    >(n13);
+    BOOST_TEST(13 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(25 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(6 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(27 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(8 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(1 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(22 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(15 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(11 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
     rotate_result = n06.rotate_left();
     BOOST_TEST(8 == **rotate_result);
     BOOST_TEST(6 == **n01.parent());
@@ -542,28 +663,52 @@ void test_01()
     BOOST_TEST(!n27.right());
     BOOST_TEST(n27.begin() == n27.end());
     BOOST_TEST(n27.rbegin() == n27.rend());
-    bft_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
-    BOOST_TEST(13 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(8 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(25 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(6 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(11 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(27 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(1 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(15 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(22 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    bft_fwd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
+    BOOST_TEST(13 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(8 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(25 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(6 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(11 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(27 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(1 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(15 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(22 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+    bft_bkd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator<
+        ::boost::mpl::true_
+    >(n13);
+    BOOST_TEST(13 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(25 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(8 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(27 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(11 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(6 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(22 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(15 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(1 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
     rotate_result = n25.rotate_right();
     BOOST_TEST(17 == **rotate_result);
     BOOST_TEST(6 == **n01.parent());
@@ -630,28 +775,52 @@ void test_01()
     BOOST_TEST(!n27.right());
     BOOST_TEST(n27.begin() == n27.end());
     BOOST_TEST(n27.rbegin() == n27.rend());
-    bft_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
-    BOOST_TEST(13 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(8 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(17 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(6 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(11 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(15 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(25 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(1 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(22 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(27 == **bft_itr);
-    ++bft_itr;
-    BOOST_TEST(!bft_itr);
+    bft_fwd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator(n13);
+    BOOST_TEST(13 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(8 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(17 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(6 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(11 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(15 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(25 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(1 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(22 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(27 == **bft_fwd_itr);
+    ++bft_fwd_itr;
+    BOOST_TEST(!bft_fwd_itr);
+    bft_bkd_itr = ::odds_and_ends::node::make_breadth_first_tree_iterator<
+        ::boost::mpl::true_
+    >(n13);
+    BOOST_TEST(13 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(17 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(8 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(25 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(15 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(11 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(6 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(27 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(22 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(1 == **bft_bkd_itr);
+    ++bft_bkd_itr;
+    BOOST_TEST(!bft_bkd_itr);
 }
 
 int main(int argc, char** argv)

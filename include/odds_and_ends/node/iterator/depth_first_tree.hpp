@@ -156,6 +156,7 @@ namespace odds_and_ends { namespace node {
         depth_first_tree_iterator& operator=(depth_first_tree_iterator const& other);
         depth_first_tree_iterator& operator=(depth_first_tree_iterator&& other);
         operator ::odds_and_ends::node::traversal_state() const;
+        bool operator!() const;
         reference operator*() const;
         pointer operator->() const;
         depth_first_tree_iterator& operator++();
@@ -376,6 +377,12 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename StackGen>
+    inline bool depth_first_tree_iterator<Node,IsReverse,StackGen>::operator!() const
+    {
+        return !this->_state.get();
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
     inline typename depth_first_tree_iterator<Node,IsReverse,StackGen>::reference
         depth_first_tree_iterator<Node,IsReverse,StackGen>::operator*() const
     {
@@ -393,64 +400,55 @@ namespace odds_and_ends { namespace node {
     inline depth_first_tree_iterator<Node,IsReverse,StackGen>&
         depth_first_tree_iterator<Node,IsReverse,StackGen>::operator++()
     {
-        switch (this->_state)
+        if (::odds_and_ends::node::pre_order_traversal == this->_state)
         {
-            case ::odds_and_ends::node::pre_order_traversal:
-            {
-                _child_iterator itr = this->_current_begin(IsReverse());
+            _child_iterator itr = this->_current_begin(IsReverse());
 
-                if (itr == this->_current_end(IsReverse()))
+            if (itr == this->_current_end(IsReverse()))
+            {
+                // No children: change state.
+                this->_state = ::odds_and_ends::node::post_order_traversal;
+            }
+            else
+            {
+                // Go deeper.
+                this->_node_stack.push(this->_current_ptr);
+                this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*itr);
+                this->_itr_stack.push(itr);
+            }
+        }
+        else if (::odds_and_ends::node::post_order_traversal == this->_state)
+        {
+            if (this->_node_stack.empty())
+            {
+                BOOST_ASSERT(this->_itr_stack.empty());
+                // Pass the end.
+                this->_state = ::odds_and_ends::node::no_traversal;
+                this->_current_ptr = nullptr;
+            }
+            else
+            {
+                BOOST_ASSERT(!this->_itr_stack.empty());
+
+                _child_iterator itr = this->_itr_stack.top();
+
+                this->_current_ptr = this->_node_stack.top();
+                this->_node_stack.pop();
+                this->_itr_stack.pop();
+
+                if (++itr != this->_current_end(IsReverse()))
                 {
-                    // No children: change state.
-                    this->_state = ::odds_and_ends::node::post_order_traversal;
-                }
-                else
-                {
-                    // Go deeper.
+                    // Traverse the next sibling.
+                    this->_state = ::odds_and_ends::node::pre_order_traversal;
                     this->_node_stack.push(this->_current_ptr);
                     this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*itr);
                     this->_itr_stack.push(itr);
                 }
-
-                break;
             }
-
-            case ::odds_and_ends::node::post_order_traversal:
-            {
-                if (this->_node_stack.empty())
-                {
-                    BOOST_ASSERT(this->_itr_stack.empty());
-                    // Pass the end.
-                    this->_state = ::odds_and_ends::node::no_traversal;
-                    this->_current_ptr = nullptr;
-                }
-                else
-                {
-                    BOOST_ASSERT(!this->_itr_stack.empty());
-
-                    _child_iterator itr = this->_itr_stack.top();
-
-                    this->_current_ptr = this->_node_stack.top();
-                    this->_node_stack.pop();
-                    this->_itr_stack.pop();
-
-                    if (++itr != this->_current_end(IsReverse()))
-                    {
-                        // Traverse the next sibling.
-                        this->_state = ::odds_and_ends::node::pre_order_traversal;
-                        this->_node_stack.push(this->_current_ptr);
-                        this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*itr);
-                        this->_itr_stack.push(itr);
-                    }
-                }
-
-                break;
-            }
-
-            default:
-            {
-                BOOST_ASSERT_MSG(false, "Do not increment past-the-end!");
-            }
+        }
+        else  // if (::odds_and_ends::node::no_traversal == this->_state)
+        {
+            BOOST_ASSERT_MSG(false, "Do not increment past-the-end!");
         }
 
         return *this;
@@ -469,70 +467,57 @@ namespace odds_and_ends { namespace node {
     inline depth_first_tree_iterator<Node,IsReverse,StackGen>&
         depth_first_tree_iterator<Node,IsReverse,StackGen>::operator--()
     {
-        switch (this->_state)
+        if (::odds_and_ends::node::post_order_traversal == this->_state)
         {
-            case ::odds_and_ends::node::pre_order_traversal:
+            _child_iterator itr = this->_current_end(IsReverse());
+
+            if (itr == this->_current_begin(IsReverse()))
             {
-                if (this->_node_stack.empty())
-                {
-                    BOOST_ASSERT(this->_itr_stack.empty());
-                    // Pass the end.
-                    this->_state = ::odds_and_ends::node::no_traversal;
-                    this->_current_ptr = nullptr;
-                }
-                else
-                {
-                    BOOST_ASSERT(!this->_itr_stack.empty());
-
-                    _child_iterator itr = this->_itr_stack.top();
-
-                    this->_current_ptr = this->_node_stack.top();
-                    this->_node_stack.pop();
-                    this->_itr_stack.pop();
-
-                    if (this->_current_begin(IsReverse()) != itr)
-                    {
-                        // Traverse the previous sibling.
-                        this->_state = ::odds_and_ends::node::post_order_traversal;
-                        this->_node_stack.push(this->_current_ptr);
-                        this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*(--itr));
-                        this->_itr_stack.push(itr);
-                    }
-                }
-
-                break;
+                // No children: change state.
+                this->_state = ::odds_and_ends::node::pre_order_traversal;
             }
-
-            case ::odds_and_ends::node::post_order_traversal:
+            else
             {
-                _child_iterator itr = this->_current_end(IsReverse());
+                // Go deeper.
+                this->_node_stack.push(this->_current_ptr);
+                this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*(--itr));
+                this->_itr_stack.push(itr);
+            }
+        }
+        else if (::odds_and_ends::node::pre_order_traversal == this->_state)
+        {
+            if (this->_node_stack.empty())
+            {
+                BOOST_ASSERT(this->_itr_stack.empty());
+                // Pass the end.
+                this->_state = ::odds_and_ends::node::no_traversal;
+                this->_current_ptr = nullptr;
+            }
+            else
+            {
+                BOOST_ASSERT(!this->_itr_stack.empty());
 
-                if (itr == this->_current_begin(IsReverse()))
+                _child_iterator itr = this->_itr_stack.top();
+
+                this->_current_ptr = this->_node_stack.top();
+                this->_node_stack.pop();
+                this->_itr_stack.pop();
+
+                if (this->_current_begin(IsReverse()) != itr)
                 {
-                    // No children: change state.
-                    this->_state = ::odds_and_ends::node::pre_order_traversal;
-                }
-                else
-                {
-                    // Go deeper.
+                    // Traverse the previous sibling.
+                    this->_state = ::odds_and_ends::node::post_order_traversal;
                     this->_node_stack.push(this->_current_ptr);
                     this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*(--itr));
                     this->_itr_stack.push(itr);
                 }
-
-                break;
             }
-
-            default:
-            {
-                BOOST_ASSERT_MSG(
-                    this->_root_ptr,
-                    "Do not decrement past-the-end of nullptr!"
-                );
-                this->_current_ptr = this->_root_ptr;
-                this->_state = ::odds_and_ends::node::post_order_traversal;
-                break;
-            }
+        }
+        else  // if (::odds_and_ends::node::no_traversal == this->_state)
+        {
+            BOOST_ASSERT_MSG(this->_root_ptr, "Do not decrement past-the-end of nullptr!");
+            this->_current_ptr = this->_root_ptr;
+            this->_state = ::odds_and_ends::node::post_order_traversal;
         }
 
         return *this;
