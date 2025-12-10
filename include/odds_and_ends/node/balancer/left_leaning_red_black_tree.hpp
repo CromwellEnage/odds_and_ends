@@ -222,6 +222,8 @@ namespace odds_and_ends { namespace node {
         }
 
         NodePointer node_ptr = nullptr;
+        NodePointer next_ptr = nullptr;
+        bool flag = false;
 
         if (succ_ptr->left())
         {
@@ -240,11 +242,43 @@ namespace odds_and_ends { namespace node {
                         !node_ptr->right(),
                         "The node to be removed is not left-leaning."
                     );
+                    next_ptr = node_ptr->parent();
                     BOOST_ASSERT_MSG(
-                        node_ptr == node_ptr->parent()->left(),
+                        node_ptr == next_ptr->left(),
                         "The parent of the node to be removed is not left-leaning."
                     );
-                    node_ptr->parent()->unset_left();
+                    next_ptr->unset_left();
+
+                    if (node_ptr->red())
+                    {
+                        // Case 00.01
+                        BOOST_ASSERT_MSG(
+                            next_ptr->black(),
+                            "*node_ptr must not have a red parent."
+                        );
+
+                        if (next_ptr->right())
+                        {
+                            BOOST_ASSERT_MSG(
+                                next_ptr->right()->red(),
+                                "*next_ptr->right() must be a red leaf node."
+                            );
+                            BOOST_ASSERT_MSG(
+                                !next_ptr->right()->left(),
+                                "*next_ptr->right() must be a red leaf node."
+                            );
+                            BOOST_ASSERT_MSG(
+                                !next_ptr->right()->right(),
+                                "*next_ptr->right() must be a red leaf node."
+                            );
+                            next_ptr->red(true);
+                            next_ptr = next_ptr->rotate_left();
+                            next_ptr->black(true);
+                        }
+
+                        // Removal of red leaf nodes does not unbalance the tree.
+                        return Result(node_ptr, succ_ptr, root_ptr);
+                    }
                 }
                 else  // if (!node_ptr->left())
                 {
@@ -254,19 +288,18 @@ namespace odds_and_ends { namespace node {
                         "The node to be removed is not left-leaning."
                     );
                     succ_ptr->unset_right();
-                }
 
-                if (node_ptr->red())
-                {
-                    // Case 00.00
-                    BOOST_ASSERT_MSG(
-                        succ_ptr->black(),
-                        "*node_ptr must not have a red parent."
-                    );
-                    // Removal of red leaf nodes does not unbalance the tree.
-                    return Result(node_ptr, succ_ptr, root_ptr);
+                    if (node_ptr->red())
+                    {
+                        // Case 00.00
+                        BOOST_ASSERT_MSG(
+                            succ_ptr->black(),
+                            "*node_ptr must not have a red parent."
+                        );
+                        // Removal of red leaf nodes does not unbalance the tree.
+                        return Result(node_ptr, succ_ptr, root_ptr);
+                    }
                 }
-                // else if (node_ptr->black())
             }
             else  // if (!succ_ptr->right())
             {
@@ -277,24 +310,20 @@ namespace odds_and_ends { namespace node {
                 succ_ptr->unset_left();
 
                 // Find the actual successor to return.
-                for (
-                    NodePointer parent_ptr = succ_ptr->parent();
-                    parent_ptr;
-                    parent_ptr = succ_ptr->parent()
-                )
+                for (; (next_ptr = succ_ptr->parent()); )
                 {
-                    if (succ_ptr == parent_ptr->left())
+                    if (succ_ptr == next_ptr->left())
                     {
-                        // Case 00.01
-                        return Result(node_ptr, parent_ptr, root_ptr);
+                        // Case 00.02
+                        return Result(node_ptr, next_ptr, root_ptr);
                     }
                     else
                     {
-                        succ_ptr = parent_ptr;
+                        succ_ptr = next_ptr;
                     }
                 }
 
-                // Case 00.02
+                // Case 00.03
                 return Result(node_ptr, nullptr, root_ptr);
             }
         }
@@ -335,7 +364,7 @@ namespace odds_and_ends { namespace node {
                         node_ptr->red(true);
                     }
 
-                    // Case 00.03
+                    // Case 00.04
                     return Result(succ_ptr, node_ptr, root_ptr);
                 }
                 else  // if (succ_ptr == node_ptr->right())
@@ -359,24 +388,20 @@ namespace odds_and_ends { namespace node {
                     node_ptr->unset_right();
 
                     // Find the actual successor to return.
-                    for (
-                        NodePointer parent_ptr = node_ptr->parent();
-                        parent_ptr;
-                        parent_ptr = node_ptr->parent()
-                    )
+                    for (; (next_ptr = node_ptr->parent()); )
                     {
-                        if (node_ptr == parent_ptr->left())
+                        if (node_ptr == next_ptr->left())
                         {
-                            // Case 00.04
-                            return Result(succ_ptr, parent_ptr, root_ptr);
+                            // Case 00.05
+                            return Result(succ_ptr, next_ptr, root_ptr);
                         }
                         else
                         {
-                            node_ptr = parent_ptr;
+                            node_ptr = next_ptr;
                         }
                     }
 
-                    // Case 00.05
+                    // Case 00.06
                     return Result(succ_ptr, nullptr, root_ptr);
                 }
             }
@@ -389,188 +414,184 @@ namespace odds_and_ends { namespace node {
                 if (node_ptr == succ_ptr->right())
                 {
                     succ_ptr->unset_right();
+                    flag = true;
                 }
                 else if (root_ptr == succ_ptr)
                 {
                     succ_ptr = succ_ptr->right();
+                    BOOST_ASSERT_MSG(
+                        succ_ptr,
+                        "At least one black descendant of *root_ptr must exist."
+                    );
 
-                    if (succ_ptr)
+                    if (succ_ptr->left())
                     {
-                        if (succ_ptr->left())
+                        if (succ_ptr->right())
                         {
-                            if (succ_ptr->right())
+                            if (succ_ptr->left()->left())
                             {
-                                if (succ_ptr->left()->left())
-                                {
-                                    BOOST_ASSERT_MSG(
+                                BOOST_ASSERT_MSG(
                                     succ_ptr->left()->left()->red(),
                                     "*root_ptr->right()->left()->left() must be a red leaf node."
-                                    );
-                                    BOOST_ASSERT_MSG(
+                                );
+                                BOOST_ASSERT_MSG(
                                     !succ_ptr->left()->left()->left(),
                                     "*root_ptr->right()->left()->left() must be a red leaf node."
-                                    );
-                                    BOOST_ASSERT_MSG(
+                                );
+                                BOOST_ASSERT_MSG(
                                     !succ_ptr->left()->left()->right(),
                                     "*root_ptr->right()->left()->left() must be a red leaf node."
+                                );
+
+                                if (succ_ptr->left()->right())
+                                {
+                                    // Case 00.10
+                                    BOOST_ASSERT_MSG(
+                                        succ_ptr->left()->right()->red(),
+                                    "*root_ptr->right()->left()->right() must be a red leaf node."
+                                    );
+                                    BOOST_ASSERT_MSG(
+                                        !succ_ptr->left()->right()->left(),
+                                    "*root_ptr->right()->left()->right() must be a red leaf node."
+                                    );
+                                    BOOST_ASSERT_MSG(
+                                        !succ_ptr->left()->right()->right(),
+                                    "*root_ptr->right()->left()->right() must be a red leaf node."
+                                    );
+                                    swap(**root_ptr, **node_ptr);
+                                    succ_ptr = succ_ptr->left();
+                                    swap(**root_ptr, **succ_ptr->left());
+                                    swap(**succ_ptr, **succ_ptr->left());
+                                    node_ptr = succ_ptr->right();
+                                    swap(**succ_ptr, **node_ptr);
+                                    succ_ptr->unset_right();
+                                    succ_ptr = root_ptr->left();
+                                }
+                                else  // if (!root_ptr->right()->left()->right())
+                                {
+                                    // Case 00.09
+                                    swap(**root_ptr, **node_ptr);
+                                    succ_ptr = succ_ptr->left();
+                                    node_ptr = succ_ptr->left();
+                                    swap(**root_ptr, **node_ptr);
+                                    succ_ptr->unset_left();
+                                }
+                            }
+                            else  // if (!root_ptr->right()->left()->left())
+                            {
+                                BOOST_ASSERT_MSG(
+                                    !succ_ptr->left()->right(),
+                                    "*root_ptr->right()->left() is not left-leaning."
+                                );
+
+                                if (succ_ptr->right()->left())
+                                {
+                                    BOOST_ASSERT_MSG(
+                                        succ_ptr->right()->left()->red(),
+                                    "*root_ptr->right()->right()->left() must be a red leaf node."
+                                    );
+                                    BOOST_ASSERT_MSG(
+                                        !succ_ptr->right()->left()->left(),
+                                    "*root_ptr->right()->right()->left() must be a red leaf node."
+                                    );
+                                    BOOST_ASSERT_MSG(
+                                        !succ_ptr->right()->left()->right(),
+                                    "*root_ptr->right()->right()->left() must be a red leaf node."
                                     );
 
-                                    if (succ_ptr->left()->right())
+                                    if (succ_ptr->right()->right())
                                     {
-                                        // Case 00.10
+                                        // Case 00.13
                                         BOOST_ASSERT_MSG(
-                                            succ_ptr->left()->right()->red(),
-                                    "*root_ptr->right()->left()->right() must be a red leaf node."
+                                            succ_ptr->right()->right()->red(),
+                                    "*root_ptr->right()->right()->right() must be a red leaf node."
                                         );
                                         BOOST_ASSERT_MSG(
-                                            !succ_ptr->left()->right()->left(),
-                                    "*root_ptr->right()->left()->right() must be a red leaf node."
+                                            !succ_ptr->right()->right()->left(),
+                                    "*root_ptr->right()->right()->right() must be a red leaf node."
                                         );
                                         BOOST_ASSERT_MSG(
-                                            !succ_ptr->left()->right()->right(),
-                                    "*root_ptr->right()->left()->right() must be a red leaf node."
+                                            !succ_ptr->right()->right()->right(),
+                                    "*root_ptr->right()->right()->right() must be a red leaf node."
                                         );
+                                        succ_ptr->right()->right()->black(true);
+                                        succ_ptr->right()->red(true);
+                                        succ_ptr->left()->red(true);
+                                        succ_ptr->rotate_left();
+                                        succ_ptr->black(true);
                                         swap(**root_ptr, **node_ptr);
-                                        succ_ptr = succ_ptr->left();
                                         swap(**root_ptr, **succ_ptr->left());
                                         swap(**succ_ptr, **succ_ptr->left());
                                         node_ptr = succ_ptr->right();
                                         swap(**succ_ptr, **node_ptr);
                                         succ_ptr->unset_right();
-                                        succ_ptr = root_ptr->left();
                                     }
-                                    else  // if (!root_ptr->right()->left()->right())
+                                    else  // if (!root_ptr->right()->right()->right())
                                     {
-                                        // Case 00.09
+                                        // Case 00.12
+                                        succ_ptr->right()->black(true);
+                                        succ_ptr->right()->rotate_right();
+                                        succ_ptr->right()->red(true);
+                                        succ_ptr->rotate_left();
+                                        succ_ptr->black(true);
                                         swap(**root_ptr, **node_ptr);
-                                        succ_ptr = succ_ptr->left();
                                         node_ptr = succ_ptr->left();
                                         swap(**root_ptr, **node_ptr);
                                         succ_ptr->unset_left();
                                     }
                                 }
-                                else  // if (!root_ptr->right()->left()->left())
+                                else  // if (!root_ptr->right()->right()->left())
                                 {
+                                    // Case 00.11
                                     BOOST_ASSERT_MSG(
-                                        !succ_ptr->left()->right(),
-                                        "*root_ptr->right()->left() is not left-leaning."
+                                        !succ_ptr->right()->right(),
+                                        "*root_ptr->right()->right() is not left-leaning."
                                     );
-
-                                    if (succ_ptr->right()->left())
-                                    {
-                                        BOOST_ASSERT_MSG(
-                                            succ_ptr->right()->left()->red(),
-                                    "*root_ptr->right()->right()->left() must be a red leaf node."
-                                        );
-                                        BOOST_ASSERT_MSG(
-                                            !succ_ptr->right()->left()->left(),
-                                    "*root_ptr->right()->right()->left() must be a red leaf node."
-                                        );
-                                        BOOST_ASSERT_MSG(
-                                            !succ_ptr->right()->left()->right(),
-                                    "*root_ptr->right()->right()->left() must be a red leaf node."
-                                        );
-
-                                        if (succ_ptr->right()->right())
-                                        {
-                                            // Case 00.13
-                                            BOOST_ASSERT_MSG(
-                                                succ_ptr->right()->right()->red(),
-                                    "*root_ptr->right()->right()->right() must be a red leaf node."
-                                            );
-                                            BOOST_ASSERT_MSG(
-                                                !succ_ptr->right()->right()->left(),
-                                    "*root_ptr->right()->right()->right() must be a red leaf node."
-                                            );
-                                            BOOST_ASSERT_MSG(
-                                                !succ_ptr->right()->right()->right(),
-                                    "*root_ptr->right()->right()->right() must be a red leaf node."
-                                            );
-                                            succ_ptr->right()->right()->black(true);
-                                            succ_ptr->right()->red(true);
-                                            succ_ptr->left()->red(true);
-                                            succ_ptr->rotate_left();
-                                            succ_ptr->black(true);
-                                            swap(**root_ptr, **node_ptr);
-                                            swap(**root_ptr, **succ_ptr->left());
-                                            swap(**succ_ptr, **succ_ptr->left());
-                                            node_ptr = succ_ptr->right();
-                                            swap(**succ_ptr, **node_ptr);
-                                            succ_ptr->unset_right();
-                                        }
-                                        else  // if (!root_ptr->right()->right()->right())
-                                        {
-                                            // Case 00.12
-                                            succ_ptr->right()->black(true);
-                                            succ_ptr->right()->rotate_right();
-                                            succ_ptr->right()->red(true);
-                                            succ_ptr->rotate_left();
-                                            succ_ptr->black(true);
-                                            swap(**root_ptr, **node_ptr);
-                                            node_ptr = succ_ptr->left();
-                                            swap(**root_ptr, **node_ptr);
-                                            succ_ptr->unset_left();
-                                        }
-                                    }
-                                    else  // if (!root_ptr->right()->right()->left())
-                                    {
-                                        // Case 00.11
-                                        BOOST_ASSERT_MSG(
-                                            !succ_ptr->right()->right(),
-                                            "*root_ptr->right()->right() is not left-leaning."
-                                        );
-                                        succ_ptr->left()->red(true);
-                                        succ_ptr->black(true);
-                                        node_ptr->black(true);
-                                        swap(**root_ptr, **node_ptr);
-                                        swap(**root_ptr, **succ_ptr->left());
-                                        swap(**succ_ptr->left(), **succ_ptr);
-                                        node_ptr = succ_ptr->right();
-                                        swap(**succ_ptr, **node_ptr);
-                                        succ_ptr->unset_right();
-                                    }
+                                    succ_ptr->left()->red(true);
+                                    succ_ptr->black(true);
+                                    node_ptr->black(true);
+                                    swap(**root_ptr, **node_ptr);
+                                    swap(**root_ptr, **succ_ptr->left());
+                                    swap(**succ_ptr->left(), **succ_ptr);
+                                    node_ptr = succ_ptr->right();
+                                    swap(**succ_ptr, **node_ptr);
+                                    succ_ptr->unset_right();
                                 }
                             }
-                            else  // if (!root_ptr->right()->right())
-                            {
-                                // Case 00.08
-                                BOOST_ASSERT_MSG(
-                                    succ_ptr->left()->red(),
-                                    "*root_ptr->right()->left() must be a red leaf node."
-                                );
-                                BOOST_ASSERT_MSG(
-                                    !succ_ptr->left()->left(),
-                                    "*root_ptr->right()->left() must be a red leaf node."
-                                );
-                                BOOST_ASSERT_MSG(
-                                    !succ_ptr->left()->right(),
-                                    "*root_ptr->right()->left() must be a red leaf node."
-                                );
-                                swap(**root_ptr, **node_ptr);
-                                node_ptr = succ_ptr->left();
-                                swap(**root_ptr, **node_ptr);
-                                succ_ptr->unset_left();
-                            }
-
-                            succ_ptr = root_ptr->left();
                         }
-                        else  // if (!root_ptr->right()->left())
+                        else  // if (!root_ptr->right()->right())
                         {
-                            // Case 00.07
-                            BOOST_ASSERT_MSG(!succ_ptr->right(), "*succ_ptr is not left-leaning.");
+                            // Case 00.08
+                            BOOST_ASSERT_MSG(
+                                succ_ptr->left()->red(),
+                                "*root_ptr->right()->left() must be a red leaf node."
+                            );
+                            BOOST_ASSERT_MSG(
+                                !succ_ptr->left()->left(),
+                                "*root_ptr->right()->left() must be a red leaf node."
+                            );
+                            BOOST_ASSERT_MSG(
+                                !succ_ptr->left()->right(),
+                                "*root_ptr->right()->left() must be a red leaf node."
+                            );
                             swap(**root_ptr, **node_ptr);
-                            swap(**root_ptr, **succ_ptr);
-                            node_ptr->red(true);
-                            succ_ptr = node_ptr;
-                            node_ptr = root_ptr->right();
-                            root_ptr->unset_right();
+                            node_ptr = succ_ptr->left();
+                            swap(**root_ptr, **node_ptr);
+                            succ_ptr->unset_left();
                         }
+
+                        succ_ptr = root_ptr->left();
                     }
-                    else  // if (!root_ptr->right())
+                    else  // if (!root_ptr->right()->left())
                     {
-                        // Case 00.06
-                        root_ptr->unset_left();
-                        succ_ptr = root_ptr;
+                        // Case 00.07
+                        BOOST_ASSERT_MSG(!succ_ptr->right(), "*succ_ptr is not left-leaning.");
+                        swap(**root_ptr, **node_ptr);
+                        swap(**root_ptr, **succ_ptr);
+                        node_ptr->red(true);
+                        succ_ptr = node_ptr;
+                        node_ptr = root_ptr->right();
+                        root_ptr->unset_right();
                     }
 
                     return Result(node_ptr, succ_ptr, root_ptr);
@@ -595,8 +616,7 @@ namespace odds_and_ends { namespace node {
             if (succ_ptr->left())
             {
                 // *node_ptr was the right child of *succ_ptr.
-                NodePointer next_ptr = succ_ptr->left();
-
+                next_ptr = succ_ptr->left();
                 BOOST_ASSERT_MSG(next_ptr->black(), "*succ_ptr must not have red children.");
 
                 if (next_ptr->left())
@@ -635,19 +655,15 @@ namespace odds_and_ends { namespace node {
                 }
 
                 // Find the actual successor to return.
-                for (
-                    NodePointer parent_ptr = succ_ptr->parent();
-                    parent_ptr;
-                    parent_ptr = succ_ptr->parent()
-                )
+                for (; (next_ptr = succ_ptr->parent()); )
                 {
-                    if (succ_ptr == parent_ptr->left())
+                    if (succ_ptr == next_ptr->left())
                     {
-                        return Result(node_ptr, parent_ptr, root_ptr);
+                        return Result(node_ptr, next_ptr, root_ptr);
                     }
                     else
                     {
-                        succ_ptr = parent_ptr;
+                        succ_ptr = next_ptr;
                     }
                 }
 
@@ -670,8 +686,7 @@ namespace odds_and_ends { namespace node {
                     "Red nodes must not have red children or red parents."
                 );
                 BOOST_ASSERT(!succ_ptr->left());
-
-                NodePointer next_ptr = parent_ptr->right();
+                next_ptr = parent_ptr->right();
 
                 if (next_ptr)
                 {
@@ -705,17 +720,122 @@ namespace odds_and_ends { namespace node {
                     next_ptr->black(true);
                     parent_ptr->red(true);
                 }
+
+                return Result(node_ptr, succ_ptr, root_ptr);
             }
-
-            return Result(node_ptr, succ_ptr, root_ptr);
         }
-        // else if (succ_ptr->black())
 
-        NodePointer next_ptr;
+        BOOST_ASSERT(succ_ptr->black());
 
-        if (succ_ptr->left())
+        NodePointer sibling_ptr = nullptr;
+
+        if (next_ptr)
+        {
+            // *succ_ptr is already correct.
+            // *node_ptr was the left child of *next_ptr.
+            sibling_ptr = next_ptr->right();
+
+            if (next_ptr->red())
+            {
+                BOOST_ASSERT_MSG(
+                    sibling_ptr,
+                    "Exactly one more black descendant of *next_ptr must exist."
+                );
+                BOOST_ASSERT_MSG(sibling_ptr->black(), "*next_ptr must not have red children.");
+
+                if (sibling_ptr->left())
+                {
+                    BOOST_ASSERT_MSG(
+                        sibling_ptr->left()->red(),
+                        "*next_ptr->right()->left() must be a red leaf node."
+                    );
+                    BOOST_ASSERT_MSG(
+                        !sibling_ptr->left()->left(),
+                        "*next_ptr->right()->left() must be a red leaf node."
+                    );
+                    BOOST_ASSERT_MSG(
+                        !sibling_ptr->left()->right(),
+                        "*next_ptr->right()->left() must be a red leaf node."
+                    );
+
+                    if (sibling_ptr->right())
+                    {
+                        // Case 01.07
+                        BOOST_ASSERT_MSG(
+                            sibling_ptr->right()->red(),
+                            "*next_ptr->right()->right() must be a red leaf node."
+                        );
+                        BOOST_ASSERT_MSG(
+                            !sibling_ptr->right()->left(),
+                            "*next_ptr->right()->right() must be a red leaf node."
+                        );
+                        BOOST_ASSERT_MSG(
+                            !sibling_ptr->right()->right(),
+                            "*next_ptr->right()->right() must be a red leaf node."
+                        );
+                        sibling_ptr->right()->black(true);
+                        sibling_ptr->red(true);
+                        sibling_ptr = next_ptr->rotate_left();
+                        next_ptr = next_ptr->rotate_left();
+                        next_ptr->black(true);
+
+                        if (!sibling_ptr->parent())
+                        {
+                            root_ptr = sibling_ptr;
+                        }
+                    }
+                    else  // if (!next_ptr->right()->right())
+                    {
+                        // Case 01.06
+                        sibling_ptr = sibling_ptr->rotate_right();
+                        next_ptr->black(true);
+                        next_ptr = next_ptr->rotate_left();
+
+                        if (!next_ptr->parent())
+                        {
+                            root_ptr = next_ptr;
+                        }
+                    }
+                }
+                else  // if (!next_ptr->right()->left())
+                {
+                    // Case 01.05
+                    BOOST_ASSERT_MSG(
+                        !sibling_ptr->right(),
+                        "*next_ptr->right() is not left-leaning."
+                    );
+                    next_ptr = next_ptr->rotate_left();
+
+                    if (!next_ptr->parent())
+                    {
+                        root_ptr = next_ptr;
+                    }
+                }
+
+                return Result(node_ptr, succ_ptr, root_ptr);
+            }
+            else  // if (next_ptr->black())
+            {
+                BOOST_ASSERT_MSG(
+                    sibling_ptr,
+                    "At least one more black descendant of *next_ptr must exist."
+                );
+            }
+        }
+        else if (succ_ptr->right())
+        {
+            // *node_ptr was the left child of *succ_ptr.
+            next_ptr = succ_ptr;
+            sibling_ptr = next_ptr->right();
+            BOOST_ASSERT_MSG(
+                sibling_ptr,
+                "At least one more black descendant of *succ_ptr must exist."
+            );
+        }
+        else
         {
             // *node_ptr was the right child of *succ_ptr.
+            BOOST_ASSERT(succ_ptr->left());
             next_ptr = succ_ptr->left();
             BOOST_ASSERT_MSG(
                 next_ptr,
@@ -740,10 +860,7 @@ namespace odds_and_ends { namespace node {
                     );
                     succ_ptr->rotate_right();
                     next_ptr = succ_ptr->left();
-                    BOOST_ASSERT_MSG(
-                        next_ptr,
-                        "rotate_right() did not work correctly."
-                    );
+                    BOOST_ASSERT_MSG(next_ptr, "rotate_right() did not work correctly.");
 
                     if (next_ptr->left())
                     {
@@ -800,19 +917,15 @@ namespace odds_and_ends { namespace node {
                 }
 
                 // Find the actual successor to return.
-                for (
-                    NodePointer parent_ptr = succ_ptr->parent();
-                    parent_ptr;
-                    parent_ptr = succ_ptr->parent()
-                )
+                for (; (next_ptr = succ_ptr->parent()); )
                 {
-                    if (succ_ptr == parent_ptr->left())
+                    if (succ_ptr == next_ptr->left())
                     {
-                        return Result(node_ptr, parent_ptr, root_ptr);
+                        return Result(node_ptr, next_ptr, root_ptr);
                     }
                     else
                     {
-                        succ_ptr = parent_ptr;
+                        succ_ptr = next_ptr;
                     }
                 }
 
@@ -820,10 +933,7 @@ namespace odds_and_ends { namespace node {
             }
             else  // if (!succ_ptr->left()->left())
             {
-                BOOST_ASSERT_MSG(
-                    !next_ptr->right(),
-                    "*succ_ptr->left() is not left-leaning."
-                );
+                BOOST_ASSERT_MSG(!next_ptr->right(), "*succ_ptr->left() is not left-leaning.");
                 BOOST_ASSERT_MSG(
                     next_ptr->black(),
                     "*succ_ptr->left() must be the only other black descendant of *succ_ptr."
@@ -834,24 +944,22 @@ namespace odds_and_ends { namespace node {
                     next_ptr->red(true);
                     next_ptr = succ_ptr;
 
-                    // Find the actual successor to return.
-                    for (
-                        NodePointer parent_ptr = succ_ptr->parent();
-                        parent_ptr;
-                        parent_ptr = succ_ptr->parent()
-                    )
+                    if (flag)
                     {
-                        if (succ_ptr == parent_ptr->left())
+                        // Find the actual successor to return.
+                        for (; succ_ptr; )
                         {
-                            succ_ptr = parent_ptr;
-                            break;
-                        }
-                        else
-                        {
-                            succ_ptr = parent_ptr;
+                            if (succ_ptr->parent() && (succ_ptr == succ_ptr->parent()->left()))
+                            {
+                                succ_ptr = succ_ptr->parent();
+                                break;
+                            }
+                            else
+                            {
+                                succ_ptr = succ_ptr->parent();
+                            }
                         }
                     }
-
                     // The red-black depth of *next_ptr has reduced by one.
                     // The main for-loop must perform more rebalancing.
                 }
@@ -865,164 +973,157 @@ namespace odds_and_ends { namespace node {
                 }
             }
         }
-        else if (succ_ptr->right())
-        {
-            // *node_ptr was the left child of *succ_ptr.
-            next_ptr = succ_ptr->right();
-            BOOST_ASSERT_MSG(
-                next_ptr,
-                "At least one more black descendant of *succ_ptr must exist."
-            );
 
-            if (next_ptr->left())
+        if (sibling_ptr)
+        {
+            if (sibling_ptr->left())
             {
-                if (next_ptr->right())
+                if (sibling_ptr->right())
                 {
-                    if (next_ptr->red())
+                    if (sibling_ptr->red())
                     {
                         BOOST_ASSERT_MSG(
-                            next_ptr->left()->black(),
-                            "Red nodes must not have red children."
+                            sibling_ptr->left()->black(),
+                            "*next_ptr->right() must not have red children."
                         );
                         BOOST_ASSERT_MSG(
-                            next_ptr->right()->black(),
-                            "Red nodes must not have red children."
+                            sibling_ptr->right()->black(),
+                            "*next_ptr->right() must not have red children."
                         );
-                        next_ptr->black(true);
-                        succ_ptr->rotate_left();
-                        next_ptr = succ_ptr->right();
+                        sibling_ptr->black(true);
+                        next_ptr->rotate_left();
+                        sibling_ptr = next_ptr->right();
 
-                        if (next_ptr->left())
+                        if (sibling_ptr->left())
                         {
                             BOOST_ASSERT_MSG(
-                                next_ptr->left()->red(),
-                                "*succ_ptr->right()->left() must be a red leaf node."
+                                sibling_ptr->left()->red(),
+                                "*next_ptr->right()->left() must be a red leaf node."
                             );
                             BOOST_ASSERT_MSG(
-                                !next_ptr->left()->left(),
-                                "*succ_ptr->right()->left() must be a red leaf node."
+                                !sibling_ptr->left()->left(),
+                                "*next_ptr->right()->left() must be a red leaf node."
                             );
                             BOOST_ASSERT_MSG(
-                                !next_ptr->left()->right(),
-                                "*succ_ptr->right()->left() must be a red leaf node."
+                                !sibling_ptr->left()->right(),
+                                "*next_ptr->right()->left() must be a red leaf node."
                             );
 
-                            if (next_ptr->right())
+                            if (sibling_ptr->right())
                             {
                                 // Case 02.08
                                 BOOST_ASSERT_MSG(
-                                    next_ptr->right()->red(),
-                                    "*succ_ptr->right()->right() must be a red leaf node."
+                                    sibling_ptr->right()->red(),
+                                    "*next_ptr->right()->right() must be a red leaf node."
                                 );
                                 BOOST_ASSERT_MSG(
-                                    !next_ptr->right()->left(),
-                                    "*succ_ptr->right()->right() must be a red leaf node."
+                                    !sibling_ptr->right()->left(),
+                                    "*next_ptr->right()->right() must be a red leaf node."
                                 );
                                 BOOST_ASSERT_MSG(
-                                    !next_ptr->right()->right(),
-                                    "*succ_ptr->right()->right() must be a red leaf node."
+                                    !sibling_ptr->right()->right(),
+                                    "*next_ptr->right()->right() must be a red leaf node."
                                 );
-                                succ_ptr->rotate_left();
-                                succ_ptr->rotate_left()->black(true);
-                                succ_ptr->red(true);
-                                next_ptr->right()->black(true);
+                                next_ptr->rotate_left();
+                                next_ptr->rotate_left()->black(true);
                                 next_ptr->red(true);
+                                sibling_ptr->right()->black(true);
+                                sibling_ptr->red(true);
                             }
-                            else  // if (!succ_ptr->right()->right())
+                            else  // if (!next_ptr->right()->right())
                             {
                                 // Case 02.07
-                                next_ptr->rotate_right()->black(true);
+                                sibling_ptr->rotate_right()->black(true);
+                                sibling_ptr->red(true);
+                                next_ptr->rotate_left();
                                 next_ptr->red(true);
-                                succ_ptr->rotate_left();
-                                succ_ptr->red(true);
                             }
                         }
-                        else  // if (!succ_ptr->right()->left())
+                        else  // if (!next_ptr->right()->left())
                         {
                             // Case 02.06
                             BOOST_ASSERT_MSG(
-                                !next_ptr->right(),
-                                "*succ_ptr->right() is not left-leaning."
+                                !sibling_ptr->right(),
+                                "*next_ptr->right() is not left-leaning."
                             );
-                            succ_ptr->rotate_left();
-                            succ_ptr->red(true);
+                            next_ptr->rotate_left();
+                            next_ptr->red(true);
                         }
                     }
-                    else  // if (succ_ptr->right()->black())
+                    else  // if (next_ptr->right()->black())
                     {
                         // Case 02.05
                         BOOST_ASSERT_MSG(
-                            next_ptr->left()->red(),
-"*next_ptr must be the only other black descendant of *succ_ptr."
+                            sibling_ptr->left()->red(),
+"*sibling_ptr must be the only other black descendant of *next_ptr."
                         );
                         BOOST_ASSERT_MSG(
-                            !next_ptr->left()->left(),
-"*next_ptr must be the only other black descendant of *succ_ptr."
+                            !sibling_ptr->left()->left(),
+"*sibling_ptr must be the only other black descendant of *next_ptr."
                         );
                         BOOST_ASSERT_MSG(
-                            !next_ptr->left()->right(),
-"*next_ptr must be the only other black descendant of *succ_ptr."
+                            !sibling_ptr->left()->right(),
+"*sibling_ptr must be the only other black descendant of *next_ptr."
                         );
                         BOOST_ASSERT_MSG(
-                            next_ptr->right()->red(),
-"*next_ptr must be the only other black descendant of *succ_ptr."
+                            sibling_ptr->right()->red(),
+"*sibling_ptr must be the only other black descendant of *next_ptr."
                         );
                         BOOST_ASSERT_MSG(
-                            !next_ptr->right()->left(),
-"*next_ptr must be the only other black descendant of *succ_ptr."
+                            !sibling_ptr->right()->left(),
+"*sibling_ptr must be the only other black descendant of *next_ptr."
                         );
                         BOOST_ASSERT_MSG(
-                            !next_ptr->right()->right(),
-"*next_ptr must be the only other black descendant of *succ_ptr."
+                            !sibling_ptr->right()->right(),
+"*sibling_ptr must be the only other black descendant of *next_ptr."
                         );
-                        succ_ptr->rotate_left();
-                        succ_ptr->rotate_left()->black(true);
-                        succ_ptr->red(true);
-                        next_ptr->right()->black(true);
+                        next_ptr->rotate_left();
+                        next_ptr->rotate_left()->black(true);
+                        next_ptr->red(true);
+                        sibling_ptr->right()->black(true);
                     }
                 }
-                else  // if (!succ_ptr->right()->right())
+                else  // if (!next_ptr->right()->right())
                 {
                     // Case 02.04
                     BOOST_ASSERT_MSG(
-                        next_ptr->black(),
-                        "*next_ptr must be the other black descendant of *succ_ptr."
+                        sibling_ptr->black(),
+                        "*sibling_ptr must be the other black descendant of *next_ptr."
                     );
                     BOOST_ASSERT_MSG(
-                        next_ptr->left()->red(),
+                        sibling_ptr->left()->red(),
                         "The only child of a black node must be a red leaf node."
                     );
                     BOOST_ASSERT_MSG(
-                        !next_ptr->left()->left(),
+                        !sibling_ptr->left()->left(),
                         "The only child of a black node must be a red leaf node."
                     );
                     BOOST_ASSERT_MSG(
-                        !next_ptr->left()->right(),
+                        !sibling_ptr->left()->right(),
                         "The only child of a black node must be a red leaf node."
                     );
                     // Restore height balance with a double-rotation and a color flip.
-                    next_ptr->rotate_right();
-                    succ_ptr->rotate_left()->black(true);
+                    sibling_ptr->rotate_right();
+                    next_ptr->rotate_left()->black(true);
                 }
 
                 return Result(node_ptr, succ_ptr, root_ptr);
             }
-            else  // if (!succ_ptr->right()->left())
+            else  // if (!next_ptr->right()->left())
             {
                 BOOST_ASSERT_MSG(
-                    !next_ptr->right(),
-                    "*succ_ptr->right() is not left-leaning."
+                    !sibling_ptr->right(),
+                    "*next_ptr->right() is not left-leaning."
                 );
                 BOOST_ASSERT_MSG(
-                    next_ptr->black(),
-                    "*succ_ptr->right() must be the only other black descendant of *succ_ptr."
+                    sibling_ptr->black(),
+                    "*next_ptr->right() must be the only other black descendant of *next_ptr."
                 );
                 BOOST_ASSERT_MSG(
-                    succ_ptr->parent(),
+                    next_ptr->parent(),
                     "Case 00.07 should have been handled previously."
                 );
                 // Restore the left-leaning property here.
-                next_ptr = succ_ptr;
                 next_ptr->rotate_left()->red(true);
                 next_ptr = next_ptr->parent();
                 // The red-black depth of *next_ptr has reduced by one.
@@ -1030,10 +1131,8 @@ namespace odds_and_ends { namespace node {
             }
         }
 
-        NodePointer sibling_ptr;
         NodePointer near_ptr;
         NodePointer far_ptr;
-        bool flag;
 
         for (NodePointer parent_ptr; (parent_ptr = next_ptr->parent()); next_ptr = parent_ptr)
         {
@@ -1125,37 +1224,28 @@ namespace odds_and_ends { namespace node {
                 far_ptr->red(true);
             }
 
-            if (sibling_ptr->black() && near_ptr->black() && far_ptr->red())
+            if (sibling_ptr->black() && /*near_ptr->black() && */far_ptr->red())
             {
                 // Case 03.02
-                if (flag)
-                {
-                    if (root_ptr == parent_ptr)
-                    {
-                        root_ptr = parent_ptr->rotate_left();
-                        root_ptr->black(true);
-                    }
-                    else
-                    {
-                        parent_ptr->rotate_left();
-                    }
-                }
-                else  // if (!flag)
-                {
-                    if (root_ptr == parent_ptr)
-                    {
-                        root_ptr = parent_ptr->rotate_right();
-                        root_ptr->black(true);
-                    }
-                    else
-                    {
-                        parent_ptr->rotate_right();
-                    }
-                }
-
                 sibling_ptr->red(parent_ptr->red());
                 parent_ptr->black(true);
                 far_ptr->black(true);
+
+                if (flag)
+                {
+                    parent_ptr = parent_ptr->rotate_left();
+                }
+                else
+                {
+                    parent_ptr = parent_ptr->rotate_right();
+                }
+
+                if (!parent_ptr->parent())
+                {
+                    root_ptr = parent_ptr;
+                    root_ptr->black(true);
+                }
+
                 return Result(node_ptr, succ_ptr, root_ptr);
             }
 
