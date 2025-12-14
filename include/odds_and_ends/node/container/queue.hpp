@@ -10,10 +10,13 @@
 #include <odds_and_ends/node/linked/base.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
 #include <odds_and_ends/static_introspection/concept/is_queue.hpp>
+#include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
+#include <odds_and_ends/static_introspection/concept/is_legacy_input_iterator.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/quote.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 
@@ -54,21 +57,77 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef value_type const& const_reference;
         typedef Size size_type;
 
-        template <typename A0, typename ...Args>
+        template <typename A0>
         explicit queue(
             A0&& a0,
-            Args&&... args,
             typename ::boost::disable_if<
                 ::odds_and_ends::static_introspection::concept::is_queue<A0>,
                 _enabler
             >::type = _enabler()
         );
 
+        template <typename A0, typename A1>
+        queue(
+            A0&& a0,
+            A1&& a1,
+            typename ::boost::disable_if<
+                typename ::boost::mpl::eval_if<
+                    ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A0>,
+                    ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A1>,
+                    ::boost::mpl::if_<
+                        ::odds_and_ends::static_introspection::concept::is_queue<A0>,
+                        ::odds_and_ends::static_introspection::concept::is_allocator<A1>,
+                        ::boost::mpl::false_
+                    >
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename A0, typename A1, typename A2, typename ...Args>
+        queue(
+            A0&& a0,
+            A1&& a1,
+            A2&& a2,
+            Args&&... args,
+            typename ::boost::disable_if<
+                typename ::boost::mpl::eval_if<
+                    ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A0>,
+                    ::boost::mpl::if_<
+                        ::std::is_same<A0,A1>,
+                        ::odds_and_ends::static_introspection::concept::is_allocator<A2>,
+                        ::boost::mpl::false_
+                    >,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
         template <typename Itr>
-        queue(Itr itr_begin, Itr itr_end);
+        queue(
+            Itr itr_begin,
+            Itr itr_end,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Itr>,
+                _enabler
+            >::type = _enabler()
+        );
 
         template <typename Itr, typename Alloc>
-        queue(Itr itr_begin, Itr itr_end, Alloc const& alloc);
+        queue(
+            Itr itr_begin,
+            Itr itr_end,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                typename ::boost::mpl::if_<
+                    ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Itr>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
 
         template <typename V, typename I, typename AG>
         queue(
@@ -77,13 +136,27 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        queue(queue const& copy, Alloc const& alloc);
+        queue(
+            queue const& copy,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                _enabler
+            >::type = _enabler()
+        );
 
         template <typename V, typename I, typename AG, typename Alloc>
         queue(
             queue<V,I,AG> const& copy,
             Alloc const& alloc,
-            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+            typename ::boost::enable_if<
+                typename ::boost::mpl::if_<
+                    ::std::is_convertible<V,T>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
         );
 
         template <typename V, typename I, typename AG>
@@ -93,13 +166,27 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        queue(queue&& copy, Alloc const& alloc);
+        queue(
+            queue&& source,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                _enabler
+            >::type = _enabler()
+        );
 
         template <typename V, typename I, typename AG, typename Alloc>
         queue(
             queue<V,I,AG>&& source,
             Alloc const& alloc,
-            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+            typename ::boost::enable_if<
+                typename ::boost::mpl::if_<
+                    ::std::is_convertible<V,T>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
         );
 
         queue(queue const& copy);
@@ -160,15 +247,69 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename AllocGen>
-    template <typename A0, typename ...Args>
+    template <typename A0>
     inline queue<T,Size,AllocGen>::queue(
         A0&& a0,
-        Args&&... args,
         typename ::boost::disable_if<
             ::odds_and_ends::static_introspection::concept::is_queue<A0>,
             _enabler
         >::type
-    ) : _alloc(::std::forward<A0>(a0), ::std::forward<Args>(args)...),
+    ) : _alloc(::std::forward<A0>(a0)),
+        _front(nullptr),
+        _back(nullptr),
+        _size(::boost::initialized_value)
+    {
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename A0, typename A1>
+    inline queue<T,Size,AllocGen>::queue(
+        A0&& a0,
+        A1&& a1,
+        typename ::boost::disable_if<
+            typename ::boost::mpl::eval_if<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A0>,
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A1>,
+                ::boost::mpl::if_<
+                    ::odds_and_ends::static_introspection::concept::is_queue<A0>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<A1>,
+                    ::boost::mpl::false_
+                >
+            >::type,
+            _enabler
+        >::type
+    ) : _alloc(::std::forward<A0>(a0), ::std::forward<A1>(a1)),
+        _front(nullptr),
+        _back(nullptr),
+        _size(::boost::initialized_value)
+    {
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename A0, typename A1, typename A2, typename ...Args>
+    inline queue<T,Size,AllocGen>::queue(
+        A0&& a0,
+        A1&& a1,
+        A2&& a2,
+        Args&&... args,
+        typename ::boost::disable_if<
+            typename ::boost::mpl::eval_if<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A0>,
+                ::boost::mpl::if_<
+                    ::std::is_same<A0,A1>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<A2>,
+                    ::boost::mpl::false_
+                >,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _alloc(
+            ::std::forward<A0>(a0),
+            ::std::forward<A1>(a1),
+            ::std::forward<A2>(a2),
+            ::std::forward<Args>(args)...
+        ),
         _front(nullptr),
         _back(nullptr),
         _size(::boost::initialized_value)
@@ -177,8 +318,14 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename Itr>
-    inline queue<T,Size,AllocGen>::queue(Itr itr, Itr itr_end) :
-        _alloc(), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    inline queue<T,Size,AllocGen>::queue(
+        Itr itr,
+        Itr itr_end,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Itr>,
+            _enabler
+        >::type
+    ) : _alloc(), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
     {
         for (_pointer p; itr != itr_end; ++itr)
         {
@@ -203,8 +350,19 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename Itr, typename Alloc>
-    inline queue<T,Size,AllocGen>::queue(Itr itr, Itr itr_end, Alloc const& alloc) :
-        _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    inline queue<T,Size,AllocGen>::queue(
+        Itr itr,
+        Itr itr_end,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            typename ::boost::mpl::if_<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Itr>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
     {
         for (_pointer p; itr != itr_end; ++itr)
         {
@@ -279,8 +437,14 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename Alloc>
-    inline queue<T,Size,AllocGen>::queue(queue const& copy, Alloc const& alloc) :
-        _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    inline queue<T,Size,AllocGen>::queue(
+        queue const& copy,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
     {
         this->_clone(copy);
     }
@@ -290,7 +454,14 @@ namespace odds_and_ends { namespace node { namespace container {
     inline queue<T,Size,AllocGen>::queue(
         queue<V,I,AG> const& copy,
         Alloc const& alloc,
-        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+        typename ::boost::enable_if<
+            typename ::boost::mpl::if_<
+                ::std::is_convertible<V,T>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
     ) : _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
     {
         this->_clone(copy);
@@ -350,8 +521,14 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename Alloc>
-    inline queue<T,Size,AllocGen>::queue(queue&& source, Alloc const& alloc) :
-        _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    inline queue<T,Size,AllocGen>::queue(
+        queue&& source,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
     {
         this->_move(static_cast<queue&&>(source));
     }
@@ -361,7 +538,14 @@ namespace odds_and_ends { namespace node { namespace container {
     inline queue<T,Size,AllocGen>::queue(
         queue<V,I,AG>&& source,
         Alloc const& alloc,
-        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+        typename ::boost::enable_if<
+            typename ::boost::mpl::if_<
+                ::std::is_convertible<V,T>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
     ) : _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
     {
         this->_move(static_cast<queue<V,I,AG>&&>(source));

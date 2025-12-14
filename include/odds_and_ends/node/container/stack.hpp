@@ -9,10 +9,13 @@
 #include <odds_and_ends/node/linked/base.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
 #include <odds_and_ends/static_introspection/concept/is_stack_or_heap.hpp>
+#include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
+#include <odds_and_ends/static_introspection/concept/is_legacy_input_iterator.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/quote.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 
@@ -52,12 +55,26 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef value_type const& const_reference;
         typedef Size size_type;
 
-        template <typename A0, typename ...Args>
+        template <typename A0>
         explicit stack(
             A0&& a0,
-            Args&&... args,
             typename ::boost::disable_if<
                 ::odds_and_ends::static_introspection::concept::is_stack_or_heap<A0>,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename A0, typename A1, typename ...Args>
+        stack(
+            A0&& a0,
+            A1&& a1,
+            Args&&... args,
+            typename ::boost::disable_if<
+                typename ::boost::mpl::if_<
+                    ::odds_and_ends::static_introspection::concept::is_stack_or_heap<A0>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<A1>,
+                    ::boost::mpl::false_
+                >::type,
                 _enabler
             >::type = _enabler()
         );
@@ -69,13 +86,27 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        stack(stack const& copy, Alloc const& alloc);
+        stack(
+            stack const& copy,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                _enabler
+            >::type = _enabler()
+        );
 
         template <typename V, typename I, typename AG, typename Alloc>
         stack(
             stack<V,I,AG> const& copy,
             Alloc const& alloc,
-            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+            typename ::boost::enable_if<
+                typename ::boost::mpl::if_<
+                    ::std::is_convertible<V,T>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
         );
 
         template <typename V, typename I, typename AG>
@@ -85,13 +116,27 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        stack(stack&& source, Alloc const& alloc);
+        stack(
+            stack&& source,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                _enabler
+            >::type = _enabler()
+        );
 
         template <typename V, typename I, typename AG, typename Alloc>
         stack(
             stack<V,I,AG>&& source,
             Alloc const& alloc,
-            typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type = _enabler()
+            typename ::boost::enable_if<
+                typename ::boost::mpl::if_<
+                    ::std::is_convertible<V,T>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
         );
 
         stack(stack const& copy);
@@ -102,10 +147,12 @@ namespace odds_and_ends { namespace node { namespace container {
         stack& operator=(stack&& source);
 
         template <typename V, typename I, typename AG>
-        stack& operator=(stack<V,I,AG> const& copy);
+        typename ::boost::enable_if< ::std::is_convertible<V,T>,stack&>::type
+            operator=(stack<V,I,AG> const& copy);
 
         template <typename V, typename I, typename AG>
-        stack& operator=(stack<V,I,AG>&& source);
+        typename ::boost::enable_if< ::std::is_convertible<V,T>,stack&>::type
+            operator=(stack<V,I,AG>&& source);
 
         allocator_type get_allocator() const;
         bool empty() const;
@@ -143,15 +190,34 @@ namespace odds_and_ends { namespace node { namespace container {
 namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
-    template <typename A0, typename ...Args>
+    template <typename A0>
     inline stack<T,Size,AllocGen>::stack(
         A0&& a0,
-        Args&&... args,
         typename ::boost::disable_if<
             ::odds_and_ends::static_introspection::concept::is_stack_or_heap<A0>,
             _enabler
         >::type
-    ) : _alloc(::std::forward<A0>(a0), ::std::forward<Args>(args)...),
+    ) : _alloc(::std::forward<A0>(a0)),
+        _top(nullptr),
+        _size(::boost::initialized_value)
+    {
+    }
+
+    template <typename T, typename Size, typename AllocGen>
+    template <typename A0, typename A1, typename ...Args>
+    inline stack<T,Size,AllocGen>::stack(
+        A0&& a0,
+        A1&& a1,
+        Args&&... args,
+        typename ::boost::disable_if<
+            typename ::boost::mpl::if_<
+                ::odds_and_ends::static_introspection::concept::is_stack_or_heap<A0>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<A1>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _alloc(::std::forward<A0>(a0), ::std::forward<A1>(a1), ::std::forward<Args>(args)...),
         _top(nullptr),
         _size(::boost::initialized_value)
     {
@@ -202,8 +268,14 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename Alloc>
-    inline stack<T,Size,AllocGen>::stack(stack const& copy, Alloc const& alloc) :
-        _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
+    inline stack<T,Size,AllocGen>::stack(
+        stack const& copy,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
     {
         this->_clone(copy);
     }
@@ -213,7 +285,14 @@ namespace odds_and_ends { namespace node { namespace container {
     inline stack<T,Size,AllocGen>::stack(
         stack<V,I,AG> const& copy,
         Alloc const& alloc,
-        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+        typename ::boost::enable_if<
+            typename ::boost::mpl::if_<
+                ::std::is_convertible<V,T>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
     ) : _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
     {
         this->_clone(copy);
@@ -246,8 +325,14 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename Alloc>
-    inline stack<T,Size,AllocGen>::stack(stack&& source, Alloc const& alloc) :
-        _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
+    inline stack<T,Size,AllocGen>::stack(
+        stack&& source,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
     {
         this->_move(static_cast<stack&&>(source));
     }
@@ -257,7 +342,14 @@ namespace odds_and_ends { namespace node { namespace container {
     inline stack<T,Size,AllocGen>::stack(
         stack<V,I,AG>&& source,
         Alloc const& alloc,
-        typename ::boost::enable_if< ::std::is_convertible<V,T>,_enabler>::type
+        typename ::boost::enable_if<
+            typename ::boost::mpl::if_<
+                ::std::is_convertible<V,T>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
     ) : _alloc(alloc), _top(nullptr), _size(::boost::initialized_value)
     {
         this->_move(static_cast<stack<V,I,AG>&&>(source));
@@ -289,7 +381,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename V, typename I, typename AG>
-    inline stack<T,Size,AllocGen>& stack<T,Size,AllocGen>::operator=(stack<V,I,AG> const& copy)
+    inline typename ::boost::enable_if< ::std::is_convertible<V,T>,stack<T,Size,AllocGen>&>::type
+        stack<T,Size,AllocGen>::operator=(stack<V,I,AG> const& copy)
     {
         if (this != &copy)
         {
@@ -314,7 +407,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename AllocGen>
     template <typename V, typename I, typename AG>
-    inline stack<T,Size,AllocGen>& stack<T,Size,AllocGen>::operator=(stack<V,I,AG>&& source)
+    inline typename ::boost::enable_if< ::std::is_convertible<V,T>,stack<T,Size,AllocGen>&>::type
+        stack<T,Size,AllocGen>::operator=(stack<V,I,AG>&& source)
     {
         if (this != &static_cast<stack<V,I,AG>&>(source))
         {
@@ -326,7 +420,8 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename AllocGen>
-    inline typename stack<T,Size,AllocGen>::allocator_type stack<T,Size,AllocGen>::get_allocator() const
+    inline typename stack<T,Size,AllocGen>::allocator_type
+        stack<T,Size,AllocGen>::get_allocator() const
     {
         return this->_alloc;
     }

@@ -318,14 +318,14 @@ namespace odds_and_ends { namespace node {
                             typedef char balance_factor_type;
                         };
 
-                        inline typename traits::balance_factor_type const& balance_factor() const
+                        inline typename traits::balance_factor_type balance_factor() const
                         {
                             return this->_balance_factor;
                         }
 
-                        inline typename traits::balance_factor_type& balance_factor()
+                        inline void balance_factor(typename traits::balance_factor_type const& bf)
                         {
-                            return this->_balance_factor;
+                            this->_balance_factor = bf;
                         }
 
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)

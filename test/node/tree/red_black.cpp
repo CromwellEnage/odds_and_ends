@@ -71,9 +71,9 @@ void output_depth(::std::size_t const& index, binary_tree_node::traits::size_typ
 
 #include <odds_and_ends/node/iterator/in_order_tree.hpp>
 
-typedef ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node const> Itr;
+typedef ::odds_and_ends::node::in_order_tree_iterator<binary_tree_node const> node_itr;
 
-void output_tree(Itr itr)
+void output_tree(node_itr itr)
 {
     for (; !(!itr); ++itr)
     {
@@ -339,7 +339,7 @@ void test_post_fill_and_insert()
 
     if (result->parent())
     {
-        output_tree(Itr(n13, false));
+        output_tree(node_itr(n13, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(n13, output_error, output_depth)
@@ -347,7 +347,7 @@ void test_post_fill_and_insert()
     }
     else
     {
-        output_tree(Itr(*result, false));
+        output_tree(node_itr(*result, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(*result, output_error, output_depth)
@@ -390,7 +390,7 @@ void test_insert_case_2_1()
 
     if (result->parent())
     {
-        output_tree(Itr(n13, false));
+        output_tree(node_itr(n13, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(n13, output_error, output_depth)
@@ -398,7 +398,7 @@ void test_insert_case_2_1()
     }
     else
     {
-        output_tree(Itr(*result, false));
+        output_tree(node_itr(*result, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(*result, output_error, output_depth)
@@ -412,7 +412,7 @@ typedef ::std::tuple<
     binary_tree_node::traits::pointer,
     binary_tree_node::traits::pointer,
     binary_tree_node::traits::pointer
-> SepResult;
+> sep_result;
 
 void test_separate_case_00_00()
 {
@@ -436,18 +436,18 @@ void test_separate_case_00_00()
     n07.set_right(n08);
     ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_fill(n03);
     ::std::cout << "Before Test separate() case 00.00" << ::std::endl;
-    output_tree(Itr(n03, false));
+    output_tree(node_itr(n03, false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm::red_black_tree_test(n03, output_error, output_depth)
     );
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n05);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n05);
 
     ::std::cout << "After Test separate() case 00.00" << ::std::endl;
     BOOST_TEST(5 == **::std::get<0>(result));
     BOOST_TEST(6 == **::std::get<1>(result));
     BOOST_TEST(3 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -478,13 +478,13 @@ void test_separate_case_00_01()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "Test separate() case 00.01, part 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
     binary_tree_node::traits::pointer p = ::std::get<1>(result);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **p);
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -493,7 +493,7 @@ void test_separate_case_00_01()
     result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(*p);
     BOOST_TEST(4 == **::std::get<0>(result));
     BOOST_TEST(5 == **::std::get<1>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -520,18 +520,18 @@ void test_separate_case_00_02()
     n06.set_right(n07);
     ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_fill(n04);
     ::std::cout << "Before Test separate() case 00.02" << ::std::endl;
-    output_tree(Itr(n04, false));
+    output_tree(node_itr(n04, false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm::red_black_tree_test(n04, output_error, output_depth)
     );
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     ::std::cout << "After Test separate() case 00.02" << ::std::endl;
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -558,18 +558,18 @@ void test_separate_case_00_03()
     n07.set_left(n06);
     ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_fill(n03);
     ::std::cout << "Before Test separate() case 00.03" << ::std::endl;
-    output_tree(Itr(n03, false));
+    output_tree(node_itr(n03, false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm::red_black_tree_test(n03, output_error, output_depth)
     );
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n07);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n07);
 
     ::std::cout << "After Test separate() case 00.03" << ::std::endl;
     BOOST_TEST(7 == **::std::get<0>(result));
     BOOST_TEST(!::std::get<1>(result));
     BOOST_TEST(3 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -600,13 +600,13 @@ void test_separate_case_00_04()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "Test separate() case 00.04, part 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
     binary_tree_node::traits::pointer p = ::std::get<1>(result);
 
     BOOST_TEST(4 == **::std::get<0>(result));
     BOOST_TEST(5 == **p);
     BOOST_TEST(3 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -616,7 +616,7 @@ void test_separate_case_00_04()
     BOOST_TEST(5 == **::std::get<0>(result));
     BOOST_TEST(6 == **::std::get<1>(result));
     BOOST_TEST(3 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -647,12 +647,12 @@ void test_separate_case_00_05()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "Test separate() case 00.05" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n06);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n06);
 
     BOOST_TEST(6 == **::std::get<0>(result));
     BOOST_TEST(7 == **::std::get<1>(result));
     BOOST_TEST(3 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -686,12 +686,12 @@ void test_separate_case_00_06()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n13));
     ::std::cout << "Test separate() case 00.06" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n27);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n27);
 
     BOOST_TEST(27 == **::std::get<0>(result));
     BOOST_TEST(!::std::get<1>(result));
     BOOST_TEST(13 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -709,12 +709,12 @@ void test_separate_case_00_07()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n01));
     ::std::cout << "Test separate() case 00.07" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(2 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -735,12 +735,12 @@ void test_separate_case_00_08()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n01));
     ::std::cout << "Test separate() case 00.08" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(2 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -766,12 +766,12 @@ void test_separate_case_00_09()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n01));
     ::std::cout << "Test separate() case 00.09" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(2 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -800,12 +800,12 @@ void test_separate_case_00_10()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n01));
     ::std::cout << "Test separate() case 00.10" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(2 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -828,12 +828,12 @@ void test_separate_case_00_11()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n01));
     ::std::cout << "Test separate() case 00.11" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(2 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -859,12 +859,12 @@ void test_separate_case_00_12()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n01));
     ::std::cout << "Test separate() case 00.12" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(2 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -893,12 +893,12 @@ void test_separate_case_00_13()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n01));
     ::std::cout << "Test separate() case 00.13" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(2 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -921,12 +921,12 @@ void test_separate_case_01_00()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "Test separate() case 01.00" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n02);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n02);
 
     BOOST_TEST(2 == **::std::get<0>(result));
     BOOST_TEST(3 == **::std::get<1>(result));
     BOOST_TEST(3 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -952,12 +952,12 @@ void test_separate_case_01_01()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n04));
     ::std::cout << "Test separate() case 01.01" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -986,12 +986,12 @@ void test_separate_case_01_02()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n05));
     ::std::cout << "Test separate() case 01.02" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
 
     BOOST_TEST(4 == **::std::get<0>(result));
     BOOST_TEST(5 == **::std::get<1>(result));
     BOOST_TEST(5 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1014,12 +1014,12 @@ void test_separate_case_01_03()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "Test separate() case 01.03" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(3 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1048,12 +1048,12 @@ void test_separate_case_01_04()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n05));
     ::std::cout << "Test separate() case 01.04" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(5 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1084,12 +1084,12 @@ void test_separate_case_01_05()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "Test separate() case 01.05" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1123,12 +1123,12 @@ void test_separate_case_01_06()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "Test separate() case 01.06" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1163,16 +1163,16 @@ void test_separate_case_01_07()
     n06.red(true);
     n08.red(true);
     ::std::cout << "Before Test separate() case 01.07" << ::std::endl;
-    output_tree(Itr(n03, false));
+    output_tree(node_itr(n03, false));
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n03));
     ::std::cout << "After Test separate() case 01.07" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1189,12 +1189,12 @@ void test_separate_case_02_00()
     n01.set_right(n02);
     ::std::cout << "Test separate() case 02.00" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n02);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n02);
 
     BOOST_TEST(2 == **::std::get<0>(result));
     BOOST_TEST(!::std::get<1>(result));
     BOOST_TEST(1 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1223,12 +1223,12 @@ void test_separate_case_02_01()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n04));
     ::std::cout << "Test separate() case 02.01" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1258,15 +1258,15 @@ void test_separate_case_02_02()
     n01.red(true);
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n05));
     ::std::cout << "Before Test separate() case 02.02" << ::std::endl;
-    output_tree(Itr(n05, false));
+    output_tree(node_itr(n05, false));
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
 
     ::std::cout << "After Test separate() case 02.02" << ::std::endl;
     BOOST_TEST(4 == **::std::get<0>(result));
     BOOST_TEST(5 == **::std::get<1>(result));
     BOOST_TEST(5 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1302,15 +1302,15 @@ void test_separate_case_02_03()
     n04.red(true);
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n07));
     ::std::cout << "Before Test separate() case 02.03" << ::std::endl;
-    output_tree(Itr(n07, false));
+    output_tree(node_itr(n07, false));
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n06);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n06);
 
     ::std::cout << "After Test separate() case 02.03" << ::std::endl;
     BOOST_TEST(6 == **::std::get<0>(result));
     BOOST_TEST(7 == **::std::get<1>(result));
     BOOST_TEST(7 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1338,15 +1338,15 @@ void test_separate_case_02_04()
     n02.red(true);
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(n04));
     ::std::cout << "Before Test separate() case 02.04" << ::std::endl;
-    output_tree(Itr(n04, false));
+    output_tree(node_itr(n04, false));
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n00);
 
     ::std::cout << "After Test separate() case 02.04" << ::std::endl;
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(4 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1377,12 +1377,12 @@ void test_separate_case_02_05_p1()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(p06));
     ::std::cout << "Test separate() case 02.05, remove 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
 
     BOOST_TEST(1 == **::std::get<0>(result));
     BOOST_TEST(2 == **::std::get<1>(result));
     BOOST_TEST(6 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1429,12 +1429,12 @@ void test_separate_case_02_05_o0()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 02.05, remove 0" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(1 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1465,12 +1465,12 @@ void test_separate_case_02_06_p1()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(p06));
     ::std::cout << "Test separate() case 02.06, remove 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
 
     BOOST_TEST(1 == **::std::get<0>(result));
     BOOST_TEST(2 == **::std::get<1>(result));
     BOOST_TEST(6 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1517,12 +1517,12 @@ void test_separate_case_02_06_o0()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 02.06, remove 0" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(1 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1556,12 +1556,12 @@ void test_separate_case_02_07_p1()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(p07));
     ::std::cout << "Test separate() case 02.07, remove 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
 
     BOOST_TEST(1 == **::std::get<0>(result));
     BOOST_TEST(2 == **::std::get<1>(result));
     BOOST_TEST(7 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1611,12 +1611,12 @@ void test_separate_case_02_07_o0()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 02.07, remove 0" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(1 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1653,12 +1653,12 @@ void test_separate_case_02_08_p1()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(p08));
     ::std::cout << "Test separate() case 02.08, remove 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
 
     BOOST_TEST(1 == **::std::get<0>(result));
     BOOST_TEST(2 == **::std::get<1>(result));
     BOOST_TEST(8 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1711,12 +1711,12 @@ void test_separate_case_02_08_o0()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 02.08, remove 0" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(1 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1760,12 +1760,12 @@ void test_separate_case_03_00()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.00, part 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(-3 == **::std::get<0>(result));
     BOOST_TEST(-2 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1775,7 +1775,7 @@ void test_separate_case_03_00()
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1835,12 +1835,12 @@ void test_separate_case_03_01()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.01, part 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(-3 == **::std::get<0>(result));
     BOOST_TEST(-2 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1850,7 +1850,7 @@ void test_separate_case_03_01()
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1902,12 +1902,12 @@ void test_separate_case_03_02()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.02: remove -3" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(-3 == **::std::get<0>(result));
     BOOST_TEST(-2 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1917,7 +1917,7 @@ void test_separate_case_03_02()
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1971,12 +1971,12 @@ void test_separate_case_03_03()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.03, part 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(-3 == **::std::get<0>(result));
     BOOST_TEST(-2 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -1986,7 +1986,7 @@ void test_separate_case_03_03()
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2028,12 +2028,12 @@ void test_separate_case_03_04_n7()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove -7" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n07);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n07);
 
     BOOST_TEST(-7 == **::std::get<0>(result));
     BOOST_TEST(-6 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2075,12 +2075,12 @@ void test_separate_case_03_04_n6()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove -6" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n06);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n06);
 
     BOOST_TEST(-6 == **::std::get<0>(result));
     BOOST_TEST(-5 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2122,12 +2122,12 @@ void test_separate_case_03_04_n5()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove -5" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n05);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n05);
 
     BOOST_TEST(-5 == **::std::get<0>(result));
     BOOST_TEST(-4 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2169,12 +2169,12 @@ void test_separate_case_03_04_n4()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove -4" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n04);
 
     BOOST_TEST(-4 == **::std::get<0>(result));
     BOOST_TEST(-3 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2216,12 +2216,12 @@ void test_separate_case_03_04_n3()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove -3" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
 
     BOOST_TEST(-3 == **::std::get<0>(result));
     BOOST_TEST(-2 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2263,12 +2263,12 @@ void test_separate_case_03_04_n2()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove -2" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n02);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n02);
 
     BOOST_TEST(-2 == **::std::get<0>(result));
     BOOST_TEST(-1 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2310,12 +2310,12 @@ void test_separate_case_03_04_n1()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove -1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n01);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n01);
 
     BOOST_TEST(-1 == **::std::get<0>(result));
     BOOST_TEST(0 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2357,12 +2357,12 @@ void test_separate_case_03_04_o0()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 0" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(o00);
 
     BOOST_TEST(0 == **::std::get<0>(result));
     BOOST_TEST(1 == **::std::get<1>(result));
     BOOST_TEST(1 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2404,12 +2404,12 @@ void test_separate_case_03_04_p1()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 1" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p01);
 
     BOOST_TEST(1 == **::std::get<0>(result));
     BOOST_TEST(2 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2451,12 +2451,12 @@ void test_separate_case_03_04_p2()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 2" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p02);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p02);
 
     BOOST_TEST(2 == **::std::get<0>(result));
     BOOST_TEST(3 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2498,12 +2498,12 @@ void test_separate_case_03_04_p3()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 3" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p03);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2545,12 +2545,12 @@ void test_separate_case_03_04_p4()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 4" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p04);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p04);
 
     BOOST_TEST(4 == **::std::get<0>(result));
     BOOST_TEST(5 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2592,12 +2592,12 @@ void test_separate_case_03_04_p5()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 5" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p05);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p05);
 
     BOOST_TEST(5 == **::std::get<0>(result));
     BOOST_TEST(6 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2639,12 +2639,12 @@ void test_separate_case_03_04_p6()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 6" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p06);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p06);
 
     BOOST_TEST(6 == **::std::get<0>(result));
     BOOST_TEST(7 == **::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2686,12 +2686,12 @@ void test_separate_case_03_04_p7()
     BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
     ::std::cout << "Test separate() case 03.04, remove 7" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p07);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p07);
 
     BOOST_TEST(7 == **::std::get<0>(result));
     BOOST_TEST(!::std::get<1>(result));
     BOOST_TEST(0 == **::std::get<2>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2842,18 +2842,18 @@ void test_separate_case_03_0x()
     p17.red(true);
     p19.red(true);
     ::std::cout << "Before Test separate() case 03.0x" << ::std::endl;
-    output_tree(Itr(o00, false));
+    output_tree(node_itr(o00, false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(o00, output_error, output_depth)
     );
     ::std::cout << "After Test separate() case 03.0x: remove 3" << ::std::endl;
 
-    SepResult result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p03);
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p03);
 
     BOOST_TEST(3 == **::std::get<0>(result));
     BOOST_TEST(4 == **::std::get<1>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
@@ -2862,7 +2862,7 @@ void test_separate_case_03_0x()
     result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(n03);
     BOOST_TEST(-3 == **::std::get<0>(result));
     BOOST_TEST(-2 == **::std::get<1>(result));
-    output_tree(Itr(*::std::get<2>(result), false));
+    output_tree(node_itr(*::std::get<2>(result), false));
     BOOST_TEST(
         ::odds_and_ends::node::algorithm
         ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)

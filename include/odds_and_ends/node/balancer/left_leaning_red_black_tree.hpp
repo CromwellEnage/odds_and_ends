@@ -7,11 +7,12 @@
 
 namespace odds_and_ends { namespace node {
 
-    struct left_leaning_red_black_tree_balancer
+    class left_leaning_red_black_tree_balancer
     {
         template <typename Node, typename Size>
-        static void post_fill(Node& root, Size n);
+        static void _post_fill(Node& root, Size n);
 
+    public:
         template <typename Node>
         static void post_fill(Node& root);
 
@@ -37,6 +38,9 @@ namespace odds_and_ends { namespace node {
     typename Node::traits::pointer left_leaning_red_black_tree_balancer::post_insert(Node& node)
     {
         typedef typename Node::traits::pointer NodePointer;
+
+        BOOST_ASSERT_MSG(!node.left(), "The input node must be a leaf node.");
+        BOOST_ASSERT_MSG(!node.right(), "The input node must be a leaf node.");
 
         NodePointer node_ptr = ::std::pointer_traits<NodePointer>::pointer_to(node);
         NodePointer parent_ptr;
@@ -144,7 +148,7 @@ namespace odds_and_ends { namespace node {
 namespace odds_and_ends { namespace node {
 
     template <typename Node, typename Size>
-    void left_leaning_red_black_tree_balancer::post_fill(Node& root, Size n)
+    void left_leaning_red_black_tree_balancer::_post_fill(Node& root, Size n)
     {
         Size counter = ::boost::initialized_value;
 
@@ -158,16 +162,14 @@ namespace odds_and_ends { namespace node {
 
             if (black_count == n + counter)
             {
-/*
                 for (
                     ::odds_and_ends::node::breadth_first_tree_iterator<Node> itr(root);
-                    itr;
+                    !(!itr);
                     ++itr
                 )
                 {
                     itr->black(true);
                 }
-*/
             }
             else
             {
@@ -180,6 +182,7 @@ namespace odds_and_ends { namespace node {
 
                 for (; counter < black_count; ++counter)
                 {
+                    itr->black(true);
                     ++itr;
                 }
 
@@ -194,7 +197,7 @@ namespace odds_and_ends { namespace node {
     template <typename Node>
     inline void left_leaning_red_black_tree_balancer::post_fill(Node& root)
     {
-        left_leaning_red_black_tree_balancer::post_fill(root, root.size());
+        left_leaning_red_black_tree_balancer::_post_fill(root, root.size());
     }
 }}  // namespace odds_and_ends::node
 
