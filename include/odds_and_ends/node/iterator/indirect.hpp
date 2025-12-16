@@ -5,13 +5,19 @@
 
 #include <type_traits>
 #include <iterator>
+#include <odds_and_ends/static_introspection/nested_type/has_difference_type.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/equal_to.hpp>
 
 namespace odds_and_ends { namespace node {
 
-    template <typename Iterator>
+    template <
+        typename Iterator,
+        typename HasDiff = typename ::odds_and_ends::static_introspection
+        ::nested_type::has_difference_type<Iterator>::type
+    >
     class indirect_iterator
     {
         struct _enabler
@@ -46,18 +52,18 @@ namespace odds_and_ends { namespace node {
         Iterator _current;
 
     public:
-        template <typename Itr>
+        template <typename Itr, typename B>
         indirect_iterator(
-            indirect_iterator<Itr> const& other,
+            indirect_iterator<Itr,B> const& other,
             typename ::boost::enable_if<
                 ::std::is_convertible<Itr,Iterator>,
                 _enabler
             >::type = _enabler()
         );
 
-        template <typename Itr>
+        template <typename Itr, typename B>
         indirect_iterator(
-            indirect_iterator<Itr>&& other,
+            indirect_iterator<Itr,B>&& other,
             typename ::boost::enable_if<
                 ::std::is_convertible<Itr,Iterator>,
                 _enabler
@@ -83,23 +89,35 @@ namespace odds_and_ends { namespace node {
         indirect_iterator& operator-=(difference_type const& n);
 
     private:
-        template <typename Itr>
+        template <typename Itr, typename B>
         friend class indirect_iterator;
 
-        template <typename Itr1, typename Itr2>
-        friend bool
-            operator==(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs);
+        template <typename Itr1, typename B1, typename Itr2, typename B2>
+        friend typename ::boost::enable_if< ::boost::mpl::equal_to<B1,B2>,bool>::type
+            operator==(
+                indirect_iterator<Itr1,B1> const& lhs,
+                indirect_iterator<Itr2,B2> const& rhs
+            );
 
-        template <typename Itr1, typename Itr2>
-        friend bool
-            operator<(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs);
+        template <typename Itr1, typename B1, typename Itr2, typename B2>
+        friend typename ::boost::enable_if<
+            typename ::boost::mpl::if_<B1,B2,::boost::mpl::false_>::type,
+            bool
+        >::type
+            operator<(
+                indirect_iterator<Itr1,B1> const& lhs,
+                indirect_iterator<Itr2,B2> const& rhs
+            );
 
-        template <typename Itr1, typename Itr2>
+        template <typename Itr1, typename B1, typename Itr2, typename B2>
         friend ::std::common_type<
-            typename indirect_iterator<Itr1>::difference_type,
-            typename indirect_iterator<Itr2>::difference_type
+            typename indirect_iterator<Itr1,B1>::difference_type,
+            typename indirect_iterator<Itr2,B2>::difference_type
         >
-            operator-(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs);
+            operator-(
+                indirect_iterator<Itr1,B1> const& lhs,
+                indirect_iterator<Itr2,B2> const& rhs
+            );
     };
 }}  // namespace odds_and_ends::node
 
@@ -108,72 +126,205 @@ namespace odds_and_ends { namespace node {
 namespace odds_and_ends { namespace node {
 
     template <typename Iterator>
-    indirect_iterator<Iterator>::_proxy::_proxy(Iterator const& itr, difference_type const& n) :
+    class indirect_iterator<Iterator,::boost::mpl::false_>
+    {
+        struct _enabler
+        {
+        };
+
+        typedef typename Iterator::value_type _node_t;
+        typedef typename ::std::remove_const<_node_t>::type::traits::value_type _value_t;
+
+    public:
+        typedef typename Iterator::iterator_category iterator_category;
+        typedef typename ::boost::mpl::if_<
+            ::std::is_const<_node_t>,
+            _value_t const,
+            _value_t
+        >::type value_type;
+        typedef value_type* pointer;
+        typedef value_type& reference;
+
+    private:
+        Iterator _current;
+
+    public:
+        template <typename Itr, typename B>
+        inline indirect_iterator(
+            indirect_iterator<Itr,B> const& other,
+            typename ::boost::enable_if<
+                ::std::is_convertible<Itr,Iterator>,
+                _enabler
+            >::type = _enabler()
+        ) : _current(other._current)
+        {
+        }
+
+        template <typename Itr, typename B>
+        inline indirect_iterator(
+            indirect_iterator<Itr,B>&& other,
+            typename ::boost::enable_if<
+                ::std::is_convertible<Itr,Iterator>,
+                _enabler
+            >::type = _enabler()
+        ) : _current(::std::move(other._current))
+        {
+        }
+
+        inline indirect_iterator(indirect_iterator const& other) : _current(other._current)
+        {
+        }
+
+        inline indirect_iterator(indirect_iterator&& other) : _current(::std::move(other._current))
+        {
+        }
+
+        inline indirect_iterator(Iterator const& itr) : _current(itr)
+        {
+        }
+
+        inline indirect_iterator() : _current()
+        {
+        }
+
+        inline ~indirect_iterator()
+        {
+        }
+
+        inline indirect_iterator& operator=(indirect_iterator const& other)
+        {
+            if (this != &other)
+            {
+                this->_current = other._current;
+            }
+
+            return *this;
+        }
+
+        inline indirect_iterator& operator=(indirect_iterator&& other)
+        {
+            if (this != &static_cast<indirect_iterator&>(other))
+            {
+                this->_current = ::std::move(other._current);
+            }
+
+            return *this;
+        }
+
+        inline Iterator base() const
+        {
+            return this->_current;
+        }
+
+        inline reference operator*() const
+        {
+            return **this->_current;
+        }
+
+        inline pointer operator->() const
+        {
+            return &**this->_current;
+        }
+
+        inline indirect_iterator& operator++()
+        {
+            ++this->_current;
+            return *this;
+        }
+
+        indirect_iterator operator++(int)
+        {
+            indirect_iterator itr(*this);
+            ++this->_current;
+            return itr;
+        }
+
+        inline indirect_iterator& operator--()
+        {
+            --this->_current;
+            return *this;
+        }
+
+        indirect_iterator operator--(int)
+        {
+            indirect_iterator itr(*this);
+            --this->_current;
+            return itr;
+        }
+
+    private:
+        template <typename Itr, typename B>
+        friend class indirect_iterator;
+
+        template <typename Itr1, typename B1, typename Itr2, typename B2>
+        friend typename ::boost::enable_if< ::boost::mpl::equal_to<B1,B2>,bool>::type
+            operator==(
+                indirect_iterator<Itr1,B1> const& lhs,
+                indirect_iterator<Itr2,B2> const& rhs
+            );
+    };
+
+    template <typename Itr, typename HasDiff>
+    indirect_iterator<Itr,HasDiff>::_proxy::_proxy(Itr const& itr, difference_type const& n) :
         _itr(itr)
     {
         this->_itr += n;
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>::_proxy::operator indirect_iterator&()
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>::_proxy::operator indirect_iterator&()
     {
         return this->_itr;
     }
 
-    template <typename Iterator>
-    indirect_iterator<Iterator>::indirect_iterator() : _current()
+    template <typename Iterator, typename HasDiff>
+    indirect_iterator<Iterator,HasDiff>::indirect_iterator() : _current()
     {
     }
 
-    template <typename Iterator>
-    indirect_iterator<Iterator>::indirect_iterator(Iterator const& itr) : _current(itr)
+    template <typename Iterator, typename HasDiff>
+    indirect_iterator<Iterator,HasDiff>::indirect_iterator(Iterator const& itr) : _current(itr)
     {
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>::indirect_iterator(indirect_iterator const& other) :
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>::indirect_iterator(indirect_iterator const& other) :
         _current(other._current)
     {
     }
 
-    template <typename Iterator>
-    template <typename Itr>
-    inline indirect_iterator<Iterator>::indirect_iterator(
-        indirect_iterator<Itr> const& other,
-        typename ::boost::enable_if<
-            ::std::is_convertible<Itr,Iterator>,
-            _enabler
-        >::type
+    template <typename Iterator, typename HasDiff>
+    template <typename Itr, typename B>
+    inline indirect_iterator<Iterator,HasDiff>::indirect_iterator(
+        indirect_iterator<Itr,B> const& other,
+        typename ::boost::enable_if< ::std::is_convertible<Itr,Iterator>,_enabler>::type
     ) : _current(other._current)
     {
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>::indirect_iterator(indirect_iterator&& other) :
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>::indirect_iterator(indirect_iterator&& other) :
         _current(::std::move(other._current))
     {
     }
 
-    template <typename Iterator>
-    template <typename Itr>
-    inline indirect_iterator<Iterator>::indirect_iterator(
-        indirect_iterator<Itr>&& other,
-        typename ::boost::enable_if<
-            ::std::is_convertible<Itr,Iterator>,
-            _enabler
-        >::type
+    template <typename Iterator, typename HasDiff>
+    template <typename Itr, typename B>
+    inline indirect_iterator<Iterator,HasDiff>::indirect_iterator(
+        indirect_iterator<Itr,B>&& other,
+        typename ::boost::enable_if< ::std::is_convertible<Itr,Iterator>,_enabler>::type
     ) : _current(::std::move(other._current))
     {
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>::~indirect_iterator()
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>::~indirect_iterator()
     {
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>&
-        indirect_iterator<Iterator>::operator=(indirect_iterator const& other)
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>&
+        indirect_iterator<Iterator,HasDiff>::operator=(indirect_iterator const& other)
     {
         if (this != &other)
         {
@@ -183,9 +334,9 @@ namespace odds_and_ends { namespace node {
         return *this;
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>&
-        indirect_iterator<Iterator>::operator=(indirect_iterator&& other)
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>&
+        indirect_iterator<Iterator,HasDiff>::operator=(indirect_iterator&& other)
     {
         if (this != &static_cast<indirect_iterator&>(other))
         {
@@ -195,163 +346,175 @@ namespace odds_and_ends { namespace node {
         return *this;
     }
 
-    template <typename Iterator>
-    inline Iterator indirect_iterator<Iterator>::base() const
+    template <typename Iterator, typename HasDiff>
+    inline Iterator indirect_iterator<Iterator,HasDiff>::base() const
     {
         return this->_current;
     }
 
-    template <typename Iterator>
-    inline typename indirect_iterator<Iterator>::reference
-        indirect_iterator<Iterator>::operator*() const
+    template <typename Iterator, typename HasDiff>
+    inline typename indirect_iterator<Iterator,HasDiff>::reference
+        indirect_iterator<Iterator,HasDiff>::operator*() const
     {
         return **this->_current;
     }
 
-    template <typename Iterator>
-    inline typename indirect_iterator<Iterator>::pointer
-        indirect_iterator<Iterator>::operator->() const
+    template <typename Iterator, typename HasDiff>
+    inline typename indirect_iterator<Iterator,HasDiff>::pointer
+        indirect_iterator<Iterator,HasDiff>::operator->() const
     {
         return &**this->_current;
     }
 
-    template <typename Iterator>
-    inline typename indirect_iterator<Iterator>::_proxy
-        indirect_iterator<Iterator>::operator[](difference_type const& n) const
+    template <typename Iterator, typename HasDiff>
+    inline typename indirect_iterator<Iterator,HasDiff>::_proxy
+        indirect_iterator<Iterator,HasDiff>::operator[](difference_type const& n) const
     {
         return _proxy(this->_current, n);
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>& indirect_iterator<Iterator>::operator++()
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>& indirect_iterator<Iterator,HasDiff>::operator++()
     {
         ++this->_current;
         return *this;
     }
 
-    template <typename Iterator>
-    indirect_iterator<Iterator> indirect_iterator<Iterator>::operator++(int)
+    template <typename Iterator, typename HasDiff>
+    indirect_iterator<Iterator,HasDiff> indirect_iterator<Iterator,HasDiff>::operator++(int)
     {
         indirect_iterator itr(*this);
         ++this->_current;
         return itr;
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>& indirect_iterator<Iterator>::operator--()
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>& indirect_iterator<Iterator,HasDiff>::operator--()
     {
         --this->_current;
         return *this;
     }
 
-    template <typename Iterator>
-    indirect_iterator<Iterator> indirect_iterator<Iterator>::operator--(int)
+    template <typename Iterator, typename HasDiff>
+    indirect_iterator<Iterator,HasDiff> indirect_iterator<Iterator,HasDiff>::operator--(int)
     {
         indirect_iterator itr(*this);
         --this->_current;
         return itr;
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>&
-        indirect_iterator<Iterator>::operator+=(difference_type const& n)
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>&
+        indirect_iterator<Iterator,HasDiff>::operator+=(difference_type const& n)
     {
         this->_current += n;
         return *this;
     }
 
-    template <typename Iterator>
-    indirect_iterator<Iterator>
+    template <typename Iterator, typename HasDiff>
+    indirect_iterator<Iterator,HasDiff>
         operator+(
-            indirect_iterator<Iterator> const& operand,
-            typename indirect_iterator<Iterator>::difference_type const& n
+            indirect_iterator<Iterator,HasDiff> const& operand,
+            typename indirect_iterator<Iterator,HasDiff>::difference_type const& n
         )
     {
-        indirect_iterator<Iterator> itr(operand);
+        indirect_iterator<Iterator,HasDiff> itr(operand);
         itr += n;
         return itr;
     }
 
-    template <typename Iterator>
-    indirect_iterator<Iterator>
+    template <typename Iterator, typename HasDiff>
+    indirect_iterator<Iterator,HasDiff>
         operator+(
-            typename indirect_iterator<Iterator>::difference_type const& n,
-            indirect_iterator<Iterator> const& operand
+            typename indirect_iterator<Iterator,HasDiff>::difference_type const& n,
+            indirect_iterator<Iterator,HasDiff> const& operand
         )
     {
-        indirect_iterator<Iterator> itr(operand);
+        indirect_iterator<Iterator,HasDiff> itr(operand);
         itr += n;
         return itr;
     }
 
-    template <typename Iterator>
-    inline indirect_iterator<Iterator>&
-        indirect_iterator<Iterator>::operator-=(difference_type const& n)
+    template <typename Iterator, typename HasDiff>
+    inline indirect_iterator<Iterator,HasDiff>&
+        indirect_iterator<Iterator,HasDiff>::operator-=(difference_type const& n)
     {
         this->_current -= n;
         return *this;
     }
 
-    template <typename Iterator>
-    indirect_iterator<Iterator>
+    template <typename Iterator, typename HasDiff>
+    indirect_iterator<Iterator,HasDiff>
         operator-(
-            indirect_iterator<Iterator> const& operand,
-            typename indirect_iterator<Iterator>::difference_type const& n
+            indirect_iterator<Iterator,HasDiff> const& operand,
+            typename indirect_iterator<Iterator,HasDiff>::difference_type const& n
         )
     {
-        indirect_iterator<Iterator> itr(operand);
+        indirect_iterator<Iterator,HasDiff> itr(operand);
         itr -= n;
         return itr;
     }
 
-    template <typename Itr1, typename Itr2>
-    inline bool
-        operator==(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs)
+    template <typename Itr1, typename B1, typename Itr2, typename B2>
+    inline typename ::boost::enable_if< ::boost::mpl::equal_to<B1,B2>,bool>::type
+        operator==(indirect_iterator<Itr1,B1> const& lhs, indirect_iterator<Itr2,B2> const& rhs)
     {
         return lhs._current == rhs._current;
     }
 
-    template <typename Itr1, typename Itr2>
-    inline bool
-        operator!=(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs)
+    template <typename Itr1, typename B1, typename Itr2, typename B2>
+    inline typename ::boost::enable_if< ::boost::mpl::equal_to<B1,B2>,bool>::type
+        operator!=(indirect_iterator<Itr1,B1> const& lhs, indirect_iterator<Itr2,B2> const& rhs)
     {
         return !(lhs == rhs);
     }
 
-    template <typename Itr1, typename Itr2>
-    inline bool
-        operator<(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs)
+    template <typename Itr1, typename B1, typename Itr2, typename B2>
+    inline typename ::boost::enable_if<
+        typename ::boost::mpl::if_<B1,B2,::boost::mpl::false_>::type,
+        bool
+    >::type
+        operator<(indirect_iterator<Itr1,B1> const& lhs, indirect_iterator<Itr2,B2> const& rhs)
     {
         return lhs._current < rhs._current;
     }
 
-    template <typename Itr1, typename Itr2>
-    inline bool
-        operator>(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs)
+    template <typename Itr1, typename B1, typename Itr2, typename B2>
+    inline typename ::boost::enable_if<
+        typename ::boost::mpl::if_<B1,B2,::boost::mpl::false_>::type,
+        bool
+    >::type
+        operator>(indirect_iterator<Itr1,B1> const& lhs, indirect_iterator<Itr2,B2> const& rhs)
     {
         return rhs < lhs;
     }
 
-    template <typename Itr1, typename Itr2>
-    inline bool
-        operator<=(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs)
+    template <typename Itr1, typename B1, typename Itr2, typename B2>
+    inline typename ::boost::enable_if<
+        typename ::boost::mpl::if_<B1,B2,::boost::mpl::false_>::type,
+        bool
+    >::type
+        operator<=(indirect_iterator<Itr1,B1> const& lhs, indirect_iterator<Itr2,B2> const& rhs)
     {
         return !(rhs < lhs);
     }
 
-    template <typename Itr1, typename Itr2>
-    inline bool
-        operator>=(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs)
+    template <typename Itr1, typename B1, typename Itr2, typename B2>
+    inline typename ::boost::enable_if<
+        typename ::boost::mpl::if_<B1,B2,::boost::mpl::false_>::type,
+        bool
+    >::type
+        operator>=(indirect_iterator<Itr1,B1> const& lhs, indirect_iterator<Itr2,B2> const& rhs)
     {
         return !(lhs < rhs);
     }
 
-    template <typename Itr1, typename Itr2>
+    template <typename Itr1, typename B1, typename Itr2, typename B2>
     inline ::std::common_type<
-        typename indirect_iterator<Itr1>::difference_type,
-        typename indirect_iterator<Itr2>::difference_type
+        typename indirect_iterator<Itr1,B1>::difference_type,
+        typename indirect_iterator<Itr2,B2>::difference_type
     >
-        operator-(indirect_iterator<Itr1> const& lhs, indirect_iterator<Itr2> const& rhs)
+        operator-(indirect_iterator<Itr1,B1> const& lhs, indirect_iterator<Itr2,B2> const& rhs)
     {
         return lhs._current - rhs._current;
     }

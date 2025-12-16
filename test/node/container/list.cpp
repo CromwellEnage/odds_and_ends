@@ -1,85 +1,68 @@
 // Copyright (C) 2025 Cromwell D. Enage
 
 #include <string>
-#include <odds_and_ends/node/container/deque.hpp>
-#include <odds_and_ends/node/balancer/left_leaning_red_black_tree.hpp>
-#include <odds_and_ends/node/red_black.hpp>
+#include <odds_and_ends/node/container/list.hpp>
 #include <odds_and_ends/static_introspection/concept/is_container.hpp>
-#include <boost/mpl/deque.hpp>
 #include <boost/core/lightweight_test.hpp>
 
-typedef ::odds_and_ends::node::container::deque<
-    char,
-    ::boost::mpl::deque< ::odds_and_ends::node::red_black>,
-    ::odds_and_ends::node::left_leaning_red_black_tree_balancer
-> CharDeque;
+typedef ::odds_and_ends::node::container::list<char> CharList;
 
-void test_char_deque_00()
+void test_char_list_00()
 {
 /*
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_container<CharDeque>::value,
+        ::odds_and_ends::static_introspection::concept::is_container<CharList>::value,
         ""
     );
 */
-    CharDeque char_deque;
-    CharDeque::const_iterator c_itr = char_deque.begin();
-    CharDeque::const_reverse_iterator c_r_itr = char_deque.rbegin();
+    CharList char_list;
+    CharList::const_iterator c_itr = char_list.begin();
+    CharList::const_reverse_iterator c_r_itr = char_list.rbegin();
 
-    BOOST_TEST(char_deque.empty());
-    BOOST_TEST(c_itr == char_deque.end());
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_back('m');
-    BOOST_TEST('m' == char_deque[0]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(char_list.empty());
+    BOOST_TEST(c_itr == char_list.end());
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_back('m');
+    c_itr = char_list.begin();
     BOOST_TEST('m' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('m' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_back('n');
-    BOOST_TEST('m' == char_deque[0]);
-    BOOST_TEST('n' == char_deque[1]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_back('n');
+    c_itr = char_list.begin();
     BOOST_TEST('m' == *c_itr);
     ++c_itr;
     BOOST_TEST('n' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('n' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('m' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_back('o');
-    BOOST_TEST('m' == char_deque[0]);
-    BOOST_TEST('n' == char_deque[1]);
-    BOOST_TEST('o' == char_deque[2]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_back('o');
+    c_itr = char_list.begin();
     BOOST_TEST('m' == *c_itr);
     ++c_itr;
     BOOST_TEST('n' == *c_itr);
     ++c_itr;
     BOOST_TEST('o' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('o' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('n' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('m' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_front('l');
-    BOOST_TEST('l' == char_deque[0]);
-    BOOST_TEST('m' == char_deque[1]);
-    BOOST_TEST('n' == char_deque[2]);
-    BOOST_TEST('o' == char_deque[3]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_front('l');
+    c_itr = char_list.begin();
     BOOST_TEST('l' == *c_itr);
     ++c_itr;
     BOOST_TEST('m' == *c_itr);
@@ -88,8 +71,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('o' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('o' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('n' == *c_r_itr);
@@ -98,14 +81,9 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('l' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_front('k');
-    BOOST_TEST('k' == char_deque[0]);
-    BOOST_TEST('l' == char_deque[1]);
-    BOOST_TEST('m' == char_deque[2]);
-    BOOST_TEST('n' == char_deque[3]);
-    BOOST_TEST('o' == char_deque[4]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_front('k');
+    c_itr = char_list.begin();
     BOOST_TEST('k' == *c_itr);
     ++c_itr;
     BOOST_TEST('l' == *c_itr);
@@ -116,8 +94,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('o' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('o' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('n' == *c_r_itr);
@@ -128,15 +106,9 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('k' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_back('q');
-    BOOST_TEST('k' == char_deque[0]);
-    BOOST_TEST('l' == char_deque[1]);
-    BOOST_TEST('m' == char_deque[2]);
-    BOOST_TEST('n' == char_deque[3]);
-    BOOST_TEST('o' == char_deque[4]);
-    BOOST_TEST('q' == char_deque[5]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_back('q');
+    c_itr = char_list.begin();
     BOOST_TEST('k' == *c_itr);
     ++c_itr;
     BOOST_TEST('l' == *c_itr);
@@ -149,8 +121,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('o' == *c_r_itr);
@@ -163,19 +135,13 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('k' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
+    BOOST_TEST(c_r_itr == char_list.rend());
+    c_itr = char_list.end();
 
-    CharDeque::iterator itr = char_deque.insert(char_deque.end() - 1, 'p');
+    CharList::iterator itr = char_list.insert(--c_itr, 'p');
 
-    BOOST_TEST('k' == char_deque[0]);
-    BOOST_TEST('l' == char_deque[1]);
-    BOOST_TEST('m' == char_deque[2]);
-    BOOST_TEST('n' == char_deque[3]);
-    BOOST_TEST('o' == char_deque[4]);
-    BOOST_TEST('p' == char_deque[5]);
-    BOOST_TEST('q' == char_deque[6]);
     BOOST_TEST('p' == *itr);
-    c_itr = char_deque.begin();
+    c_itr = char_list.begin();
     BOOST_TEST('k' == *c_itr);
     ++c_itr;
     BOOST_TEST('l' == *c_itr);
@@ -190,8 +156,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('p' == *c_r_itr);
@@ -206,17 +172,9 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('k' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_front('h');
-    BOOST_TEST('h' == char_deque[0]);
-    BOOST_TEST('k' == char_deque[1]);
-    BOOST_TEST('l' == char_deque[2]);
-    BOOST_TEST('m' == char_deque[3]);
-    BOOST_TEST('n' == char_deque[4]);
-    BOOST_TEST('o' == char_deque[5]);
-    BOOST_TEST('p' == char_deque[6]);
-    BOOST_TEST('q' == char_deque[7]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_front('h');
+    c_itr = char_list.begin();
     BOOST_TEST('h' == *c_itr);
     ++c_itr;
     BOOST_TEST('k' == *c_itr);
@@ -233,8 +191,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('p' == *c_r_itr);
@@ -251,19 +209,11 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('h' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    itr = char_deque.insert(char_deque.begin() + 1, 'i');
-    BOOST_TEST('h' == char_deque[0]);
-    BOOST_TEST('i' == char_deque[1]);
-    BOOST_TEST('k' == char_deque[2]);
-    BOOST_TEST('l' == char_deque[3]);
-    BOOST_TEST('m' == char_deque[4]);
-    BOOST_TEST('n' == char_deque[5]);
-    BOOST_TEST('o' == char_deque[6]);
-    BOOST_TEST('p' == char_deque[7]);
-    BOOST_TEST('q' == char_deque[8]);
+    BOOST_TEST(c_r_itr == char_list.rend());
+    c_itr = char_list.begin();
+    itr = char_list.insert(++c_itr, 'i');
     BOOST_TEST('i' == *itr);
-    c_itr = char_deque.begin();
+    c_itr = char_list.begin();
     BOOST_TEST('h' == *c_itr);
     ++c_itr;
     BOOST_TEST('i' == *c_itr);
@@ -282,8 +232,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('p' == *c_r_itr);
@@ -302,19 +252,9 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('h' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.push_front('a');
-    BOOST_TEST('a' == char_deque[0]);
-    BOOST_TEST('h' == char_deque[1]);
-    BOOST_TEST('i' == char_deque[2]);
-    BOOST_TEST('k' == char_deque[3]);
-    BOOST_TEST('l' == char_deque[4]);
-    BOOST_TEST('m' == char_deque[5]);
-    BOOST_TEST('n' == char_deque[6]);
-    BOOST_TEST('o' == char_deque[7]);
-    BOOST_TEST('p' == char_deque[8]);
-    BOOST_TEST('q' == char_deque[9]);
-    c_itr = char_deque.begin();
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.push_front('a');
+    c_itr = char_list.begin();
     BOOST_TEST('a' == *c_itr);
     ++c_itr;
     BOOST_TEST('h' == *c_itr);
@@ -335,8 +275,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('p' == *c_r_itr);
@@ -357,29 +297,14 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('a' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
+    BOOST_TEST(c_r_itr == char_list.rend());
 
     ::std::string sample = "bcdefg";
 
-    itr = char_deque.insert(char_deque.begin() + 1, sample.cbegin(), sample.cend());
-    BOOST_TEST('a' == char_deque[0]);
-    BOOST_TEST('b' == char_deque[1]);
-    BOOST_TEST('c' == char_deque[2]);
-    BOOST_TEST('d' == char_deque[3]);
-    BOOST_TEST('e' == char_deque[4]);
-    BOOST_TEST('f' == char_deque[5]);
-    BOOST_TEST('g' == char_deque[6]);
-    BOOST_TEST('h' == char_deque[7]);
-    BOOST_TEST('i' == char_deque[8]);
-    BOOST_TEST('k' == char_deque[9]);
-    BOOST_TEST('l' == char_deque[10]);
-    BOOST_TEST('m' == char_deque[11]);
-    BOOST_TEST('n' == char_deque[12]);
-    BOOST_TEST('o' == char_deque[13]);
-    BOOST_TEST('p' == char_deque[14]);
-    BOOST_TEST('q' == char_deque[15]);
+    c_itr = char_list.begin();
+    itr = char_list.insert(++c_itr, sample.cbegin(), sample.cend());
     BOOST_TEST('b' == *itr);
-    c_itr = char_deque.begin();
+    c_itr = char_list.begin();
     BOOST_TEST('a' == *c_itr);
     ++c_itr;
     BOOST_TEST('b' == *c_itr);
@@ -412,8 +337,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('p' == *c_r_itr);
@@ -446,25 +371,15 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('a' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    itr = char_deque.erase(char_deque.begin() + 4);
-    BOOST_TEST('a' == char_deque[0]);
-    BOOST_TEST('b' == char_deque[1]);
-    BOOST_TEST('c' == char_deque[2]);
-    BOOST_TEST('d' == char_deque[3]);
-    BOOST_TEST('f' == char_deque[4]);
-    BOOST_TEST('g' == char_deque[5]);
-    BOOST_TEST('h' == char_deque[6]);
-    BOOST_TEST('i' == char_deque[7]);
-    BOOST_TEST('k' == char_deque[8]);
-    BOOST_TEST('l' == char_deque[9]);
-    BOOST_TEST('m' == char_deque[10]);
-    BOOST_TEST('n' == char_deque[11]);
-    BOOST_TEST('o' == char_deque[12]);
-    BOOST_TEST('p' == char_deque[13]);
-    BOOST_TEST('q' == char_deque[14]);
+    BOOST_TEST(c_r_itr == char_list.rend());
+    c_itr = char_list.begin();
+    ++c_itr;
+    ++c_itr;
+    ++c_itr;
+    ++c_itr;
+    itr = char_list.erase(c_itr);
     BOOST_TEST('f' == *itr);
-    c_itr = char_deque.begin();
+    c_itr = char_list.begin();
     BOOST_TEST('a' == *c_itr);
     ++c_itr;
     BOOST_TEST('b' == *c_itr);
@@ -495,8 +410,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('p' == *c_r_itr);
@@ -527,22 +442,18 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('a' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    itr = char_deque.erase(char_deque.end() - 5, char_deque.end() - 2);
-    BOOST_TEST('a' == char_deque[0]);
-    BOOST_TEST('b' == char_deque[1]);
-    BOOST_TEST('c' == char_deque[2]);
-    BOOST_TEST('d' == char_deque[3]);
-    BOOST_TEST('f' == char_deque[4]);
-    BOOST_TEST('g' == char_deque[5]);
-    BOOST_TEST('h' == char_deque[6]);
-    BOOST_TEST('i' == char_deque[7]);
-    BOOST_TEST('k' == char_deque[8]);
-    BOOST_TEST('l' == char_deque[9]);
-    BOOST_TEST('p' == char_deque[10]);
-    BOOST_TEST('q' == char_deque[11]);
+    BOOST_TEST(c_r_itr == char_list.rend());
+
+    CharList::iterator itr_last = char_list.end();
+
+    --itr_last;
+    itr = --itr_last;
+    --itr;
+    --itr;
+    --itr;
+    itr = char_list.erase(itr, itr_last);
     BOOST_TEST('p' == *itr);
-    c_itr = char_deque.begin();
+    c_itr = char_list.begin();
     BOOST_TEST('a' == *c_itr);
     ++c_itr;
     BOOST_TEST('b' == *c_itr);
@@ -567,8 +478,8 @@ void test_char_deque_00()
     ++c_itr;
     BOOST_TEST('q' == *c_itr);
     ++c_itr;
-    BOOST_TEST(c_itr == char_deque.end());
-    c_r_itr = char_deque.rbegin();
+    BOOST_TEST(c_itr == char_list.end());
+    c_r_itr = char_list.rbegin();
     BOOST_TEST('q' == *c_r_itr);
     ++c_r_itr;
     BOOST_TEST('p' == *c_r_itr);
@@ -593,14 +504,14 @@ void test_char_deque_00()
     ++c_r_itr;
     BOOST_TEST('a' == *c_r_itr);
     ++c_r_itr;
-    BOOST_TEST(c_r_itr == char_deque.rend());
-    char_deque.clear();
-    BOOST_TEST(char_deque.empty());
+    BOOST_TEST(c_r_itr == char_list.rend());
+    char_list.clear();
+    BOOST_TEST(char_list.empty());
 }
 
 int main(int argc, char** argv)
 {
-    test_char_deque_00();
+    test_char_list_00();
     return ::boost::report_errors();
 }
 

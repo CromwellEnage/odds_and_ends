@@ -329,7 +329,9 @@ namespace odds_and_ends { namespace node { namespace linked {
                             }
 
                             _composite_parent_t::insert_next(p);
-                            p->_prior = &this->derived();
+                            p->_prior = ::std::pointer_traits<
+                                typename traits::pointer
+                            >::pointer_to(this->derived());
                         }
 
                         inline typename traits::pointer erase_next()
@@ -338,7 +340,9 @@ namespace odds_and_ends { namespace node { namespace linked {
 
                             if (this->next())
                             {
-                                this->next()->_prior = &this->derived();
+                                this->next()->_prior = ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(this->derived());
                             }
 
                             p->_prior = nullptr;
@@ -354,7 +358,11 @@ namespace odds_and_ends { namespace node { namespace linked {
                             }
 
                             this->_prior = p;
-                            p->_set_next(&this->derived());
+                            p->_set_next(
+                                ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(this->derived())
+                            );
                         }
 
                         inline typename traits::pointer erase_prior()
@@ -365,7 +373,11 @@ namespace odds_and_ends { namespace node { namespace linked {
 
                             if (this->_prior)
                             {
-                                this->_prior->_set_next(&this->derived());
+                                this->_prior->_set_next(
+                                    ::std::pointer_traits<
+                                        typename traits::pointer
+                                    >::pointer_to(this->derived())
+                                );
                             }
 
                             p->_set_next(nullptr);

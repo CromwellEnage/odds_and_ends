@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <memory>
+//#include <initializer_list>
 #include <odds_and_ends/node/data.hpp>
 #include <odds_and_ends/node/tree/base.hpp>
 #include <odds_and_ends/node/tree/binary.hpp>
@@ -226,7 +227,11 @@ namespace odds_and_ends { namespace node { namespace container {
         iterator insert(const_iterator pos, size_type n, const_reference t);
 
         template <typename Iterator>
-        iterator insert(const_iterator pos, Iterator itr_begin, Iterator itr_end);
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+            iterator
+        >::type
+            insert(const_iterator pos, Iterator itr_begin, Iterator itr_end);
 
         template <typename ...Args>
         void emplace_front(Args&& ...args);
@@ -240,7 +245,7 @@ namespace odds_and_ends { namespace node { namespace container {
         const_reference operator[](size_type index) const;
         reference operator[](size_type index);
         iterator erase(const_iterator pos);
-        void erase(const_iterator itr_begin, const_iterator itr_end);
+        iterator erase(const_iterator itr_begin, const_iterator itr_end);
         void pop_front();
         void pop_back();
         void swap(deque& other);
@@ -1757,7 +1762,10 @@ namespace odds_and_ends { namespace node { namespace container {
         typename AllocXForm
     >
     template <typename Iterator>
-    typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::iterator
+    typename ::boost::enable_if<
+        ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+        typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::iterator
+    >::type
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::insert(
             const_iterator pos,
             Iterator itr,
@@ -1868,7 +1876,7 @@ namespace odds_and_ends { namespace node { namespace container {
         BOOST_ASSERT(pos != this->cend());
 
         _node_ptr_t node_ptr = const_cast<_node_ptr_t>(
-            ::std::pointer_traits<_node_const_ptr_t>::pointer_to(*pos)
+            ::std::pointer_traits<_node_const_ptr_t>::pointer_to(*pos.base())
         );
 
         BOOST_ASSERT_MSG(this->_root_ptr, "This container cannot be empty!");
@@ -1901,15 +1909,27 @@ namespace odds_and_ends { namespace node { namespace container {
         typename PtrXForm,
         typename AllocXForm
     >
-    void
+    typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::iterator
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::erase(
             const_iterator itr,
             const_iterator itr_end
         )
     {
-        for (; itr != itr_end; itr = this->erase(itr))
+        iterator result = this->end();
+
+        if (itr_end != this->cend())
         {
+            result = ::odds_and_ends::node::make_in_order_tree_iterator_position(
+                const_cast<node&>(*itr_end.base())
+            );
         }
+
+        for (; itr != itr_end; itr = result)
+        {
+            result = this->erase(itr);
+        }
+
+        return result;
     }
 
     template <

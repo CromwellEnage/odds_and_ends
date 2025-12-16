@@ -2,16 +2,16 @@
 
 #include <string>
 #include <odds_and_ends/node/container/deque.hpp>
-#include <odds_and_ends/node/balancer/left_leaning_red_black_tree.hpp>
-#include <odds_and_ends/node/red_black.hpp>
+#include <odds_and_ends/node/balancer/adelson_velskii_landis_tree.hpp>
+#include <odds_and_ends/node/with_balance_factor.hpp>
 #include <odds_and_ends/static_introspection/concept/is_container.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/core/lightweight_test.hpp>
 
 typedef ::odds_and_ends::node::container::deque<
     char,
-    ::boost::mpl::deque< ::odds_and_ends::node::red_black>,
-    ::odds_and_ends::node::left_leaning_red_black_tree_balancer
+    ::boost::mpl::deque< ::odds_and_ends::node::with_balance_factor>,
+    ::odds_and_ends::node::adelson_velskii_landis_tree_balancer
 > CharDeque;
 
 void test_char_deque_00()
