@@ -7,13 +7,15 @@
 #include <utility>
 #include <memory>
 #include <odds_and_ends/node/iterator/binary_tree_child.hpp>
+#include <odds_and_ends/node/event/pre_clear.hpp>
+#include <odds_and_ends/node/event/pre_erase.hpp>
+#include <odds_and_ends/node/event/post_clear.hpp>
+#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
+#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
 #include <odds_and_ends/node/event/post_insert_left_tree.hpp>
 #include <odds_and_ends/node/event/post_insert_right_tree.hpp>
 #include <odds_and_ends/node/event/post_rotate_left_tree.hpp>
 #include <odds_and_ends/node/event/post_rotate_right_tree.hpp>
-#include <odds_and_ends/node/event/pre_erase.hpp>
-#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
-#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
 #include <odds_and_ends/node/algorithm/is_ancestor_of.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
@@ -364,6 +366,11 @@ namespace odds_and_ends { namespace node { namespace tree {
                             return this->_right;
                         }
 
+                        inline bool is_leaf()
+                        {
+                            return !this->_left && !this->_right;
+                        }
+
                         inline typename traits::child_const_iterator begin() const
                         {
                             return typename traits::child_const_iterator(
@@ -469,6 +476,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 "This node has no left child to remove."
                             );
                             this->_left->handle(::odds_and_ends::node::pre_erase_event());
+                            this->_left->parent(nullptr);
                             this->_left = nullptr;
                             this->handle(::odds_and_ends::node::post_erase_left_tree_event());
                         }
@@ -513,6 +521,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 "This node has no right child to remove."
                             );
                             this->_right->handle(::odds_and_ends::node::pre_erase_event());
+                            this->_right->parent(nullptr);
                             this->_right = nullptr;
                             this->handle(::odds_and_ends::node::post_erase_right_tree_event());
                         }
@@ -548,6 +557,25 @@ namespace odds_and_ends { namespace node { namespace tree {
                             this->set_right_ptr(
                                 ::std::pointer_traits<typename traits::pointer>::pointer_to(n)
                             );
+                        }
+
+                        inline void clear()
+                        {
+                            this->handle(::odds_and_ends::node::pre_clear_event());
+
+                            if (this->_left)
+                            {
+                                this->_left->parent(nullptr);
+                                this->_left = nullptr;
+                            }
+
+                            if (this->_right)
+                            {
+                                this->_right->parent(nullptr);
+                                this->_right = nullptr;
+                            }
+
+                            this->handle(::odds_and_ends::node::post_clear_event());
                         }
 
                         inline typename traits::pointer rotate_left()

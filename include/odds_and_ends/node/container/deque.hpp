@@ -42,14 +42,13 @@ namespace odds_and_ends { namespace node { namespace container {
     >
     class deque
     {
-        typedef ::odds_and_ends::node::container
-        ::deque<T,NodeParentGeneratorList,Balancer,Size,Difference,PtrXForm,AllocXForm> _self;
-
         struct _enabler
         {
         };
 
     public:
+        typedef ::odds_and_ends::node::container
+        ::deque<T,NodeParentGeneratorList,Balancer,Size,Difference,PtrXForm,AllocXForm> type;
         typedef T value_type;
         typedef Size size_type;
         typedef Difference difference_type;
@@ -85,10 +84,11 @@ namespace odds_and_ends { namespace node { namespace container {
         ::in_order_tree_iterator<node const,::boost::mpl::true_,Difference> _c_r_itr_t;
 
     public:
-        typedef ::odds_and_ends::node::indirect_iterator<_itr_t> iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t> const_iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t> reverse_iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_c_r_itr_t> const_reverse_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_itr_t,PtrXForm> iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t,PtrXForm> const_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t,PtrXForm> reverse_iterator;
+        typedef ::odds_and_ends::node
+        ::indirect_iterator<_c_r_itr_t,PtrXForm> const_reverse_iterator;
 
     private:
         typedef typename node::traits::const_pointer _node_const_ptr_t;
@@ -437,7 +437,7 @@ namespace odds_and_ends { namespace node { namespace container {
     {
         if (n)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, n);
+            type::_fill_construct(this->_alloc, this->_root_ptr, n);
         }
     }
 
@@ -457,7 +457,7 @@ namespace odds_and_ends { namespace node { namespace container {
     {
         if (n)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, n, t);
+            type::_fill_construct(this->_alloc, this->_root_ptr, n, t);
         }
     }
 
@@ -483,7 +483,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
         if (n)
         {
-            _self::_fill_construct(alloc, root_ptr, n, *itr);
+            type::_fill_construct(alloc, root_ptr, n, *itr);
 
             for (_itr_t out_itr(*root_ptr, false); !(!out_itr); ++out_itr)
             {
@@ -512,7 +512,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type
     ) : _alloc(), _root_ptr(nullptr)
     {
-        _self::_fill_construct(this->_alloc, this->_root_ptr, itr, itr_end);
+        type::_fill_construct(this->_alloc, this->_root_ptr, itr, itr_end);
     }
 
     template <
@@ -540,7 +540,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type
     ) : _alloc(alloc), _root_ptr(nullptr)
     {
-        _self::_fill_construct(this->_alloc, this->_root_ptr, itr, itr_end);
+        type::_fill_construct(this->_alloc, this->_root_ptr, itr, itr_end);
     }
 
     template <
@@ -592,7 +592,7 @@ namespace odds_and_ends { namespace node { namespace container {
     inline deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::deque(deque const& copy) :
         _alloc(copy._alloc), _root_ptr(nullptr)
     {
-        _self::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
+        type::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
     }
 
     template <
@@ -614,7 +614,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type
     ) : _alloc(alloc), _root_ptr(nullptr)
     {
-        _self::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
+        type::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
     }
 
     template <
@@ -640,7 +640,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename ::boost::enable_if< ::std::is_convertible<U,T>,_enabler>::type
     ) : _alloc(copy._alloc), _root_ptr(nullptr)
     {
-        _self::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
+        type::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
     }
 
     template <
@@ -675,7 +675,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type
     ) : _alloc(alloc), _root_ptr(nullptr)
     {
-        _self::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
+        type::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
     }
 
     template <
@@ -775,7 +775,7 @@ namespace odds_and_ends { namespace node { namespace container {
         if (this != &copy)
         {
             this->clear();
-            _self::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
+            type::_fill_construct(this->_alloc, this->_root_ptr, copy.cbegin(), copy.cend());
         }
 
         return *this;
@@ -1290,7 +1290,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else  // if (!this->_root_ptr)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, 1, t);
+            type::_fill_construct(this->_alloc, this->_root_ptr, 1, t);
         }
     }
 
@@ -1325,7 +1325,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else  // if (!this->_root_ptr)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, 1, static_cast<value_type&&>(t));
+            type::_fill_construct(this->_alloc, this->_root_ptr, 1, static_cast<value_type&&>(t));
         }
     }
 
@@ -1361,7 +1361,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else  // if (!this->_root_ptr)
         {
-            _self::_fill_construct(
+            type::_fill_construct(
                 this->_alloc,
                 this->_root_ptr,
                 1,
@@ -1398,7 +1398,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else  // if (!this->_root_ptr)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, 1, t);
+            type::_fill_construct(this->_alloc, this->_root_ptr, 1, t);
         }
     }
 
@@ -1433,7 +1433,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else  // if (!this->_root_ptr)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, 1, static_cast<value_type&&>(t));
+            type::_fill_construct(this->_alloc, this->_root_ptr, 1, static_cast<value_type&&>(t));
         }
     }
 
@@ -1469,7 +1469,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else  // if (!this->_root_ptr)
         {
-            _self::_fill_construct(
+            type::_fill_construct(
                 this->_alloc,
                 this->_root_ptr,
                 1,
@@ -1724,7 +1724,7 @@ namespace odds_and_ends { namespace node { namespace container {
             }
             else
             {
-                _self::_fill_construct(this->_alloc, this->_root_ptr, n, t);
+                type::_fill_construct(this->_alloc, this->_root_ptr, n, t);
                 return this->begin();
             }
         }
@@ -1812,7 +1812,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, itr, itr_end);
+            type::_fill_construct(this->_alloc, this->_root_ptr, itr, itr_end);
             return this->begin();
         }
     }
@@ -1978,7 +1978,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else if (n)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, n);
+            type::_fill_construct(this->_alloc, this->_root_ptr, n);
         }
     }
 
@@ -2014,7 +2014,7 @@ namespace odds_and_ends { namespace node { namespace container {
         }
         else if (n)
         {
-            _self::_fill_construct(this->_alloc, this->_root_ptr, n, t);
+            type::_fill_construct(this->_alloc, this->_root_ptr, n, t);
         }
     }
 

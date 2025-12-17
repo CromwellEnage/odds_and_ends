@@ -6,15 +6,17 @@
 #include <cstddef>
 #include <utility>
 #include <memory>
+#include <odds_and_ends/node/event/pre_clear.hpp>
+#include <odds_and_ends/node/event/pre_erase.hpp>
+#include <odds_and_ends/node/event/post_clear.hpp>
+#include <odds_and_ends/node/event/post_erase.hpp>
+#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
+#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
 #include <odds_and_ends/node/event/post_insert.hpp>
 #include <odds_and_ends/node/event/post_insert_left_tree.hpp>
 #include <odds_and_ends/node/event/post_insert_right_tree.hpp>
 #include <odds_and_ends/node/event/post_rotate_left_tree.hpp>
 #include <odds_and_ends/node/event/post_rotate_right_tree.hpp>
-#include <odds_and_ends/node/event/post_erase.hpp>
-#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
-#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
-#include <odds_and_ends/node/event/pre_erase.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/allocator_ctor_2nd_stage.hpp>
@@ -368,33 +370,41 @@ namespace odds_and_ends { namespace node { namespace tree {
                             return result;
                         }
 
-                        bool listen_to(::odds_and_ends::node::pre_erase_event const& e)
+                        inline bool listen_to(::odds_and_ends::node::pre_clear_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-
-                            for (
-                                typename traits::pointer p = this->parent();
-                                p;
-                                p = p->parent()
-                            )
-                            {
-                                p->_size -= this->size();
-                            }
-
+                            --this->_size;
+                            this->_pre_erase_update_size();
+                            this->_size = ::boost::initialized_value;
+                            ++this->_size;
                             return result;
                         }
 
-                        bool listen_to(::odds_and_ends::node::post_erase_event const& e)
+                        inline bool listen_to(::odds_and_ends::node::pre_erase_event const& e)
+                        {
+                            bool const result = _composite_parent_t::listen_to(e);
+                            this->_pre_erase_update_size();
+                            return result;
+                        }
+
+                        inline bool listen_to(::odds_and_ends::node::post_clear_event const& e)
                         {
                             return _composite_parent_t::listen_to(e);
                         }
 
-                        bool listen_to(::odds_and_ends::node::post_erase_left_tree_event const& e)
+                        inline bool listen_to(::odds_and_ends::node::post_erase_event const& e)
                         {
                             return _composite_parent_t::listen_to(e);
                         }
 
-                        bool listen_to(::odds_and_ends::node::post_erase_right_tree_event const& e)
+                        inline bool
+                            listen_to(::odds_and_ends::node::post_erase_left_tree_event const& e)
+                        {
+                            return _composite_parent_t::listen_to(e);
+                        }
+
+                        inline bool
+                            listen_to(::odds_and_ends::node::post_erase_right_tree_event const& e)
                         {
                             return _composite_parent_t::listen_to(e);
                         }
@@ -418,7 +428,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
 
                     private:
-                        inline void _post_insert_update_size()
+                        void _post_insert_update_size()
                         {
                             typename traits::child_iterator itr;
 
@@ -452,6 +462,18 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 this->right() ? this->right()->size() : ::boost::initialized_value
                             );
                             ++this->_size;
+                        }
+
+                        void _pre_erase_update_size()
+                        {
+                            for (
+                                typename traits::pointer p = this->parent();
+                                p;
+                                p = p->parent()
+                            )
+                            {
+                                p->_size -= this->size();
+                            }
                         }
 
                         friend class _result;

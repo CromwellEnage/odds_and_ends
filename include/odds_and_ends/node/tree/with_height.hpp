@@ -6,15 +6,17 @@
 #include <cstddef>
 #include <utility>
 #include <memory>
+#include <odds_and_ends/node/event/pre_clear.hpp>
+#include <odds_and_ends/node/event/pre_erase.hpp>
+#include <odds_and_ends/node/event/post_clear.hpp>
+#include <odds_and_ends/node/event/post_erase.hpp>
+#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
+#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
 #include <odds_and_ends/node/event/post_insert.hpp>
 #include <odds_and_ends/node/event/post_insert_left_tree.hpp>
 #include <odds_and_ends/node/event/post_insert_right_tree.hpp>
 #include <odds_and_ends/node/event/post_rotate_left_tree.hpp>
 #include <odds_and_ends/node/event/post_rotate_right_tree.hpp>
-#include <odds_and_ends/node/event/post_erase.hpp>
-#include <odds_and_ends/node/event/post_erase_left_tree.hpp>
-#include <odds_and_ends/node/event/post_erase_right_tree.hpp>
-#include <odds_and_ends/node/event/pre_erase.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/allocator_ctor_2nd_stage.hpp>
@@ -358,9 +360,21 @@ namespace odds_and_ends { namespace node { namespace tree {
                             return result;
                         }
 
+                        inline bool listen_to(::odds_and_ends::node::pre_clear_event const& e)
+                        {
+                            return _composite_parent_t::listen_to(e);
+                        }
+
                         inline bool listen_to(::odds_and_ends::node::pre_erase_event const& e)
                         {
                             return _composite_parent_t::listen_to(e);
+                        }
+
+                        inline bool listen_to(::odds_and_ends::node::post_clear_event const& e)
+                        {
+                            bool const result = _composite_parent_t::listen_to(e);
+                            this->_update_height();
+                            return result;
                         }
 
                         inline bool listen_to(::odds_and_ends::node::post_erase_event const& e)

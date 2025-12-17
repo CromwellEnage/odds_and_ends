@@ -58,10 +58,11 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef typename ::boost::mpl::apply_wrap1<AllocXForm,_node_t>::type allocator_type;
         typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type>::type pointer;
         typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type const*>::type const_pointer;
-        typedef ::odds_and_ends::node::indirect_iterator<_itr_t> iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t> const_iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t> reverse_iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_c_r_itr_t> const_reverse_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_itr_t,PtrXForm> iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t,PtrXForm> const_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t,PtrXForm> reverse_iterator;
+        typedef ::odds_and_ends::node
+        ::indirect_iterator<_c_r_itr_t,PtrXForm> const_reverse_iterator;
 
     private:
         allocator_type _alloc;
