@@ -32,6 +32,7 @@
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/event/move_assignment.hpp>
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/swap.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/utility/value_init.hpp>
@@ -422,6 +423,18 @@ namespace odds_and_ends { namespace node { namespace tree {
                         {
                             bool const result = _composite_parent_t::listen_to(e);
                             this->_post_rotate_update_size();
+                            return result;
+                        }
+
+                        inline bool
+                            listen_to(
+                                ::odds_and_ends::composite_type::swap_event const& e,
+                                Derived& other
+                            )
+                        {
+                            using ::std::swap;
+                            bool const result = _composite_parent_t::listen_to(e, other);
+                            swap(this->_size, other._size);
                             return result;
                         }
 

@@ -329,6 +329,8 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
+
+                        friend class _result;
                     };
 
                 public:

@@ -240,7 +240,14 @@ namespace odds_and_ends { namespace node {
                     {
                     }
 
-                    swap(**succ_ptr, **node_ptr);
+                    swap(*succ_ptr, *node_ptr);
+                    swap(succ_ptr, node_ptr);
+
+                    if (root_ptr == node_ptr)
+                    {
+                        root_ptr = succ_ptr;
+                    }
+
                     BOOST_ASSERT_MSG(
                         !node_ptr->right(),
                         "The node to be removed is not left-leaning."
@@ -285,12 +292,18 @@ namespace odds_and_ends { namespace node {
                 }
                 else  // if (!node_ptr->left())
                 {
-                    swap(**succ_ptr, **node_ptr);
+                    swap(*succ_ptr, *node_ptr);
+                    swap(succ_ptr, node_ptr);
                     BOOST_ASSERT_MSG(
                         !node_ptr->right(),
                         "The node to be removed is not left-leaning."
                     );
                     succ_ptr->unset_right();
+
+                    if (root_ptr == node_ptr)
+                    {
+                        root_ptr = succ_ptr;
+                    }
 
                     if (node_ptr->red())
                     {
@@ -309,8 +322,14 @@ namespace odds_and_ends { namespace node {
                 BOOST_ASSERT(succ_ptr->black());
                 node_ptr = succ_ptr->left();
                 BOOST_ASSERT(node_ptr->red());
-                swap(**succ_ptr, **node_ptr);
+                swap(*succ_ptr, *node_ptr);
+                swap(succ_ptr, node_ptr);
                 succ_ptr->unset_left();
+
+                if (root_ptr == node_ptr)
+                {
+                    root_ptr = succ_ptr;
+                }
 
                 // Find the actual successor to return.
                 for (; (next_ptr = succ_ptr->parent()); )
@@ -461,22 +480,31 @@ namespace odds_and_ends { namespace node {
                                         !succ_ptr->left()->right()->right(),
                                     "*root_ptr->right()->left()->right() must be a red leaf node."
                                     );
-                                    swap(**root_ptr, **node_ptr);
+                                    swap(*root_ptr, *node_ptr);
+                                    swap(root_ptr, node_ptr);
                                     succ_ptr = succ_ptr->left();
-                                    swap(**root_ptr, **succ_ptr->left());
-                                    swap(**succ_ptr, **succ_ptr->left());
+
+                                    NodePointer child_ptr = succ_ptr->left();
+
+                                    swap(*root_ptr, *child_ptr);
+                                    swap(root_ptr, child_ptr);
+                                    swap(*succ_ptr, *child_ptr);
+                                    swap(succ_ptr, child_ptr);
                                     node_ptr = succ_ptr->right();
-                                    swap(**succ_ptr, **node_ptr);
+                                    swap(*succ_ptr, *node_ptr);
+                                    swap(succ_ptr, node_ptr);
                                     succ_ptr->unset_right();
                                     succ_ptr = root_ptr->left();
                                 }
                                 else  // if (!root_ptr->right()->left()->right())
                                 {
                                     // Case 00.09
-                                    swap(**root_ptr, **node_ptr);
+                                    swap(*root_ptr, *node_ptr);
+                                    swap(root_ptr, node_ptr);
                                     succ_ptr = succ_ptr->left();
                                     node_ptr = succ_ptr->left();
-                                    swap(**root_ptr, **node_ptr);
+                                    swap(*root_ptr, *node_ptr);
+                                    swap(root_ptr, node_ptr);
                                     succ_ptr->unset_left();
                                 }
                             }
@@ -522,11 +550,18 @@ namespace odds_and_ends { namespace node {
                                         succ_ptr->left()->red(true);
                                         succ_ptr->rotate_left();
                                         succ_ptr->black(true);
-                                        swap(**root_ptr, **node_ptr);
-                                        swap(**root_ptr, **succ_ptr->left());
-                                        swap(**succ_ptr, **succ_ptr->left());
+                                        swap(*root_ptr, *node_ptr);
+                                        swap(root_ptr, node_ptr);
+
+                                        NodePointer child_ptr = succ_ptr->left();
+
+                                        swap(*root_ptr, *child_ptr);
+                                        swap(root_ptr, child_ptr);
+                                        swap(*succ_ptr, *child_ptr);
+                                        swap(succ_ptr, child_ptr);
                                         node_ptr = succ_ptr->right();
-                                        swap(**succ_ptr, **node_ptr);
+                                        swap(*succ_ptr, *node_ptr);
+                                        swap(succ_ptr, node_ptr);
                                         succ_ptr->unset_right();
                                     }
                                     else  // if (!root_ptr->right()->right()->right())
@@ -537,9 +572,11 @@ namespace odds_and_ends { namespace node {
                                         succ_ptr->right()->red(true);
                                         succ_ptr->rotate_left();
                                         succ_ptr->black(true);
-                                        swap(**root_ptr, **node_ptr);
+                                        swap(*root_ptr, *node_ptr);
+                                        swap(root_ptr, node_ptr);
                                         node_ptr = succ_ptr->left();
-                                        swap(**root_ptr, **node_ptr);
+                                        swap(*root_ptr, *node_ptr);
+                                        swap(root_ptr, node_ptr);
                                         succ_ptr->unset_left();
                                     }
                                 }
@@ -553,11 +590,18 @@ namespace odds_and_ends { namespace node {
                                     succ_ptr->left()->red(true);
                                     succ_ptr->black(true);
                                     node_ptr->black(true);
-                                    swap(**root_ptr, **node_ptr);
-                                    swap(**root_ptr, **succ_ptr->left());
-                                    swap(**succ_ptr->left(), **succ_ptr);
+                                    swap(*root_ptr, *node_ptr);
+                                    swap(root_ptr, node_ptr);
+
+                                    NodePointer child_ptr = succ_ptr->left();
+
+                                    swap(*root_ptr, *child_ptr);
+                                    swap(root_ptr, child_ptr);
+                                    swap(*child_ptr, *succ_ptr);
+                                    swap(child_ptr, succ_ptr);
                                     node_ptr = succ_ptr->right();
-                                    swap(**succ_ptr, **node_ptr);
+                                    swap(*succ_ptr, *node_ptr);
+                                    swap(succ_ptr, node_ptr);
                                     succ_ptr->unset_right();
                                 }
                             }
@@ -577,9 +621,11 @@ namespace odds_and_ends { namespace node {
                                 !succ_ptr->left()->right(),
                                 "*root_ptr->right()->left() must be a red leaf node."
                             );
-                            swap(**root_ptr, **node_ptr);
+                            swap(*root_ptr, *node_ptr);
+                            swap(root_ptr, node_ptr);
                             node_ptr = succ_ptr->left();
-                            swap(**root_ptr, **node_ptr);
+                            swap(*root_ptr, *node_ptr);
+                            swap(root_ptr, node_ptr);
                             succ_ptr->unset_left();
                         }
 
@@ -589,8 +635,10 @@ namespace odds_and_ends { namespace node {
                     {
                         // Case 00.07
                         BOOST_ASSERT_MSG(!succ_ptr->right(), "*succ_ptr is not left-leaning.");
-                        swap(**root_ptr, **node_ptr);
-                        swap(**root_ptr, **succ_ptr);
+                        swap(*root_ptr, *node_ptr);
+                        swap(root_ptr, node_ptr);
+                        swap(*root_ptr, *succ_ptr);
+                        swap(root_ptr, succ_ptr);
                         node_ptr->red(true);
                         succ_ptr = node_ptr;
                         node_ptr = root_ptr->right();

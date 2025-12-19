@@ -32,7 +32,9 @@
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/event/move_assignment.hpp>
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/swap.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/assert.hpp>
@@ -662,7 +664,410 @@ namespace odds_and_ends { namespace node { namespace tree {
                             return p;
                         }
 
+                    protected:
+                        inline bool
+                            listen_to(
+                                ::odds_and_ends::composite_type::swap_event const& e,
+                                Derived& other
+                            )
+                        {
+                            using ::std::swap;
+                            bool const result = _composite_parent_t::listen_to(e, other);
+
+                            if (
+                                other._left == ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(this->derived())
+                            )
+                            {
+                                if (other.parent())
+                                {
+                                    if (
+                                        other.parent()->_left == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    )
+                                    {
+                                        other.parent()->_left = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived());
+                                    }
+                                    else
+                                    {
+                                        BOOST_ASSERT(
+                                            other.parent()->_right == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other)
+                                        );
+                                        other.parent()->_right = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived());
+                                    }
+                                }
+
+                                if (this->_left)
+                                {
+                                    this->_left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (this->_right)
+                                {
+                                    this->_right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (other._right)
+                                {
+                                    other._right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                other._left = this->_left;
+                                this->_left = ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(other);
+                                this->parent(other.parent());
+                                other.parent(
+                                    ::std::pointer_traits<
+                                        typename traits::pointer
+                                    >::pointer_to(this->derived())
+                                );
+                                swap(this->_right, other._right);
+                            }
+                            else if (
+                                other._right == ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(this->derived())
+                            )
+                            {
+                                if (other.parent())
+                                {
+                                    if (
+                                        other.parent()->_left == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    )
+                                    {
+                                        other.parent()->_left = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived());
+                                    }
+                                    else
+                                    {
+                                        BOOST_ASSERT(
+                                            other.parent()->_right == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other)
+                                        );
+                                        other.parent()->_right = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived());
+                                    }
+                                }
+
+                                if (this->_right)
+                                {
+                                    this->_right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (this->_left)
+                                {
+                                    this->_left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (other._left)
+                                {
+                                    other._left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                other._right = this->_right;
+                                this->_right = ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(other);
+                                this->parent(other.parent());
+                                other.parent(
+                                    ::std::pointer_traits<
+                                        typename traits::pointer
+                                    >::pointer_to(this->derived())
+                                );
+                                swap(this->_left, other._left);
+                            }
+                            else if (
+                                this->_left == ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(other)
+                            )
+                            {
+                                if (this->parent())
+                                {
+                                    if (
+                                        this->parent()->_left == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    )
+                                    {
+                                        this->parent()->_left = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other);
+                                    }
+                                    else
+                                    {
+                                        BOOST_ASSERT(
+                                            this->parent()->_right == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived())
+                                        );
+                                        this->parent()->_right = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other);
+                                    }
+                                }
+
+                                if (other._left)
+                                {
+                                    other._left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                if (this->_right)
+                                {
+                                    this->_right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (other._right)
+                                {
+                                    other._right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                this->_left = other._left;
+                                other._left = ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(this->derived());
+                                other.parent(this->parent());
+                                this->parent(
+                                    ::std::pointer_traits<
+                                        typename traits::pointer
+                                    >::pointer_to(other)
+                                );
+                                swap(this->_right, other._right);
+                            }
+                            else if (
+                                this->_right == ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(other)
+                            )
+                            {
+                                if (this->parent())
+                                {
+                                    if (
+                                        this->parent()->_left == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    )
+                                    {
+                                        this->parent()->_left = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other);
+                                    }
+                                    else
+                                    {
+                                        BOOST_ASSERT(
+                                            this->parent()->_right == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived())
+                                        );
+                                        this->parent()->_right = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other);
+                                    }
+                                }
+
+                                if (other._right)
+                                {
+                                    other._right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                if (this->_left)
+                                {
+                                    this->_left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (other._left)
+                                {
+                                    other._left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                this->_right = other._right;
+                                other._right = ::std::pointer_traits<
+                                    typename traits::pointer
+                                >::pointer_to(this->derived());
+                                other.parent(this->parent());
+                                this->parent(
+                                    ::std::pointer_traits<
+                                        typename traits::pointer
+                                    >::pointer_to(other)
+                                );
+                                swap(this->_left, other._left);
+                            }
+                            else
+                            {
+                                if (this->parent())
+                                {
+                                    if (
+                                        this->parent()->_left == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    )
+                                    {
+                                        this->parent()->_left = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other);
+                                    }
+                                    else
+                                    {
+                                        BOOST_ASSERT(
+                                            this->parent()->_right == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived())
+                                        );
+                                        this->parent()->_right = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other);
+                                    }
+                                }
+
+                                if (other.parent())
+                                {
+                                    if (
+                                        other.parent()->_left == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    )
+                                    {
+                                        other.parent()->_left = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived());
+                                    }
+                                    else
+                                    {
+                                        BOOST_ASSERT(
+                                            other.parent()->_right == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other)
+                                        );
+                                        other.parent()->_right = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived());
+                                    }
+                                }
+
+                                if (this->_left)
+                                {
+                                    this->_left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (other._left)
+                                {
+                                    other._left->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                if (this->_right)
+                                {
+                                    this->_right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                if (other._right)
+                                {
+                                    other._right->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                typename traits::pointer p = this->parent();
+
+                                this->parent(other.parent());
+                                other.parent(p);
+                                swap(this->_left, other._left);
+                                swap(this->_right, other._right);
+                            }
+
+                            return result;
+                        }
+
+                        template <typename Event, typename ...Args>
+                        inline typename ::boost::disable_if<
+                            ::std::is_same<Event,::odds_and_ends::composite_type::swap_event>,
+                            bool
+                        >::type
+                            listen_to(Event const& e, Args&&... args)
+                        {
+                            return (
+                                _composite_parent_t::listen_to(e, ::std::forward<Args>(args)...)
+                            );
+                        }
+
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
+
+                        friend class _result;
                     };
 
                 public:

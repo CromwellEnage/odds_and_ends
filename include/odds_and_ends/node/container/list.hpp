@@ -33,18 +33,6 @@ namespace odds_and_ends { namespace node { namespace container {
     >
     class list
     {
-        typedef ::odds_and_ends::composite_type::composite_type<
-            ::boost::mpl::deque<
-                ::odds_and_ends::node::data<T>,
-                ::odds_and_ends::node::linked::doubly<PtrXForm>
-            >
-        > _node_t;
-        typedef ::odds_and_ends::node::list_iterator<_node_t,::boost::mpl::false_> _itr_t;
-        typedef ::odds_and_ends::node::list_iterator<_node_t const,::boost::mpl::false_> _c_itr_t;
-        typedef ::odds_and_ends::node::list_iterator<_node_t,::boost::mpl::true_> _r_itr_t;
-        typedef ::odds_and_ends::node::list_iterator<_node_t const,::boost::mpl::true_> _c_r_itr_t;
-        typedef typename _node_t::traits::pointer _node_ptr_t;
-
         struct _enabler
         {
         };
@@ -55,9 +43,24 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef T value_type;
         typedef value_type& reference;
         typedef value_type const& const_reference;
-        typedef typename ::boost::mpl::apply_wrap1<AllocXForm,_node_t>::type allocator_type;
         typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type>::type pointer;
-        typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type const*>::type const_pointer;
+        typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type const>::type const_pointer;
+        typedef ::odds_and_ends::composite_type::composite_type<
+            ::boost::mpl::deque<
+                ::odds_and_ends::node::data<T>,
+                ::odds_and_ends::node::linked::doubly<PtrXForm>
+            >
+        > node_type;
+
+    private:
+        typedef ::odds_and_ends::node::list_iterator<node_type,::boost::mpl::false_> _itr_t;
+        typedef ::odds_and_ends::node::list_iterator<node_type const,::boost::mpl::false_> _c_itr_t;
+        typedef ::odds_and_ends::node::list_iterator<node_type,::boost::mpl::true_> _r_itr_t;
+        typedef ::odds_and_ends::node::list_iterator<node_type const,::boost::mpl::true_> _c_r_itr_t;
+        typedef typename node_type::traits::pointer _node_ptr_t;
+
+    public:
+        typedef typename ::boost::mpl::apply_wrap1<AllocXForm,node_type>::type allocator_type;
         typedef ::odds_and_ends::node::indirect_iterator<_itr_t,PtrXForm> iterator;
         typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t,PtrXForm> const_iterator;
         typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t,PtrXForm> reverse_iterator;
@@ -433,7 +436,7 @@ namespace odds_and_ends { namespace node { namespace container {
     template <typename V, typename S, typename PX, typename AX>
     void list<T,Size,PtrXForm,AllocXForm>::_clone(list<V,S,PX,AX> const& copy)
     {
-        typename list<V,S,PX,AX>::_node_t::traits::const_pointer q = copy._front;
+        typename list<V,S,PX,AX>::node_type::traits::const_pointer q = copy._front;
 
         for (_node_ptr_t p; q; q = q->next())
         {

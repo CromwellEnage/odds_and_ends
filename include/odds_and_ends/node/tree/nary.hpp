@@ -4,7 +4,6 @@
 #define ODDS_AND_ENDS__NODE__TREE__NARY_HPP
 
 #include <type_traits>
-#include <deque>
 #include <memory>
 #include <utility>
 #include <odds_and_ends/node/iterator/indirect.hpp>
@@ -24,15 +23,17 @@
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/event/move_assignment.hpp>
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/swap.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
-#include <boost/mpl/placeholders.hpp>
+#include <boost/utility/value_init.hpp>
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/mpl/quote.hpp>
 
 namespace odds_and_ends { namespace node { namespace tree {
 
     template <
-        typename ContainerGenerator = ::std::deque< ::boost::mpl::_>,
+        typename ContainerGenerator,
         typename XForm = ::boost::mpl::quote1< ::std::add_pointer>
     >
     struct nary
@@ -400,6 +401,262 @@ namespace odds_and_ends { namespace node { namespace tree {
 
                             this->_children.clear();
                             this->handle(::odds_and_ends::node::post_clear_event());
+                        }
+
+                    protected:
+                        bool
+                            listen_to(
+                                ::odds_and_ends::composite_type::swap_event const& e,
+                                Derived& other
+                            )
+                        {
+                            using ::std::swap;
+                            bool const result = _composite_parent_t::listen_to(e, other);
+
+                            if (
+                                ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                    other
+                                ) == this->parent()
+                            )
+                            {
+                                if (other.parent())
+                                {
+                                    for (
+                                        typename _children_t::size_type i = (
+                                            ::boost::initialized_value
+                                        );
+                                        i < other.parent()->_children.size();
+                                        ++i
+                                    )
+                                    {
+                                        if (
+                                            other.parent()->_children[i] == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other)
+                                        )
+                                        {
+                                            other.parent()->_children[i] = ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived());
+                                        }
+                                    }
+                                }
+
+                                for (
+                                    typename _children_t::iterator itr = this->_children.begin();
+                                    itr != this->_children.end();
+                                    ++itr
+                                )
+                                {
+                                    (*itr)->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other.parent())
+                                    );
+                                }
+
+                                for (
+                                    typename _children_t::size_type i = ::boost::initialized_value;
+                                    i < other._children.size();
+                                    ++i
+                                )
+                                {
+                                    if (
+                                        other._children[i] == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    )
+                                    {
+                                        other._children[i] = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other);
+                                    }
+                                    else
+                                    {
+                                        other._children[i]->parent(
+                                            ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived())
+                                        );
+                                    }
+                                }
+
+                                this->parent(other.parent());
+                                other.parent(
+                                    ::std::pointer_traits<
+                                        typename traits::pointer
+                                    >::pointer_to(this->derived())
+                                );
+                            }
+                            else if (
+                                ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                    this->derived()
+                                ) == other.parent()
+                            )
+                            {
+                                if (this->parent())
+                                {
+                                    for (
+                                        typename _children_t::size_type i = (
+                                            ::boost::initialized_value
+                                        );
+                                        i < this->parent()->_children.size();
+                                        ++i
+                                    )
+                                    {
+                                        if (
+                                            this->parent()->_children[i] == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived())
+                                        )
+                                        {
+                                            this->parent()->_children[i] = ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other);
+                                        }
+                                    }
+                                }
+
+                                for (
+                                    typename _children_t::iterator itr = other._children.begin();
+                                    itr != other._children.end();
+                                    ++itr
+                                )
+                                {
+                                    (*itr)->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived().parent())
+                                    );
+                                }
+
+                                for (
+                                    typename _children_t::size_type i = ::boost::initialized_value;
+                                    i < this->_children.size();
+                                    ++i
+                                )
+                                {
+                                    if (
+                                        this->_children[i] == ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    )
+                                    {
+                                        this->_children[i] = ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived());
+                                    }
+                                    else
+                                    {
+                                        this->_children[i]->parent(
+                                            ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other)
+                                        );
+                                    }
+                                }
+
+                                other.parent(this->parent());
+                                this->parent(
+                                    ::std::pointer_traits<
+                                        typename traits::pointer
+                                    >::pointer_to(other)
+                                );
+                            }
+                            else
+                            {
+                                if (this->parent())
+                                {
+                                    for (
+                                        typename _children_t::size_type i = (
+                                            ::boost::initialized_value
+                                        );
+                                        i < this->parent()->_children.size();
+                                        ++i
+                                    )
+                                    {
+                                        if (
+                                            this->parent()->_children[i] == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived())
+                                        )
+                                        {
+                                            this->parent()->_children[i] = ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other);
+                                        }
+                                    }
+                                }
+
+                                if (other.parent())
+                                {
+                                    for (
+                                        typename _children_t::size_type i = (
+                                            ::boost::initialized_value
+                                        );
+                                        i < other.parent()->_children.size();
+                                        ++i
+                                    )
+                                    {
+                                        if (
+                                            other.parent()->_children[i] == ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(other)
+                                        )
+                                        {
+                                            other.parent()->_children[i] = ::std::pointer_traits<
+                                                typename traits::pointer
+                                            >::pointer_to(this->derived());
+                                        }
+                                    }
+                                }
+
+                                for (
+                                    typename _children_t::iterator itr = this->_children.begin();
+                                    itr != this->_children.end();
+                                    ++itr
+                                )
+                                {
+                                    (*itr)->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(other)
+                                    );
+                                }
+
+                                for (
+                                    typename _children_t::iterator itr = other._children.begin();
+                                    itr != other._children.end();
+                                    ++itr
+                                )
+                                {
+                                    (*itr)->parent(
+                                        ::std::pointer_traits<
+                                            typename traits::pointer
+                                        >::pointer_to(this->derived())
+                                    );
+                                }
+
+                                typename traits::pointer p = this->parent();
+
+                                this->parent(other.parent());
+                                other.parent(p);
+                            }
+
+                            swap(this->_children, other._children);
+                            return result;
+                        }
+
+                        template <typename Event, typename ...Args>
+                        inline typename ::boost::disable_if<
+                            ::std::is_same<Event,::odds_and_ends::composite_type::swap_event>,
+                            bool
+                        >::type
+                            listen_to(Event const& e, Args&&... args)
+                        {
+                            return (
+                                _composite_parent_t::listen_to(e, ::std::forward<Args>(args)...)
+                            );
                         }
 
                     private:

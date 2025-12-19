@@ -4,7 +4,6 @@
 #define ODDS_AND_ENDS__NODE__ITERATOR__INDIRECT_HPP
 
 #include <type_traits>
-#include <iterator>
 #include <odds_and_ends/static_introspection/nested_type/has_difference_type.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
 #include <odds_and_ends/static_introspection/iterator_value_of.hpp>

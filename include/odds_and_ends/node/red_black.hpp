@@ -20,7 +20,9 @@
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/event/move_assignment.hpp>
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/swap.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 
 namespace odds_and_ends { namespace node {
@@ -336,7 +338,34 @@ namespace odds_and_ends { namespace node {
                             this->_is_red = !b;
                         }
 
+                    protected:
+                        inline bool
+                            listen_to(
+                                ::odds_and_ends::composite_type::swap_event const& e,
+                                Derived& other
+                            )
+                        {
+                            using ::std::swap;
+                            bool const result = _composite_parent_t::listen_to(e, other);
+                            swap(this->_is_red, other._is_red);
+                            return result;
+                        }
+
+                        template <typename Event, typename ...Args>
+                        inline typename ::boost::disable_if<
+                            ::std::is_same<Event,::odds_and_ends::composite_type::swap_event>,
+                            bool
+                        >::type
+                            listen_to(Event const& e, Args&&... args)
+                        {
+                            return (
+                                _composite_parent_t::listen_to(e, ::std::forward<Args>(args)...)
+                            );
+                        }
+
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
+
+                        friend class _result;
                     };
 
                 public:

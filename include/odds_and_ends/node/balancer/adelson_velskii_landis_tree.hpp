@@ -501,12 +501,12 @@ namespace odds_and_ends { namespace node {
                 pred_ptr,
                 root_ptr
             );
-            swap(**pred_ptr, **succ_ptr);
+            swap(*pred_ptr, *succ_ptr);
+            swap(pred_ptr, succ_ptr);
 
             if (pred_ptr->left())
             {
-                pred_ptr = pred_ptr->left();
-                swap(**pred_ptr, **pred_ptr->parent());
+                pred_ptr->swap(*pred_ptr->left());
             }
             else  // if (!pred_ptr->left())
             {
@@ -528,7 +528,8 @@ namespace odds_and_ends { namespace node {
                 pred_ptr,
                 root_ptr
             );
-            swap(**pred_ptr, **succ_ptr);
+            swap(*pred_ptr, *succ_ptr);
+            swap(pred_ptr, succ_ptr);
 
             if (pred_ptr->right())
             {
@@ -543,7 +544,7 @@ namespace odds_and_ends { namespace node {
                     !pred_ptr->right(),
                     "The tree is unbalanced to the right at this point."
                 );
-                swap(**pred_ptr, **other_ptr);
+                swap(*pred_ptr, *other_ptr);
             }
         }
         else if (pred_ptr == root_ptr)

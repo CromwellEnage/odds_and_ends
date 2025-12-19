@@ -55,7 +55,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef value_type& reference;
         typedef value_type const& const_reference;
         typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type>::type pointer;
-        typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type const*>::type const_pointer;
+        typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type const>::type const_pointer;
         typedef ::odds_and_ends::composite_type::composite_type<
             typename ::boost::mpl::push_front<
                 typename ::boost::mpl::push_front<
@@ -70,18 +70,18 @@ namespace odds_and_ends { namespace node { namespace container {
                 >::type,
                 ::odds_and_ends::node::data<T>
             >::type
-        > node;
-        typedef typename ::boost::mpl::apply_wrap1<AllocXForm,node>::type allocator_type;
+        > node_type;
+        typedef typename ::boost::mpl::apply_wrap1<AllocXForm,node_type>::type allocator_type;
 
     private:
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node,::boost::mpl::false_,Difference> _itr_t;
+        ::in_order_tree_iterator<node_type,::boost::mpl::false_,Difference> _itr_t;
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node const,::boost::mpl::false_,Difference> _c_itr_t;
+        ::in_order_tree_iterator<node_type const,::boost::mpl::false_,Difference> _c_itr_t;
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node,::boost::mpl::true_,Difference> _r_itr_t;
+        ::in_order_tree_iterator<node_type,::boost::mpl::true_,Difference> _r_itr_t;
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node const,::boost::mpl::true_,Difference> _c_r_itr_t;
+        ::in_order_tree_iterator<node_type const,::boost::mpl::true_,Difference> _c_r_itr_t;
 
     public:
         typedef ::odds_and_ends::node::indirect_iterator<_itr_t,PtrXForm> iterator;
@@ -91,8 +91,8 @@ namespace odds_and_ends { namespace node { namespace container {
         ::indirect_iterator<_c_r_itr_t,PtrXForm> const_reverse_iterator;
 
     private:
-        typedef typename node::traits::const_pointer _node_const_ptr_t;
-        typedef typename node::traits::pointer _node_ptr_t;
+        typedef typename node_type::traits::const_pointer _node_const_ptr_t;
+        typedef typename node_type::traits::pointer _node_ptr_t;
 
         allocator_type _alloc;
         _node_ptr_t _root_ptr;
@@ -355,7 +355,7 @@ namespace odds_and_ends { namespace node { namespace container {
         _node_ptr_t node_ptr;
 
         for (
-            ::odds_and_ends::node::breadth_first_tree_iterator<node> itr(*root_ptr);
+            ::odds_and_ends::node::breadth_first_tree_iterator<node_type> itr(*root_ptr);
             n && !(!itr);
             ++itr
         )
@@ -400,7 +400,7 @@ namespace odds_and_ends { namespace node { namespace container {
         _node_ptr_t node_ptr;
 
         for (
-            ::odds_and_ends::node::breadth_first_tree_iterator<node> itr(*root_ptr);
+            ::odds_and_ends::node::breadth_first_tree_iterator<node_type> itr(*root_ptr);
             n && !(!itr);
             ++itr
         )
@@ -692,7 +692,7 @@ namespace odds_and_ends { namespace node { namespace container {
         if (this->_root_ptr)
         {
             for (
-                ::odds_and_ends::node::post_order_tree_iterator<node> itr(*this->_root_ptr);
+                ::odds_and_ends::node::post_order_tree_iterator<node_type> itr(*this->_root_ptr);
                 !(!itr);
                 ++itr
             )
@@ -1206,7 +1206,8 @@ namespace odds_and_ends { namespace node { namespace container {
     inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::_node_const_ptr_t
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::_at(size_type index) const
     {
-        BOOST_ASSERT_MSG(this->_root_ptr && (index < this->size()), "index out of bounds");
+        BOOST_ASSERT_MSG(this->_root_ptr, "There are no elements to index.");
+        BOOST_ASSERT_MSG(index < this->size(), "The index is out of bounds.");
         return ::odds_and_ends::node::algorithm::binary_tree_descendant_at_index(
             this->_root_ptr,
             index
@@ -1240,7 +1241,8 @@ namespace odds_and_ends { namespace node { namespace container {
     inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::_node_ptr_t
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::_at(size_type index)
     {
-        BOOST_ASSERT_MSG(this->_root_ptr && (index < this->size()), "index out of bounds");
+        BOOST_ASSERT_MSG(this->_root_ptr, "There are no elements to index.");
+        BOOST_ASSERT_MSG(index < this->size(), "The index is out of bounds.");
         return ::odds_and_ends::node::algorithm::binary_tree_descendant_at_index(
             this->_root_ptr,
             index
@@ -1528,7 +1530,7 @@ namespace odds_and_ends { namespace node { namespace container {
             {
                 node_ptr = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
                 ::std::allocator_traits<allocator_type>::construct(this->_alloc, node_ptr, t);
-                const_cast<node&>(*pos.base()).set_left_ptr(node_ptr);
+                const_cast<node_type&>(*pos.base()).set_left_ptr(node_ptr);
             }
 
             _node_ptr_t anc_ptr = Balancer::post_insert(*node_ptr);
@@ -1602,7 +1604,7 @@ namespace odds_and_ends { namespace node { namespace container {
                     node_ptr,
                     static_cast<value_type&&>(t)
                 );
-                const_cast<node&>(*pos.base()).set_left_ptr(node_ptr);
+                const_cast<node_type&>(*pos.base()).set_left_ptr(node_ptr);
             }
 
             _node_ptr_t anc_ptr = Balancer::post_insert(*node_ptr);
@@ -1677,7 +1679,7 @@ namespace odds_and_ends { namespace node { namespace container {
                     node_ptr,
                     ::std::forward<Args>(args)...
                 );
-                const_cast<node&>(*pos.base()).set_left_ptr(node_ptr);
+                const_cast<node_type&>(*pos.base()).set_left_ptr(node_ptr);
             }
 
             _node_ptr_t anc_ptr = Balancer::post_insert(*node_ptr);
@@ -1744,7 +1746,7 @@ namespace odds_and_ends { namespace node { namespace container {
             );
             iterator result(
                 ::odds_and_ends::node::make_in_order_tree_iterator_position(
-                    const_cast<node&>(*pos.base())
+                    const_cast<node_type&>(*pos.base())
                 )
             );
             BOOST_ASSERT(result == pos);
@@ -1790,7 +1792,7 @@ namespace odds_and_ends { namespace node { namespace container {
                 );
                 iterator result(
                     ::odds_and_ends::node::make_in_order_tree_iterator_position(
-                        const_cast<node&>(*pos.base())
+                        const_cast<node_type&>(*pos.base())
                     )
                 );
                 BOOST_ASSERT(result == pos);
@@ -1920,7 +1922,7 @@ namespace odds_and_ends { namespace node { namespace container {
         if (itr_end != this->cend())
         {
             result = ::odds_and_ends::node::make_in_order_tree_iterator_position(
-                const_cast<node&>(*itr_end.base())
+                const_cast<node_type&>(*itr_end.base())
             );
         }
 
@@ -1941,13 +1943,10 @@ namespace odds_and_ends { namespace node { namespace container {
         typename PtrXForm,
         typename AllocXForm
     >
-    inline void
-        deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::swap(deque& other)
+    inline void deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::swap(deque& other)
     {
-        _node_ptr_t p = this->_root_ptr;
-
-        this->_root_ptr = other._root_ptr;
-        other._root_ptr = p;
+        using ::std::swap;
+        swap(this->_root_ptr, other._root_ptr);
     }
 
     template <
