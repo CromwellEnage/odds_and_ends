@@ -575,7 +575,7 @@ namespace odds_and_ends { namespace node { namespace container {
             ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
             _enabler
         >::type
-    ) : _alloc(alloc), _root_ptr(nullptr)
+    ) : _alloc(alloc), _root_ptr(source._root_ptr)
     {
         source._root_ptr = nullptr;
     }

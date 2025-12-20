@@ -120,10 +120,10 @@ namespace odds_and_ends { namespace node {
             );
 
         template <typename I1, typename PX1, typename B1, typename I2, typename PX2, typename B2>
-        friend ::std::common_type<
+        friend typename ::std::common_type<
             typename indirect_iterator<I1,PX1,B1>::difference_type,
             typename indirect_iterator<I2,PX2,B2>::difference_type
-        >
+        >::type
             operator-(
                 indirect_iterator<I1,PX1,B1> const& lhs,
                 indirect_iterator<I2,PX2,B2> const& rhs
@@ -544,10 +544,10 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Itr1, typename PX1, typename B1, typename Itr2, typename PX2, typename B2>
-    inline ::std::common_type<
+    inline typename ::std::common_type<
         typename indirect_iterator<Itr1,PX1,B1>::difference_type,
         typename indirect_iterator<Itr2,PX2,B2>::difference_type
-    >
+    >::type
         operator-(
             indirect_iterator<Itr1,PX1,B1> const& lhs,
             indirect_iterator<Itr2,PX2,B2> const& rhs

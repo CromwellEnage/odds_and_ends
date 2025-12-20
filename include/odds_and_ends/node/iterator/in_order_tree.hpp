@@ -131,7 +131,7 @@ namespace odds_and_ends { namespace node {
             );
 
         template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
-        friend ::std::common_type<D1,D2>
+        friend typename ::std::common_type<D1,D2>::type
             operator-(
                 in_order_tree_iterator<N1,I1,D1> const& lhs,
                 in_order_tree_iterator<N2,I2,D2> const& rhs
@@ -636,7 +636,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
-    inline ::std::common_type<D1,D2>
+    inline typename ::std::common_type<D1,D2>::type
         operator-(
             in_order_tree_iterator<N1,I1,D1> const& lhs,
             in_order_tree_iterator<N2,I2,D2> const& rhs
