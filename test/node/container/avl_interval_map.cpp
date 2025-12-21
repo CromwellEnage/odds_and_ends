@@ -1,6 +1,5 @@
 // Copyright (C) 2025 Cromwell D. Enage
 
-#include <vector>
 #include <string>
 #include <odds_and_ends/node/container/interval_map.hpp>
 #include <odds_and_ends/node/balancer/adelson_velskii_landis_tree.hpp>
@@ -17,8 +16,7 @@ typedef ::odds_and_ends::node::container::interval_map<
 
 int main(int argc, char** argv)
 {
-    ::std::vector<unsigned int> thresholds = {0, 60, 62, 65, 68, 72, 75, 78, 82, 85, 88, 94, 100};
-    GradeMap grade_map(thresholds.begin(), thresholds.end());
+    GradeMap grade_map = {0, 60, 62, 65, 68, 72, 75, 78, 82, 85, 88, 94, 100};
 
     BOOST_TEST(grade_map.find(-1) == grade_map.end());
     BOOST_TEST(grade_map.find(111) == grade_map.end());
@@ -35,8 +33,56 @@ int main(int argc, char** argv)
     grade_map.find(91.9)->second = "A";
     grade_map.find(98.6)->second = "A+";
 
-    GradeMap::const_iterator c_fwd_itr = grade_map.cbegin();
+    GradeMap::const_iterator c_fwd_itr = grade_map.find(0);
 
+    BOOST_TEST(0 == c_fwd_itr->first.lower());
+    BOOST_TEST(60 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("F") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(60);
+    BOOST_TEST(60 == c_fwd_itr->first.lower());
+    BOOST_TEST(62 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("D") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(62);
+    BOOST_TEST(62 == c_fwd_itr->first.lower());
+    BOOST_TEST(65 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("D+") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(65);
+    BOOST_TEST(65 == c_fwd_itr->first.lower());
+    BOOST_TEST(68 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("C-") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(68);
+    BOOST_TEST(68 == c_fwd_itr->first.lower());
+    BOOST_TEST(72 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("C") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(72);
+    BOOST_TEST(72 == c_fwd_itr->first.lower());
+    BOOST_TEST(75 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("C+") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(75);
+    BOOST_TEST(75 == c_fwd_itr->first.lower());
+    BOOST_TEST(78 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("B-") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(78);
+    BOOST_TEST(78 == c_fwd_itr->first.lower());
+    BOOST_TEST(82 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("B") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(82);
+    BOOST_TEST(82 == c_fwd_itr->first.lower());
+    BOOST_TEST(85 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("B+") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(85);
+    BOOST_TEST(85 == c_fwd_itr->first.lower());
+    BOOST_TEST(88 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("A-") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(88);
+    BOOST_TEST(88 == c_fwd_itr->first.lower());
+    BOOST_TEST(94 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("A") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.find(94);
+    BOOST_TEST(94 == c_fwd_itr->first.lower());
+    BOOST_TEST(100 == c_fwd_itr->first.upper());
+    BOOST_TEST(::std::string("A+") == c_fwd_itr->second);
+    c_fwd_itr = grade_map.cbegin();
     BOOST_TEST(0 == c_fwd_itr->first.lower());
     BOOST_TEST(60 == c_fwd_itr->first.upper());
     BOOST_TEST(::std::string("F") == c_fwd_itr->second);

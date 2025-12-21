@@ -8,6 +8,7 @@
 #include <functional>
 #include <utility>
 #include <memory>
+#include <initializer_list>
 #include <odds_and_ends/node/data.hpp>
 #include <odds_and_ends/node/tree/base.hpp>
 #include <odds_and_ends/node/tree/binary.hpp>
@@ -127,7 +128,7 @@ namespace odds_and_ends { namespace node { namespace container {
             template <typename K>
             inline bool operator()(const_reference lhs, K const& k) const
             {
-                return this->_comp(lhs.first.upper(), k);
+                return !this->_comp(k, lhs.first.upper());
             }
 
             friend class interval_map;
@@ -376,6 +377,15 @@ namespace odds_and_ends { namespace node { namespace container {
             >::type = _enabler()
         );
 
+        template <typename T>
+        interval_map(
+            ::std::initializer_list<T> l,
+            typename ::boost::enable_if<
+                ::std::is_convertible<T,key_type>,
+                _enabler
+            >::type = _enabler()
+        );
+
         interval_map();
         explicit interval_map(key_compare const& comp);
         interval_map(interval_map const& copy);
@@ -385,6 +395,11 @@ namespace odds_and_ends { namespace node { namespace container {
         ~interval_map();
         interval_map& operator=(interval_map const& copy);
         interval_map& operator=(interval_map&& source);
+
+        template <typename T>
+        typename ::boost::enable_if< ::std::is_convertible<T,Key>,interval_map&>::type
+            operator=(::std::initializer_list<T> l);
+
         allocator_type get_allocator() const;
         bool empty() const;
         size_type size() const;
@@ -759,6 +774,25 @@ namespace odds_and_ends { namespace node { namespace container {
     ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
     {
         this->_fill_construct(itr_begin, itr_end);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename NPGList,
+        typename Balancer,
+        typename Comp,
+        typename Size,
+        typename PtrXForm,
+        typename AllocXForm
+    >
+    template <typename T>
+    inline interval_map<Key,Mapped,NPGList,Balancer,Comp,Size,PtrXForm,AllocXForm>::interval_map(
+        ::std::initializer_list<T> l,
+        typename ::boost::enable_if< ::std::is_convertible<T,key_type>,_enabler>::type
+    ) : _comp(), _alloc(), _root_ptr(nullptr)
+    {
+        this->_fill_construct(l.begin(), l.end());
     }
 
     template <
@@ -1340,6 +1374,30 @@ namespace odds_and_ends { namespace node { namespace container {
             source._root_ptr = nullptr;
         }
 
+        return *this;
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename NPGList,
+        typename Balancer,
+        typename Compare,
+        typename Size,
+        typename PtrXForm,
+        typename AllocXForm
+    >
+    template <typename T>
+    inline typename ::boost::enable_if<
+        ::std::is_convertible<T,Key>,
+        interval_map<Key,Mapped,NPGList,Balancer,Compare,Size,PtrXForm,AllocXForm>&
+    >::type
+        interval_map<Key,Mapped,NPGList,Balancer,Compare,Size,PtrXForm,AllocXForm>::operator=(
+            ::std::initializer_list<T> l
+        )
+    {
+        this->clear();
+        this->_fill_construct(l.begin(), l.end());
         return *this;
     }
 
