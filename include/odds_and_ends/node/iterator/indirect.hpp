@@ -132,6 +132,7 @@ namespace odds_and_ends { namespace node {
 }}  // namespace odds_and_ends::node
 
 #include <utility>
+#include <memory>
 
 namespace odds_and_ends { namespace node {
 
