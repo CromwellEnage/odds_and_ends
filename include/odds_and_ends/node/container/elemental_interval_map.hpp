@@ -1,7 +1,7 @@
 // Copyright (C) 2025 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__NODE__CONTAINER__INTERVAL_MAP_HPP
-#define ODDS_AND_ENDS__NODE__CONTAINER__INTERVAL_MAP_HPP
+#ifndef ODDS_AND_ENDS__NODE__CONTAINER__ELEMENTAL_INTERVAL_MAP_HPP
+#define ODDS_AND_ENDS__NODE__CONTAINER__ELEMENTAL_INTERVAL_MAP_HPP
 
 #include <type_traits>
 #include <functional>
@@ -28,7 +28,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Compare = ::std::less<Key>,
         typename ContainerGen = ::odds_and_ends::use_default_policy
     >
-    class interval_map
+    class elemental_interval_map
     {
         struct _enabler
         {
@@ -36,7 +36,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     public:
         typedef ::odds_and_ends::node::container
-        ::interval_map<Key,Mapped,Compare,ContainerGen> type;
+        ::elemental_interval_map<Key,Mapped,Compare,ContainerGen> type;
         typedef Key key_type;
         typedef Mapped mapped_type;
         typedef Compare key_compare;
@@ -64,7 +64,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
         protected:
             value_compare();
-            value_compare(key_compare const& comp);
+            explicit value_compare(key_compare const& comp);
 
         public:
             bool operator()(const_reference lhs, const_reference rhs) const;
@@ -94,7 +94,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef typename _container_type::size_type size_type;
 
         template <typename Alloc>
-        interval_map(
+        explicit elemental_interval_map(
             Alloc const& alloc,
             typename ::boost::enable_if<
                 ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
@@ -103,7 +103,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        interval_map(
+        elemental_interval_map(
             key_compare const& comp,
             Alloc const& alloc,
             typename ::boost::enable_if<
@@ -113,8 +113,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        interval_map(
-            interval_map const& copy,
+        elemental_interval_map(
+            elemental_interval_map const& copy,
             Alloc const& alloc,
             typename ::boost::enable_if<
                 ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
@@ -123,8 +123,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        interval_map(
-            interval_map const& copy,
+        elemental_interval_map(
+            elemental_interval_map const& copy,
             key_compare const& comp,
             Alloc const& alloc,
             typename ::boost::enable_if<
@@ -134,8 +134,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M, typename C, typename G>
-        interval_map(
-            interval_map<K,M,C,G> const& copy,
+        elemental_interval_map(
+            elemental_interval_map<K,M,C,G> const& copy,
             typename ::boost::enable_if<
                 typename ::boost::mpl::if_<
                     ::std::is_convertible<K,Key>,
@@ -147,8 +147,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M, typename C, typename G>
-        interval_map(
-            interval_map<K,M,C,G> const& copy,
+        elemental_interval_map(
+            elemental_interval_map<K,M,C,G> const& copy,
             key_compare const& comp,
             typename ::boost::enable_if<
                 typename ::boost::mpl::if_<
@@ -161,8 +161,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M, typename C, typename G, typename Alloc>
-        interval_map(
-            interval_map<K,M,C,G> const& copy,
+        elemental_interval_map(
+            elemental_interval_map<K,M,C,G> const& copy,
             Alloc const& alloc,
             typename ::boost::enable_if<
                 typename ::boost::mpl::eval_if<
@@ -179,8 +179,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M, typename C, typename G, typename Alloc>
-        interval_map(
-            interval_map<K,M,C,G> const& copy,
+        elemental_interval_map(
+            elemental_interval_map<K,M,C,G> const& copy,
             key_compare const& comp,
             Alloc const& alloc,
             typename ::boost::enable_if<
@@ -198,8 +198,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        interval_map(
-            interval_map&& source,
+        elemental_interval_map(
+            elemental_interval_map&& source,
             Alloc const& alloc,
             typename ::boost::enable_if<
                 ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
@@ -208,8 +208,8 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename Alloc>
-        interval_map(
-            interval_map&& source,
+        elemental_interval_map(
+            elemental_interval_map&& source,
             key_compare const& comp,
             Alloc const& alloc,
             typename ::boost::enable_if<
@@ -219,7 +219,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename KeyIterator, typename ValueIterator>
-        interval_map(
+        elemental_interval_map(
             KeyIterator key_itr_begin,
             KeyIterator key_itr_end,
             ValueIterator value_itr_begin,
@@ -237,7 +237,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename KeyIterator, typename ValueIterator>
-        interval_map(
+        elemental_interval_map(
             KeyIterator key_itr_begin,
             KeyIterator key_itr_end,
             ValueIterator value_itr_begin,
@@ -256,7 +256,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename KeyIterator, typename ValueIterator, typename Alloc>
-        interval_map(
+        elemental_interval_map(
             KeyIterator key_itr_begin,
             KeyIterator key_itr_end,
             ValueIterator value_itr_begin,
@@ -279,7 +279,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename KeyIterator, typename ValueIterator, typename Alloc>
-        interval_map(
+        elemental_interval_map(
             KeyIterator key_itr_begin,
             KeyIterator key_itr_end,
             ValueIterator value_itr_begin,
@@ -303,7 +303,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M>
-        interval_map(
+        elemental_interval_map(
             ::std::initializer_list<K> keys,
             ::std::initializer_list<M> values,
             typename ::boost::enable_if<
@@ -317,7 +317,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M>
-        interval_map(
+        elemental_interval_map(
             ::std::initializer_list<K> keys,
             ::std::initializer_list<M> values,
             key_compare const& comp,
@@ -332,7 +332,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M, typename Alloc>
-        interval_map(
+        elemental_interval_map(
             ::std::initializer_list<K> keys,
             ::std::initializer_list<M> values,
             Alloc const& alloc,
@@ -351,7 +351,7 @@ namespace odds_and_ends { namespace node { namespace container {
         );
 
         template <typename K, typename M, typename Alloc>
-        interval_map(
+        elemental_interval_map(
             ::std::initializer_list<K> keys,
             ::std::initializer_list<M> values,
             key_compare const& comp,
@@ -370,18 +370,18 @@ namespace odds_and_ends { namespace node { namespace container {
             >::type = _enabler()
         );
 
-        interval_map();
-        explicit interval_map(key_compare const& comp);
-        interval_map(interval_map const& copy);
-        interval_map(interval_map const& copy, key_compare const& comp);
-        interval_map(interval_map&& source);
-        interval_map(interval_map&& source, key_compare const& comp);
-        ~interval_map();
-        interval_map& operator=(interval_map const& copy);
-        interval_map& operator=(interval_map&& source);
+        elemental_interval_map();
+        explicit elemental_interval_map(key_compare const& comp);
+        elemental_interval_map(elemental_interval_map const& copy);
+        elemental_interval_map(elemental_interval_map const& copy, key_compare const& comp);
+        elemental_interval_map(elemental_interval_map&& source);
+        elemental_interval_map(elemental_interval_map&& source, key_compare const& comp);
+        ~elemental_interval_map();
+        elemental_interval_map& operator=(elemental_interval_map const& copy);
+        elemental_interval_map& operator=(elemental_interval_map&& source);
+        void clear();
         bool empty() const;
         size_type size() const;
-        void clear();
         const_iterator cbegin() const;
         const_iterator begin() const;
         const_iterator cend() const;
@@ -412,14 +412,14 @@ namespace odds_and_ends { namespace node { namespace container {
 
 namespace odds_and_ends { namespace node { namespace container {
 
-    template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_type::interval_type() :
+    template <typename Key, typename Mapped, typename Comp, typename ContainerGen>
+    inline elemental_interval_map<Key,Mapped,Comp,ContainerGen>::interval_type::interval_type() :
         _l(::boost::initialized_value), _u(::boost::initialized_value)
     {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_type::interval_type(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::interval_type::interval_type(
         key_type const& l,
         key_type const& u
     ) : _l(l), _u(u)
@@ -427,27 +427,27 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::key_type const&
-        interval_map<Key,Mapped,Compare,ContainerGen>::interval_type::lower() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::key_type const&
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::interval_type::lower() const
     {
         return this->_l;
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::key_type const&
-        interval_map<Key,Mapped,Compare,ContainerGen>::interval_type::upper() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::key_type const&
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::interval_type::upper() const
     {
         return this->_u;
     }
 
-    template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::value_compare::value_compare() :
+    template <typename Key, typename Mapped, typename Comp, typename ContainerGen>
+    inline elemental_interval_map<Key,Mapped,Comp,ContainerGen>::value_compare::value_compare() :
         _comp()
     {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::value_compare::value_compare(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::value_compare::value_compare(
         key_compare const& c
     ) : _comp(c)
     {
@@ -455,7 +455,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     inline bool
-        interval_map<Key,Mapped,Compare,ContainerGen>::value_compare::operator()(
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::value_compare::operator()(
             const_reference lhs,
             const_reference rhs
         ) const
@@ -464,13 +464,13 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map() :
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map() :
         _comp(), _container()
     {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         key_compare const& comp
     ) : _comp(comp), _container()
     {
@@ -478,7 +478,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         Alloc const& alloc,
         typename ::boost::enable_if<
             ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
@@ -490,7 +490,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         key_compare const& comp,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -504,7 +504,7 @@ namespace odds_and_ends { namespace node { namespace container {
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename KeyIterator, typename ValueIterator>
     void
-        interval_map<Key,Mapped,Compare,ContainerGen>::_fill_construct(
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::_fill_construct(
             KeyIterator key_itr,
             KeyIterator key_itr_end,
             ValueIterator value_itr
@@ -523,7 +523,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename KeyIterator, typename ValueIterator>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         KeyIterator key_itr_begin,
         KeyIterator key_itr_end,
         ValueIterator value_itr_begin,
@@ -545,7 +545,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename KeyIterator, typename ValueIterator>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         KeyIterator key_itr_begin,
         KeyIterator key_itr_end,
         ValueIterator value_itr_begin,
@@ -568,7 +568,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename KeyIterator, typename ValueIterator, typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         KeyIterator key_itr_begin,
         KeyIterator key_itr_end,
         ValueIterator value_itr_begin,
@@ -595,7 +595,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename KeyIterator, typename ValueIterator, typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         KeyIterator key_itr_begin,
         KeyIterator key_itr_end,
         ValueIterator value_itr_begin,
@@ -624,7 +624,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         ::std::initializer_list<K> keys,
         ::std::initializer_list<M> values,
         typename ::boost::enable_if<
@@ -643,7 +643,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         ::std::initializer_list<K> keys,
         ::std::initializer_list<M> values,
         key_compare const& comp,
@@ -663,7 +663,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M, typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         ::std::initializer_list<K> keys,
         ::std::initializer_list<M> values,
         Alloc const& alloc,
@@ -687,7 +687,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M, typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
         ::std::initializer_list<K> keys,
         ::std::initializer_list<M> values,
         key_compare const& comp,
@@ -711,15 +711,15 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map const& copy
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map const& copy
     ) : _comp(copy._comp), _container(copy._container)
     {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map const& copy,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map const& copy,
         key_compare const& comp
     ) : _comp(comp), _container(copy._container)
     {
@@ -727,8 +727,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map const& copy,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map const& copy,
         Alloc const& alloc,
         typename ::boost::enable_if<
             ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
@@ -740,8 +740,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map const& copy,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map const& copy,
         key_compare const& comp,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -754,8 +754,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M, typename C, typename G>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map<K,M,C,G> const& copy,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map<K,M,C,G> const& copy,
         typename ::boost::enable_if<
             typename ::boost::mpl::if_<
                 ::std::is_convertible<K,Key>,
@@ -770,8 +770,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M, typename C, typename G>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map<K,M,C,G> const& copy,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map<K,M,C,G> const& copy,
         key_compare const& comp,
         typename ::boost::enable_if<
             typename ::boost::mpl::if_<
@@ -787,8 +787,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M, typename C, typename G, typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map<K,M,C,G> const& copy,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map<K,M,C,G> const& copy,
         Alloc const& alloc,
         typename ::boost::enable_if<
             typename ::boost::mpl::eval_if<
@@ -808,8 +808,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K, typename M, typename C, typename G, typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map<K,M,C,G> const& copy,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map<K,M,C,G> const& copy,
         key_compare const& comp,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -829,15 +829,15 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map&& source
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map&& source
     ) : _comp(source._comp), _container(::std::move(source._container))
     {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map&& source,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map&& source,
         key_compare const& comp
     ) : _comp(comp), _container(::std::move(source._container))
     {
@@ -845,8 +845,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map&& source,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map&& source,
         Alloc const& alloc,
         typename ::boost::enable_if<
             ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
@@ -858,8 +858,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename Alloc>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::interval_map(
-        interval_map&& source,
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::elemental_interval_map(
+        elemental_interval_map&& source,
         key_compare const& comp,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -871,21 +871,21 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline void interval_map<Key,Mapped,Compare,ContainerGen>::clear()
+    inline void elemental_interval_map<Key,Mapped,Compare,ContainerGen>::clear()
     {
         this->_container.clear();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>::~interval_map()
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>::~elemental_interval_map()
     {
         this->clear();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>&
-        interval_map<Key,Mapped,Compare,ContainerGen>::operator=(
-            interval_map const& copy
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>&
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::operator=(
+            elemental_interval_map const& copy
         )
     {
         if (this != &copy)
@@ -898,12 +898,12 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline interval_map<Key,Mapped,Compare,ContainerGen>&
-        interval_map<Key,Mapped,Compare,ContainerGen>::operator=(
-            interval_map&& source
+    inline elemental_interval_map<Key,Mapped,Compare,ContainerGen>&
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::operator=(
+            elemental_interval_map&& source
         )
     {
-        if (this != &static_cast<interval_map&>(source))
+        if (this != &static_cast<elemental_interval_map&>(source))
         {
             this->_comp = source._comp;
             this->_container = ::std::move(source._container);
@@ -913,77 +913,77 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline bool interval_map<Key,Mapped,Compare,ContainerGen>::empty() const
+    inline bool elemental_interval_map<Key,Mapped,Compare,ContainerGen>::empty() const
     {
         return this->_container.empty();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::size_type
-        interval_map<Key,Mapped,Compare,ContainerGen>::size() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::size_type
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::size() const
     {
         return this->_container.size();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::cbegin() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::cbegin() const
     {
         return this->_container.cbegin();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::begin() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::begin() const
     {
         return this->_container.begin();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::cend() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::cend() const
     {
         return this->_container.cend();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::end() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::end() const
     {
         return this->_container.end();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::crbegin() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::crbegin() const
     {
         return this->_container.crbegin();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::rbegin() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::rbegin() const
     {
         return this->_container.rbegin();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::crend() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::crend() const
     {
         return this->_container.crend();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::rend() const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_reverse_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::rend() const
     {
         return this->_container.rend();
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    typename interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::find(key_type const& key) const
+    typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::find(key_type const& key) const
     {
         size_type index_l = ::boost::initialized_value;
         size_type one = index_l;
@@ -1013,8 +1013,8 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K>
-    typename interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
-        interval_map<Key,Mapped,Compare,ContainerGen>::find(K const& key) const
+    typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::const_iterator
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::find(K const& key) const
     {
         size_type index_l = ::boost::initialized_value;
         size_type one = index_l;
@@ -1042,21 +1042,21 @@ namespace odds_and_ends { namespace node { namespace container {
         return this->cend();
     }
 
-    template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::mapped_type const&
-        interval_map<Key,Mapped,Compare,ContainerGen>::operator[](key_type const& key) const
+    template <typename Key, typename Mapped, typename Comp, typename ContainerGen>
+    inline typename elemental_interval_map<Key,Mapped,Comp,ContainerGen>::mapped_type const&
+        elemental_interval_map<Key,Mapped,Comp,ContainerGen>::operator[](key_type const& key) const
     {
         return this->find(key)->second;
     }
 
     template <typename Key, typename Mapped, typename Compare, typename ContainerGen>
     template <typename K>
-    inline typename interval_map<Key,Mapped,Compare,ContainerGen>::mapped_type const&
-        interval_map<Key,Mapped,Compare,ContainerGen>::operator[](K const& key) const
+    inline typename elemental_interval_map<Key,Mapped,Compare,ContainerGen>::mapped_type const&
+        elemental_interval_map<Key,Mapped,Compare,ContainerGen>::operator[](K const& key) const
     {
         return this->find(key)->second;
     }
 }}}  // namespace odds_and_ends::node::container
 
-#endif  // ODDS_AND_ENDS__NODE__CONTAINER__INTERVAL_MAP_HPP
+#endif  // ODDS_AND_ENDS__NODE__CONTAINER__ELEMENTAL_INTERVAL_MAP_HPP
 
