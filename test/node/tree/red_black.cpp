@@ -110,63 +110,87 @@ void output_tree(node_itr itr)
     }
 }
 
-void test_insert_case_0_0()
+void test_insert_case_00_00()
 {
     binary_tree_node parent(1);
     binary_tree_node child(0);
 
     parent.set_left(child);
-    ::std::cout << "Test post_insert() case 0.0" << ::std::endl;
+    ::std::cout << "Test post_insert() case 00.00" << ::std::endl;
 
     binary_tree_node::traits::pointer result = (
         ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(child)
     );
 
-    if (result->parent())
-    {
-        BOOST_TEST(
-            ::odds_and_ends::node::algorithm
-            ::red_black_tree_test(parent, output_error, output_depth)
-        );
-    }
-    else
-    {
-        BOOST_TEST(
-            ::odds_and_ends::node::algorithm
-            ::red_black_tree_test(*result, output_error, output_depth)
-        );
-    }
+    output_tree(node_itr(parent, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm::red_black_tree_test(parent, output_error, output_depth)
+    );
+
+    binary_tree_node sibling(-1);
+
+    child.set_left(sibling);
+    ::std::cout << "Test post_insert() case 00.03" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(sibling);
+    BOOST_TEST(!result->parent());
+    output_tree(node_itr(*result, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm::red_black_tree_test(*result, output_error, output_depth)
+    );
 }
 
-void test_insert_case_0_1()
+void test_insert_case_00_01()
 {
-    binary_tree_node parent(1);
-    binary_tree_node child(0);
+    binary_tree_node parent(0);
+    binary_tree_node child(1);
 
     parent.set_right(child);
-    ::std::cout << "Test post_insert() case 0.1" << ::std::endl;
+    ::std::cout << "Test post_insert() case 00.01" << ::std::endl;
 
     binary_tree_node::traits::pointer result = (
         ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(child)
     );
 
-    if (result->parent())
-    {
-        BOOST_TEST(
-            ::odds_and_ends::node::algorithm
-            ::red_black_tree_test(parent, output_error, output_depth)
-        );
-    }
-    else
-    {
-        BOOST_TEST(
-            ::odds_and_ends::node::algorithm
-            ::red_black_tree_test(*result, output_error, output_depth)
-        );
-    }
+    BOOST_TEST(!result->parent());
+    output_tree(node_itr(*result, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm::red_black_tree_test(*result, output_error, output_depth)
+    );
+
+    binary_tree_node sibling(2);
+
+    child.set_right(sibling);
+    ::std::cout << "Test post_insert() case 00.02" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(sibling);
+    output_tree(node_itr(child, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm::red_black_tree_test(child, output_error, output_depth)
+    );
 }
 
-void test_insert_case_1_0()
+void test_insert_case_00_02()
+{
+    binary_tree_node grandparent(2);
+    binary_tree_node parent(0);
+
+    grandparent.set_left(parent);
+
+    binary_tree_node::traits::pointer result = (
+        ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(parent)
+    );
+    binary_tree_node child(1);
+
+    parent.set_right(child);
+    ::std::cout << "Test post_insert() case 00.04" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(child);
+    BOOST_TEST(!result->parent());
+    output_tree(node_itr(*result, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm::red_black_tree_test(*result, output_error, output_depth)
+    );
+}
+
+void test_insert_case_01_00()
 {
     binary_tree_node grandparent(2);
     binary_tree_node parent(1);
@@ -177,8 +201,9 @@ void test_insert_case_1_0()
     grandparent.set_right(uncle);
     uncle.red(true);
     parent.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(grandparent));
     parent.set_left(child);
-    ::std::cout << "Test post_insert() case 1.0" << ::std::endl;
+    ::std::cout << "Test post_insert() case 01.00" << ::std::endl;
 
     binary_tree_node::traits::pointer result = (
         ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(child)
@@ -186,6 +211,7 @@ void test_insert_case_1_0()
 
     if (result->parent())
     {
+        output_tree(node_itr(grandparent, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(grandparent, output_error, output_depth)
@@ -193,6 +219,7 @@ void test_insert_case_1_0()
     }
     else
     {
+        output_tree(node_itr(*result, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(*result, output_error, output_depth)
@@ -200,19 +227,20 @@ void test_insert_case_1_0()
     }
 }
 
-void test_insert_case_1_1()
+void test_insert_case_01_01()
 {
     binary_tree_node grandparent(2);
-    binary_tree_node parent(1);
+    binary_tree_node parent(0);
     binary_tree_node uncle(3);
-    binary_tree_node child(0);
+    binary_tree_node child(1);
 
     grandparent.set_left(parent);
     grandparent.set_right(uncle);
     uncle.red(true);
     parent.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(grandparent));
     parent.set_right(child);
-    ::std::cout << "Test post_insert() case 1.1" << ::std::endl;
+    ::std::cout << "Test post_insert() case 01.01" << ::std::endl;
 
     binary_tree_node::traits::pointer result = (
         ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(child)
@@ -220,6 +248,7 @@ void test_insert_case_1_1()
 
     if (result->parent())
     {
+        output_tree(node_itr(grandparent, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(grandparent, output_error, output_depth)
@@ -227,6 +256,7 @@ void test_insert_case_1_1()
     }
     else
     {
+        output_tree(node_itr(*result, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(*result, output_error, output_depth)
@@ -234,19 +264,20 @@ void test_insert_case_1_1()
     }
 }
 
-void test_insert_case_1_2()
+void test_insert_case_01_02()
 {
     binary_tree_node grandparent(2);
-    binary_tree_node parent(1);
+    binary_tree_node parent(0);
     binary_tree_node uncle(3);
-    binary_tree_node child(0);
+    binary_tree_node child(1);
 
     grandparent.set_right(parent);
     grandparent.set_left(uncle);
     uncle.red(true);
     parent.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(grandparent));
     parent.set_left(child);
-    ::std::cout << "Test post_insert() case 1.2" << ::std::endl;
+    ::std::cout << "Test post_insert() case 01.02" << ::std::endl;
 
     binary_tree_node::traits::pointer result = (
         ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(child)
@@ -254,6 +285,7 @@ void test_insert_case_1_2()
 
     if (result->parent())
     {
+        output_tree(node_itr(grandparent, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(grandparent, output_error, output_depth)
@@ -261,6 +293,7 @@ void test_insert_case_1_2()
     }
     else
     {
+        output_tree(node_itr(*result, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(*result, output_error, output_depth)
@@ -268,7 +301,7 @@ void test_insert_case_1_2()
     }
 }
 
-void test_insert_case_1_3()
+void test_insert_case_01_03()
 {
     binary_tree_node grandparent(2);
     binary_tree_node parent(1);
@@ -279,8 +312,9 @@ void test_insert_case_1_3()
     grandparent.set_left(uncle);
     uncle.red(true);
     parent.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(grandparent));
     parent.set_right(child);
-    ::std::cout << "Test post_insert() case 1.3" << ::std::endl;
+    ::std::cout << "Test post_insert() case 01.03" << ::std::endl;
 
     binary_tree_node::traits::pointer result = (
         ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(child)
@@ -288,6 +322,7 @@ void test_insert_case_1_3()
 
     if (result->parent())
     {
+        output_tree(node_itr(grandparent, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(grandparent, output_error, output_depth)
@@ -295,6 +330,7 @@ void test_insert_case_1_3()
     }
     else
     {
+        output_tree(node_itr(*result, false));
         BOOST_TEST(
             ::odds_and_ends::node::algorithm
             ::red_black_tree_test(*result, output_error, output_depth)
@@ -355,7 +391,7 @@ void test_post_fill_and_insert()
     }
 }
 
-void test_insert_case_2_1()
+void test_insert_case_02_00()
 {
     binary_tree_node n01(1);
     binary_tree_node n06(6);
@@ -382,7 +418,7 @@ void test_insert_case_2_1()
     n08.red(true);
     n17.red(true);
     n22.set_left(n20);
-    ::std::cout << "Test post_insert() case 2.1" << ::std::endl;
+    ::std::cout << "Test post_insert() case 02.00" << ::std::endl;
 
     binary_tree_node::traits::pointer result = (
         ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(n20)
@@ -404,6 +440,426 @@ void test_insert_case_2_1()
             ::red_black_tree_test(*result, output_error, output_depth)
         );
     }
+}
+
+void test_insert_case_02_01()
+{
+    binary_tree_node n08(-8);
+    binary_tree_node n07(-7);
+    binary_tree_node n06(-6);
+    binary_tree_node n05(-5);
+    binary_tree_node n04(-4);
+    binary_tree_node n03(-3);
+    binary_tree_node n02(-2);
+    binary_tree_node n01(-1);
+    binary_tree_node o00(0);
+    binary_tree_node p01(1);
+    binary_tree_node p02(2);
+    binary_tree_node p03(3);
+    binary_tree_node p04(4);
+    binary_tree_node p05(5);
+    binary_tree_node p06(6);
+    binary_tree_node p07(7);
+    binary_tree_node p08(8);
+
+    n06.set_left(n07);
+    n06.set_right(n05);
+    n04.set_left(n06);
+    n04.set_right(n03);
+    n02.set_left(n04);
+    n02.set_right(n01);
+    o00.set_left(n02);
+    o00.set_right(p02);
+    p02.set_left(p01);
+    p02.set_right(p04);
+    p04.set_left(p03);
+    p04.set_right(p06);
+    p06.set_left(p05);
+    p06.set_right(p07);
+    n07.red(true);
+    n05.red(true);
+    n04.red(true);
+    p04.red(true);
+    p05.red(true);
+    p07.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
+    n07.set_left(n08);
+    ::std::cout << "Test post_insert() case 02.01" << ::std::endl;
+
+    binary_tree_node::traits::pointer result = (
+        ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(n08)
+    );
+
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
+    p07.set_right(p08);
+    ::std::cout << "Test post_insert() case 02.02" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(p08);
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
+}
+
+void test_insert_case_02_02()
+{
+    binary_tree_node n08(-8);
+    binary_tree_node n07(-7);
+    binary_tree_node n06(-6);
+    binary_tree_node n05(-5);
+    binary_tree_node n04(-4);
+    binary_tree_node n03(-3);
+    binary_tree_node n02(-2);
+    binary_tree_node n01(-1);
+    binary_tree_node o00(0);
+    binary_tree_node p01(1);
+    binary_tree_node p02(2);
+    binary_tree_node p03(3);
+    binary_tree_node p04(4);
+    binary_tree_node p05(5);
+    binary_tree_node p06(6);
+    binary_tree_node p07(7);
+    binary_tree_node p08(8);
+
+    n07.set_left(n08);
+    n07.set_right(n05);
+    n05.set_left(n06);
+    n05.set_right(n03);
+    n02.set_left(n07);
+    n02.set_right(n01);
+    o00.set_left(n02);
+    o00.set_right(p02);
+    p02.set_left(p01);
+    p02.set_right(p07);
+    p05.set_left(p03);
+    p05.set_right(p06);
+    p07.set_left(p05);
+    p07.set_right(p08);
+    n07.red(true);
+    n06.red(true);
+    n03.red(true);
+    p03.red(true);
+    p06.red(true);
+    p07.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
+    n03.set_left(n04);
+    ::std::cout << "Test post_insert() case 02.03" << ::std::endl;
+
+    binary_tree_node::traits::pointer result = (
+        ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(n04)
+    );
+
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
+    p03.set_right(p04);
+    ::std::cout << "Test post_insert() case 02.04" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(p04);
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
+}
+
+void test_insert_case_02_03()
+{
+    binary_tree_node n26(-26);
+    binary_tree_node n25(-25);
+    binary_tree_node n24(-24);
+    binary_tree_node n23(-23);
+    binary_tree_node n22(-22);
+    binary_tree_node n21(-21);
+    binary_tree_node n20(-20);
+    binary_tree_node n19(-19);
+    binary_tree_node n18(-18);
+    binary_tree_node n17(-17);
+    binary_tree_node n16(-16);
+    binary_tree_node n15(-15);
+    binary_tree_node n14(-14);
+    binary_tree_node n13(-13);
+    binary_tree_node n12(-12);
+    binary_tree_node n11(-11);
+    binary_tree_node n10(-10);
+    binary_tree_node n09(-9);
+    binary_tree_node n08(-8);
+    binary_tree_node n07(-7);
+    binary_tree_node n06(-6);
+    binary_tree_node n05(-5);
+    binary_tree_node n04(-4);
+    binary_tree_node n03(-3);
+    binary_tree_node n02(-2);
+    binary_tree_node n01(-1);
+    binary_tree_node o00(0);
+    binary_tree_node p01(1);
+    binary_tree_node p02(2);
+    binary_tree_node p03(3);
+    binary_tree_node p04(4);
+    binary_tree_node p05(5);
+    binary_tree_node p06(6);
+    binary_tree_node p07(7);
+    binary_tree_node p08(8);
+    binary_tree_node p09(9);
+    binary_tree_node p10(10);
+    binary_tree_node p11(11);
+    binary_tree_node p12(12);
+    binary_tree_node p13(13);
+    binary_tree_node p14(14);
+    binary_tree_node p15(15);
+    binary_tree_node p16(16);
+    binary_tree_node p17(17);
+    binary_tree_node p18(18);
+    binary_tree_node p19(19);
+    binary_tree_node p20(20);
+    binary_tree_node p21(21);
+    binary_tree_node p22(22);
+    binary_tree_node p23(23);
+    binary_tree_node p24(24);
+    binary_tree_node p25(25);
+    binary_tree_node p26(26);
+
+    n24.set_left(n25);
+    n24.set_right(n23);
+    n22.set_left(n24);
+    n22.set_right(n21);
+    n20.set_left(n22);
+    n20.set_right(n18);
+    n18.set_left(n19);
+    n18.set_right(n17);
+    n16.set_left(n20);
+    n16.set_right(n12);
+    n14.set_left(n15);
+    n14.set_right(n13);
+    n12.set_left(n14);
+    n12.set_right(n10);
+    n10.set_left(n11);
+    n10.set_right(n09);
+    n08.set_left(n16);
+    n08.set_right(n04);
+    n06.set_left(n07);
+    n06.set_right(n05);
+    n04.set_left(n06);
+    n04.set_right(n02);
+    n02.set_left(n03);
+    n02.set_right(n01);
+    o00.set_left(n08);
+    o00.set_right(p08);
+    p02.set_left(p01);
+    p02.set_right(p03);
+    p04.set_left(p02);
+    p04.set_right(p06);
+    p06.set_left(p05);
+    p06.set_right(p07);
+    p08.set_left(p04);
+    p08.set_right(p16);
+    p10.set_left(p09);
+    p10.set_right(p11);
+    p12.set_left(p10);
+    p12.set_right(p14);
+    p14.set_left(p13);
+    p14.set_right(p15);
+    p16.set_left(p12);
+    p16.set_right(p20);
+    p18.set_left(p17);
+    p18.set_right(p19);
+    p20.set_left(p18);
+    p20.set_right(p22);
+    p22.set_left(p21);
+    p22.set_right(p24);
+    p24.set_left(p23);
+    p24.set_right(p25);
+    n25.red(true);
+    n23.red(true);
+    n22.red(true);
+    n18.red(true);
+    n16.red(true);
+    n14.red(true);
+    n10.red(true);
+    n06.red(true);
+    n02.red(true);
+    p02.red(true);
+    p06.red(true);
+    p10.red(true);
+    p14.red(true);
+    p16.red(true);
+    p18.red(true);
+    p22.red(true);
+    p23.red(true);
+    p25.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
+    n25.set_left(n26);
+    ::std::cout << "Test post_insert() case 02.05" << ::std::endl;
+
+    binary_tree_node::traits::pointer result = (
+        ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(n26)
+    );
+
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
+    p25.set_right(p26);
+    ::std::cout << "Test post_insert() case 02.06" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(p26);
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
+}
+
+void test_insert_case_02_04()
+{
+    binary_tree_node n26(-26);
+    binary_tree_node n25(-25);
+    binary_tree_node n24(-24);
+    binary_tree_node n23(-23);
+    binary_tree_node n22(-22);
+    binary_tree_node n21(-21);
+    binary_tree_node n20(-20);
+    binary_tree_node n19(-19);
+    binary_tree_node n18(-18);
+    binary_tree_node n17(-17);
+    binary_tree_node n16(-16);
+    binary_tree_node n15(-15);
+    binary_tree_node n14(-14);
+    binary_tree_node n13(-13);
+    binary_tree_node n12(-12);
+    binary_tree_node n11(-11);
+    binary_tree_node n10(-10);
+    binary_tree_node n09(-9);
+    binary_tree_node n08(-8);
+    binary_tree_node n07(-7);
+    binary_tree_node n06(-6);
+    binary_tree_node n05(-5);
+    binary_tree_node n04(-4);
+    binary_tree_node n03(-3);
+    binary_tree_node n02(-2);
+    binary_tree_node n01(-1);
+    binary_tree_node o00(0);
+    binary_tree_node p01(1);
+    binary_tree_node p02(2);
+    binary_tree_node p03(3);
+    binary_tree_node p04(4);
+    binary_tree_node p05(5);
+    binary_tree_node p06(6);
+    binary_tree_node p07(7);
+    binary_tree_node p08(8);
+    binary_tree_node p09(9);
+    binary_tree_node p10(10);
+    binary_tree_node p11(11);
+    binary_tree_node p12(12);
+    binary_tree_node p13(13);
+    binary_tree_node p14(14);
+    binary_tree_node p15(15);
+    binary_tree_node p16(16);
+    binary_tree_node p17(17);
+    binary_tree_node p18(18);
+    binary_tree_node p19(19);
+    binary_tree_node p20(20);
+    binary_tree_node p21(21);
+    binary_tree_node p22(22);
+    binary_tree_node p23(23);
+    binary_tree_node p24(24);
+    binary_tree_node p25(25);
+    binary_tree_node p26(26);
+
+    n25.set_left(n26);
+    n25.set_right(n24);
+    n23.set_left(n25);
+    n23.set_right(n21);
+    n21.set_left(n22);
+    n21.set_right(n20);
+    n19.set_left(n23);
+    n19.set_right(n08);
+    n17.set_left(n18);
+    n17.set_right(n16);
+    n15.set_left(n17);
+    n15.set_right(n10);
+    n13.set_left(n14);
+    n13.set_right(n11);
+    n10.set_left(n13);
+    n10.set_right(n09);
+    n08.set_left(n15);
+    n08.set_right(n04);
+    n06.set_left(n07);
+    n06.set_right(n05);
+    n04.set_left(n06);
+    n04.set_right(n02);
+    n02.set_left(n03);
+    n02.set_right(n01);
+    o00.set_left(n19);
+    o00.set_right(p19);
+    p02.set_left(p01);
+    p02.set_right(p03);
+    p04.set_left(p02);
+    p04.set_right(p06);
+    p06.set_left(p05);
+    p06.set_right(p07);
+    p08.set_left(p04);
+    p08.set_right(p15);
+    p10.set_left(p09);
+    p10.set_right(p13);
+    p13.set_left(p11);
+    p13.set_right(p14);
+    p15.set_left(p10);
+    p15.set_right(p17);
+    p17.set_left(p16);
+    p17.set_right(p18);
+    p19.set_left(p08);
+    p19.set_right(p23);
+    p21.set_left(p20);
+    p21.set_right(p22);
+    p23.set_left(p21);
+    p23.set_right(p25);
+    p25.set_left(p24);
+    p25.set_right(p26);
+    n25.red(true);
+    n21.red(true);
+    n17.red(true);
+    n14.red(true);
+    n11.red(true);
+    n10.red(true);
+    n08.red(true);
+    n06.red(true);
+    n02.red(true);
+    p02.red(true);
+    p06.red(true);
+    p08.red(true);
+    p10.red(true);
+    p11.red(true);
+    p14.red(true);
+    p17.red(true);
+    p21.red(true);
+    p25.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(o00));
+    n11.set_left(n12);
+    ::std::cout << "Test post_insert() case 02.07" << ::std::endl;
+
+    binary_tree_node::traits::pointer result = (
+        ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(n12)
+    );
+
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
+    p11.set_right(p12);
+    ::std::cout << "Test post_insert() case 02.08" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::post_insert(p12);
+    output_tree(node_itr(o00, false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(o00, output_error, output_depth)
+    );
 }
 
 #include <tuple>
@@ -2869,16 +3325,93 @@ void test_separate_case_03_0x()
     );
 }
 
+void test_separate_chain_case_00()
+{
+    binary_tree_node p70(70);
+    binary_tree_node p60(60);
+    binary_tree_node p57(57);
+    binary_tree_node p56(56);
+    binary_tree_node p55(55);
+    binary_tree_node p54(54);
+    binary_tree_node p29(29);
+    binary_tree_node p28(28);
+    binary_tree_node p10(10);
+
+    p60.set_left(p70);
+    p57.set_left(p60);
+    p57.set_right(p55);
+    p55.set_left(p56);
+    p55.set_right(p54);
+    p29.set_left(p57);
+    p29.set_right(p10);
+    p10.set_left(p28);
+    p70.red(true);
+    p57.red(true);
+    p56.red(true);
+    p54.red(true);
+    p28.red(true);
+    BOOST_TEST(::odds_and_ends::node::algorithm::red_black_tree_test(p29));
+    ::std::cout << "Test separate() chain case 00: remove 57" << ::std::endl;
+
+    sep_result result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(p57);
+
+    BOOST_TEST(57 == **::std::get<0>(result));
+    BOOST_TEST(56 == **::std::get<1>(result));
+    output_tree(node_itr(*::std::get<2>(result), false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
+    );
+    ::std::cout << "Test separate() chain case 00: remove 56" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(
+        *::std::get<1>(result)
+    );
+    BOOST_TEST(56 == **::std::get<0>(result));
+    BOOST_TEST(55 == **::std::get<1>(result));
+    output_tree(node_itr(*::std::get<2>(result), false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
+    );
+    ::std::cout << "Test separate() chain case 00: remove 55" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(
+        *::std::get<1>(result)
+    );
+    BOOST_TEST(55 == **::std::get<0>(result));
+    BOOST_TEST(54 == **::std::get<1>(result));
+    output_tree(node_itr(*::std::get<2>(result), false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
+    );
+    ::std::cout << "Test separate() chain case 00: remove 54" << ::std::endl;
+    result = ::odds_and_ends::node::left_leaning_red_black_tree_balancer::separate(
+        *::std::get<1>(result)
+    );
+    BOOST_TEST(54 == **::std::get<0>(result));
+    BOOST_TEST(29 == **::std::get<1>(result));
+    output_tree(node_itr(*::std::get<2>(result), false));
+    BOOST_TEST(
+        ::odds_and_ends::node::algorithm
+        ::red_black_tree_test(*::std::get<2>(result), output_error, output_depth)
+    );
+}
+
 int main(int argc, char** argv)
 {
-    test_insert_case_0_0();
-    test_insert_case_0_1();
-    test_insert_case_1_0();
-    test_insert_case_1_1();
-    test_insert_case_1_2();
-    test_insert_case_1_3();
+    test_insert_case_00_00();
+    test_insert_case_00_01();
+    test_insert_case_00_02();
+    test_insert_case_01_00();
+    test_insert_case_01_01();
+    test_insert_case_01_02();
+    test_insert_case_01_03();
     test_post_fill_and_insert();
-    test_insert_case_2_1();
+    test_insert_case_02_00();
+    test_insert_case_02_01();
+    test_insert_case_02_02();
+    test_insert_case_02_03();
+    test_insert_case_02_04();
     test_separate_case_00_00();
     test_separate_case_00_01();
     test_separate_case_00_02();
@@ -2934,6 +3467,7 @@ int main(int argc, char** argv)
     test_separate_case_03_04_p6();
     test_separate_case_03_04_p7();
     test_separate_case_03_0x();
+    test_separate_chain_case_00();
     return ::boost::report_errors();
 }
 

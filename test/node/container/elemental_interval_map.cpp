@@ -4,7 +4,6 @@
 #include <cstring>
 #include <odds_and_ends/node/container/elemental_interval_map.hpp>
 #include <boost/core/lightweight_test.hpp>
-#include <iostream>
 
 typedef ::odds_and_ends::node::container::elemental_interval_map<double,char const*> Num2String;
 

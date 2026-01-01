@@ -43,31 +43,81 @@ namespace odds_and_ends { namespace node {
         BOOST_ASSERT_MSG(!node.right(), "The input node must be a leaf node.");
 
         NodePointer node_ptr = ::std::pointer_traits<NodePointer>::pointer_to(node);
-        NodePointer parent_ptr;
-        NodePointer grandparent_ptr;
-        NodePointer uncle_ptr;
+        NodePointer parent_ptr = node_ptr->parent();
 
-        for (node_ptr->red(true); (parent_ptr = node_ptr->parent()); )
+        if (parent_ptr)
         {
             if (parent_ptr->black())
             {
-                if (!parent_ptr->left())
+                if (node_ptr == parent_ptr->left())
+                {
+                    BOOST_ASSERT_MSG(
+                        !parent_ptr->right(),
+                        "The parent of the inserted node is not left-leaning."
+                    );
+                    node_ptr->red(true);
+                    return parent_ptr;
+                }
+                else
                 {
                     BOOST_ASSERT(node_ptr == parent_ptr->right());
-                    node_ptr = parent_ptr->rotate_left();
-                    parent_ptr->red(true);
-                    node_ptr->black(true);
+
+                    if (parent_ptr->left())
+                    {
+                        BOOST_ASSERT_MSG(
+                            parent_ptr->left()->red(),
+                            "The left sibling of the inserted node must be a red leaf node."
+                        );
+                        BOOST_ASSERT_MSG(
+                            !parent_ptr->left()->left(),
+                            "The left sibling of the inserted node must be a red leaf node."
+                        );
+                        BOOST_ASSERT_MSG(
+                            !parent_ptr->left()->right(),
+                            "The left sibling of the inserted node must be a red leaf node."
+                        );
+                        node_ptr->red(true);
+                        return parent_ptr;
+                    }
+                    else
+                    {
+                        node_ptr = parent_ptr->rotate_left();
+                        parent_ptr->red(true);
+                        node_ptr->black(true);
+                        return node_ptr;
+                    }
                 }
-
-                return node_ptr;
             }
+        }
+        else
+        {
+            node_ptr->black(true);
+            return node_ptr;
+        }
 
-            grandparent_ptr = parent_ptr->parent();
+        BOOST_ASSERT(parent_ptr->red());
 
-            if (!grandparent_ptr)
+        NodePointer grandparent_ptr = parent_ptr->parent();
+
+        BOOST_ASSERT_MSG(grandparent_ptr, "*parent_ptr must have a black parent.");
+        BOOST_ASSERT_MSG(grandparent_ptr->black(), "*parent_ptr must have a black parent.");
+
+        NodePointer uncle_ptr;
+
+        if (parent_ptr == grandparent_ptr->left())
+        {
+            uncle_ptr = grandparent_ptr->right();
+
+            if (uncle_ptr)
             {
-                if (parent_ptr->left())
+                BOOST_ASSERT_MSG(uncle_ptr->red(), "*uncle_ptr must be a red leaf node.");
+                BOOST_ASSERT_MSG(!uncle_ptr->left(), "*uncle_ptr must be a red leaf node.");
+                BOOST_ASSERT_MSG(!uncle_ptr->right(), "*uncle_ptr must be a red leaf node.");
+                uncle_ptr->black(true);
+
+                if (node_ptr == parent_ptr->left())
                 {
+                    node_ptr->red(true);
                     parent_ptr->black(true);
                 }
                 else
@@ -77,8 +127,61 @@ namespace odds_and_ends { namespace node {
                     node_ptr->black(true);
                 }
 
+                node_ptr = grandparent_ptr;
+            }
+            else if (node_ptr == parent_ptr->left())
+            {
+                parent_ptr = grandparent_ptr->rotate_right();
+                node_ptr->red(true);
+                grandparent_ptr->red(true);
+                parent_ptr->black(true);
+                return parent_ptr;
+            }
+            else
+            {
+                BOOST_ASSERT(node_ptr == parent_ptr->right());
+                node_ptr = parent_ptr->rotate_left();
+                node_ptr = grandparent_ptr->rotate_right();
+                grandparent_ptr->red(true);
+                node_ptr->black(true);
                 return node_ptr;
             }
+        }
+        else
+        {
+            BOOST_ASSERT(parent_ptr == grandparent_ptr->right());
+            uncle_ptr = grandparent_ptr->left();
+            BOOST_ASSERT_MSG(uncle_ptr, "*grandparent_ptr is not left-leaning.");
+            BOOST_ASSERT_MSG(uncle_ptr->red(), "*uncle_ptr must be a red leaf node.");
+            BOOST_ASSERT_MSG(!uncle_ptr->left(), "*uncle_ptr must be a red leaf node.");
+            BOOST_ASSERT_MSG(!uncle_ptr->right(), "*uncle_ptr must be a red leaf node.");
+            parent_ptr->black(true);
+
+            if (node_ptr == parent_ptr->left())
+            {
+                node_ptr->red(true);
+                uncle_ptr->black(true);
+                node_ptr = grandparent_ptr;
+            }
+            else
+            {
+                BOOST_ASSERT(node_ptr == parent_ptr->right());
+                node_ptr = grandparent_ptr->rotate_left();
+            }
+        }
+
+        for (; (parent_ptr = node_ptr->parent()); )
+        {
+            node_ptr->red(true);
+
+            if (parent_ptr->black())
+            {
+                return node_ptr;
+            }
+
+            grandparent_ptr = parent_ptr->parent();
+            BOOST_ASSERT_MSG(grandparent_ptr, "*parent_ptr must have a black parent.");
+            BOOST_ASSERT_MSG(grandparent_ptr->black(), "*parent_ptr must have a black parent.");
 
             if (
                 (
@@ -92,7 +195,6 @@ namespace odds_and_ends { namespace node {
             {
                 parent_ptr->black(true);
                 uncle_ptr->black(true);
-                grandparent_ptr->red(true);
                 node_ptr = grandparent_ptr;
                 continue;
             }
@@ -113,29 +215,7 @@ namespace odds_and_ends { namespace node {
             node_ptr = (
                 node_ptr == parent_ptr->left()
             ) ? grandparent_ptr->rotate_right() : grandparent_ptr->rotate_left();
-//            break;
-        }
-
-        if (
-            node_ptr->left() && node_ptr->left()->red() &&
-            node_ptr->right() && node_ptr->right()->red()
-        )
-        {
-            node_ptr->red(true);
-            node_ptr->left()->black(true);
-            node_ptr->right()->black(true);
-        }
-        else
-        {
-            if (!node_ptr->left())
-            {
-                parent_ptr = node_ptr->parent();
-                BOOST_ASSERT(node_ptr == parent_ptr->right());
-                node_ptr = parent_ptr->rotate_left();
-                parent_ptr->red(true);
-            }
-
-            node_ptr->black(true);
+            break;
         }
 
         return node_ptr;
@@ -313,6 +393,56 @@ namespace odds_and_ends { namespace node {
                             "*node_ptr must not have a red parent."
                         );
                         // Removal of red leaf nodes does not unbalance the tree.
+                        return Result(node_ptr, succ_ptr, root_ptr);
+                    }
+                    else if (succ_ptr->red())
+                    {
+                        BOOST_ASSERT_MSG(succ_ptr->parent(), "Root nodes are black.");
+                        BOOST_ASSERT_MSG(
+                            succ_ptr->parent()->black(),
+                            "*succ_ptr must not have a red parent."
+                        );
+                        next_ptr = succ_ptr->left();
+                        BOOST_ASSERT_MSG(
+                            next_ptr->black(),
+                            "*succ_ptr must not have red children."
+                        );
+
+                        if (next_ptr->left())
+                        {
+                            BOOST_ASSERT_MSG(
+                                next_ptr->left()->red(),
+                                "*next_ptr must be the only black descendant of *succ_ptr."
+                            );
+
+                            if (next_ptr->right())
+                            {
+                                // Case 00.16
+                                BOOST_ASSERT_MSG(
+                                    next_ptr->right()->red(),
+                                    "*next_ptr must be the only black descendant of *succ_ptr."
+                                );
+                                // Flip colors to separate red nodes.
+                                next_ptr->left()->black(true);
+                                next_ptr->red(true);
+                                succ_ptr->black(true);
+                            }
+
+                            // Case 00.15
+                            // Rotate to maintain balance.
+                            succ_ptr->rotate_right();
+                        }
+                        else  // if (!next_ptr->left())
+                        {
+                            // Case 00.14
+                            BOOST_ASSERT_MSG(
+                                !next_ptr->right(),
+                                "*succ_ptr->left() is not left-leaning."
+                            );
+                            next_ptr->red(true);
+                            succ_ptr->black(true);
+                        }
+
                         return Result(node_ptr, succ_ptr, root_ptr);
                     }
                 }

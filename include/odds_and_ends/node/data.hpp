@@ -1,7 +1,7 @@
 // Copyright (C) 2011-2025 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__NODE__BASE_HPP
-#define ODDS_AND_ENDS__NODE__BASE_HPP
+#ifndef ODDS_AND_ENDS__NODE__DATA_HPP
+#define ODDS_AND_ENDS__NODE__DATA_HPP
 
 #include <utility>
 #include <memory>
@@ -339,5 +339,5 @@ namespace odds_and_ends { namespace node {
     };
 }}  // namespace odds_and_ends::node
 
-#endif  // ODDS_AND_ENDS__NODE__BASE_HPP
+#endif  // ODDS_AND_ENDS__NODE__DATA_HPP
 

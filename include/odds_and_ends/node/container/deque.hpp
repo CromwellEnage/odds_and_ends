@@ -21,7 +21,6 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/push_front.hpp>
-#include <boost/mpl/identity.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/mpl/quote.hpp>
 
@@ -838,7 +837,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::cbegin() const
     {
         return this->_root_ptr ? const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_begin(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_iterator_begin<Diff>(*this->_root_ptr)
         ) : this->cend();
     }
 
@@ -855,7 +854,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::begin() const
     {
         return this->_root_ptr ? const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_begin(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_iterator_begin<Diff>(*this->_root_ptr)
         ) : this->end();
     }
 
@@ -872,7 +871,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::begin()
     {
         return this->_root_ptr ? iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_begin(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_iterator_begin<Diff>(*this->_root_ptr)
         ) : this->end();
     }
 
@@ -889,7 +888,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::cend() const
     {
         return this->_root_ptr ? const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_end(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_iterator_end<Diff>(*this->_root_ptr)
         ) : const_iterator();
     }
 
@@ -906,7 +905,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::end() const
     {
         return this->_root_ptr ? const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_end(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_iterator_end<Diff>(*this->_root_ptr)
         ) : const_iterator();
     }
 
@@ -923,7 +922,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::end()
     {
         return this->_root_ptr ? iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_end(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_iterator_end<Diff>(*this->_root_ptr)
         ) : iterator();
     }
 
@@ -940,7 +939,9 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::crbegin() const
     {
         return this->_root_ptr ? const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<Diff>(
+                *this->_root_ptr
+            )
         ) : this->crend();
     }
 
@@ -957,7 +958,9 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::rbegin() const
     {
         return this->_root_ptr ? const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<Diff>(
+                *this->_root_ptr
+            )
         ) : this->rend();
     }
 
@@ -974,7 +977,9 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::rbegin()
     {
         return this->_root_ptr ? reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<Diff>(
+                *this->_root_ptr
+            )
         ) : this->rend();
     }
 
@@ -991,7 +996,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::crend() const
     {
         return this->_root_ptr ? const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<Diff>(*this->_root_ptr)
         ) : const_reverse_iterator();
     }
 
@@ -1008,7 +1013,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::rend() const
     {
         return this->_root_ptr ? const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<Diff>(*this->_root_ptr)
         ) : const_reverse_iterator();
     }
 
@@ -1025,7 +1030,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::rend()
     {
         return this->_root_ptr ? reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end(*this->_root_ptr)
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<Diff>(*this->_root_ptr)
         ) : reverse_iterator();
     }
 
@@ -1075,7 +1080,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::_front() const
     {
         return ::odds_and_ends::node::algorithm::increment_in_binary_tree(
-            static_cast<_node_ptr_t>(nullptr),
+            static_cast<_node_const_ptr_t>(nullptr),
             this->_root_ptr
         );
     }
@@ -1141,7 +1146,7 @@ namespace odds_and_ends { namespace node { namespace container {
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::_back() const
     {
         return ::odds_and_ends::node::algorithm::decrement_in_binary_tree(
-            static_cast<_node_ptr_t>(nullptr),
+            static_cast<_node_const_ptr_t>(nullptr),
             this->_root_ptr
         );
     }
@@ -1499,7 +1504,7 @@ namespace odds_and_ends { namespace node { namespace container {
         {
             this->push_back(t);
             return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(*this->_back())
             );
         }
         else
@@ -1541,7 +1546,7 @@ namespace odds_and_ends { namespace node { namespace container {
             }
 
             return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*node_ptr)
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(*node_ptr)
             );
         }
     }
@@ -1565,7 +1570,7 @@ namespace odds_and_ends { namespace node { namespace container {
         {
             this->push_back(static_cast<value_type&&>(t));
             return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(*this->_back())
             );
         }
         else
@@ -1615,7 +1620,7 @@ namespace odds_and_ends { namespace node { namespace container {
             }
 
             return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*node_ptr)
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(*node_ptr)
             );
         }
     }
@@ -1640,7 +1645,7 @@ namespace odds_and_ends { namespace node { namespace container {
         {
             this->emplace_back(::std::forward<Args>(args)...);
             return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*this->_back())
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(*this->_back())
             );
         }
         else
@@ -1690,7 +1695,7 @@ namespace odds_and_ends { namespace node { namespace container {
             }
 
             return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(*node_ptr)
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(*node_ptr)
             );
         }
     }
@@ -1745,7 +1750,7 @@ namespace odds_and_ends { namespace node { namespace container {
                 "The iterator does not point to any element in this container!"
             );
             iterator result(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(
                     const_cast<node_type&>(*pos.base())
                 )
             );
@@ -1791,7 +1796,7 @@ namespace odds_and_ends { namespace node { namespace container {
                     "The iterator does not point to any element in this container!"
                 );
                 iterator result(
-                    ::odds_and_ends::node::make_in_order_tree_iterator_position(
+                    ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(
                         const_cast<node_type&>(*pos.base())
                     )
                 );
@@ -1898,7 +1903,9 @@ namespace odds_and_ends { namespace node { namespace container {
         this->_root_ptr = ::std::get<2>(sep_result);
 
         return ::std::get<1>(sep_result) ? iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_position(*::std::get<1>(sep_result))
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(
+                *::std::get<1>(sep_result)
+            )
         ) : this->end();
     }
 
@@ -1921,7 +1928,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
         if (itr_end != this->cend())
         {
-            result = ::odds_and_ends::node::make_in_order_tree_iterator_position(
+            result = ::odds_and_ends::node::make_in_order_tree_iterator_position<Diff>(
                 const_cast<node_type&>(*itr_end.base())
             );
         }
