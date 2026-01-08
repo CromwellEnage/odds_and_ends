@@ -224,8 +224,8 @@ namespace odds_and_ends { namespace node {
                 _enabler
             >::type = _enabler()
         ) : _current(other._current),
-            _un_fun(),
-            _value(!_current ? _un_fun(other._un_fun) : _un_fun(*_current))
+            _un_fun(other._un_fun),
+            _value(!_current ? _un_fun() : _un_fun(*_current))
         {
         }
 

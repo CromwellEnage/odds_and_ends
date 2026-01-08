@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2013-2025 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__NODE__CONTAINER__MAP_HPP
 #define ODDS_AND_ENDS__NODE__CONTAINER__MAP_HPP
@@ -307,6 +307,7 @@ namespace odds_and_ends { namespace node { namespace container {
         iterator erase(const_iterator pos);
         iterator erase(const_iterator itr_begin, const_iterator itr_end);
         size_type erase(key_type const& key);
+        void swap(map& other);
 
         template <typename K>
         const_iterator find(K const& key) const;
@@ -1722,6 +1723,79 @@ namespace odds_and_ends { namespace node { namespace container {
         typename PtrXForm,
         typename AllocXForm
     >
+    void
+        map<
+            Key,
+            Mapped,
+            IsMulti,
+            NodeParentGeneratorList,
+            Balancer,
+            Compare,
+            Size,
+            Difference,
+            PtrXForm,
+            AllocXForm
+        >::swap(map& other)
+    {
+        using ::std::swap;
+        swap(this->_root_ptr, other._root_ptr);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename NodeParentGeneratorList,
+        typename Balancer,
+        typename Compare,
+        typename Size,
+        typename Difference,
+        typename PtrXForm,
+        typename AllocXForm
+    >
+    inline void
+        swap(
+            map<
+                Key,
+                Mapped,
+                IsMulti,
+                NodeParentGeneratorList,
+                Balancer,
+                Compare,
+                Size,
+                Difference,
+                PtrXForm,
+                AllocXForm
+            >& lhs,
+            map<
+                Key,
+                Mapped,
+                IsMulti,
+                NodeParentGeneratorList,
+                Balancer,
+                Compare,
+                Size,
+                Difference,
+                PtrXForm,
+                AllocXForm
+            >& rhs
+        )
+    {
+        lhs.swap(rhs);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename NodeParentGeneratorList,
+        typename Balancer,
+        typename Compare,
+        typename Size,
+        typename Difference,
+        typename PtrXForm,
+        typename AllocXForm
+    >
     inline typename map<
         Key,
         Mapped,
@@ -2749,7 +2823,7 @@ namespace odds_and_ends { namespace node { namespace container {
         return node_ptr ? const_iterator(
             ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(*node_ptr),
             _xform_func_1()
-        ) : this->cend();
+        ) : this->upper_bound(key);
     }
 
     template <
@@ -2798,7 +2872,7 @@ namespace odds_and_ends { namespace node { namespace container {
         return node_ptr ? const_iterator(
             ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(*node_ptr),
             _xform_func_1()
-        ) : this->cend();
+        ) : this->upper_bound(key);
     }
 
     template <
@@ -2846,7 +2920,7 @@ namespace odds_and_ends { namespace node { namespace container {
         return node_ptr ? iterator(
             ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(*node_ptr),
             _xform_func_0()
-        ) : this->end();
+        ) : this->upper_bound(key);
     }
 
     template <
@@ -2895,7 +2969,7 @@ namespace odds_and_ends { namespace node { namespace container {
         return node_ptr ? iterator(
             ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(*node_ptr),
             _xform_func_0()
-        ) : this->end();
+        ) : this->upper_bound(key);
     }
 
     template <

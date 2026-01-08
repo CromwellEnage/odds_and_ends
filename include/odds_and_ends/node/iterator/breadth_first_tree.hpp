@@ -9,6 +9,7 @@
 #include <odds_and_ends/node/traversal_state.hpp>
 #include <odds_and_ends/static_introspection/concept/is_stack_or_heap.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_forward_iterator.hpp>
+#include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_get_allocator.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
@@ -269,7 +270,10 @@ namespace odds_and_ends { namespace node {
         void _increment(::boost::mpl::false_);
 
         template <typename Itr>
-        void _push_all(Itr itr_begin, Itr itr_end);
+        void _push_all(Itr itr_begin, Itr itr_end, ::boost::mpl::true_);
+
+        template <typename Itr>
+        void _push_all(Itr itr_begin, Itr itr_end, ::boost::mpl::false_);
 
         template <typename OtherQueue>
         static void
@@ -783,11 +787,31 @@ namespace odds_and_ends { namespace node {
 
     template <typename Node, typename IsReverse, typename QGen>
     template <typename Itr>
-    void breadth_first_tree_iterator<Node,IsReverse,QGen>::_push_all(Itr itr, Itr itr_end)
+    void
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_push_all(
+            Itr itr,
+            Itr itr_end,
+            ::boost::mpl::true_
+        )
     {
         for (; itr != itr_end; ++itr)
         {
             this->_queue.push(::std::pointer_traits<pointer>::pointer_to(*itr));
+        }
+    }
+
+    template <typename Node, typename IsReverse, typename QGen>
+    template <typename Itr>
+    void
+        breadth_first_tree_iterator<Node,IsReverse,QGen>::_push_all(
+            Itr itr,
+            Itr itr_end,
+            ::boost::mpl::false_
+        )
+    {
+        for (; itr != itr_end; ++itr)
+        {
+            this->_queue.push(itr->second);
         }
     }
 
@@ -824,13 +848,23 @@ namespace odds_and_ends { namespace node {
     template <typename Node, typename IsReverse, typename QGen>
     inline void breadth_first_tree_iterator<Node,IsReverse,QGen>::_increment(::boost::mpl::false_)
     {
-        this->_push_all(this->_current->begin(), this->_current->end());
+        this->_push_all(
+            this->_current->begin(),
+            this->_current->end(),
+            ::odds_and_ends::static_introspection::nested_type
+            ::has_traits<typename Node::traits::child_iterator::value_type>()
+        );
     }
 
     template <typename Node, typename IsReverse, typename QGen>
     inline void breadth_first_tree_iterator<Node,IsReverse,QGen>::_increment(::boost::mpl::true_)
     {
-        this->_push_all(this->_current->rbegin(), this->_current->rend());
+        this->_push_all(
+            this->_current->rbegin(),
+            this->_current->rend(),
+            ::odds_and_ends::static_introspection::nested_type
+            ::has_traits<typename Node::traits::child_reverse_iterator::value_type>()
+        );
     }
 
     template <typename Node, typename IsReverse, typename QGen>

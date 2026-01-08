@@ -4,6 +4,7 @@
 #define ODDS_AND_ENDS__NODE__TREE__WITH_HEIGHT_HPP
 
 #include <cstddef>
+#include <type_traits>
 #include <utility>
 #include <memory>
 #include <odds_and_ends/node/event/pre_clear.hpp>
@@ -341,7 +342,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                         inline bool listen_to(::odds_and_ends::node::post_insert_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -349,7 +355,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_insert_left_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -357,7 +368,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_insert_right_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -374,14 +390,24 @@ namespace odds_and_ends { namespace node { namespace tree {
                         inline bool listen_to(::odds_and_ends::node::post_clear_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
                         inline bool listen_to(::odds_and_ends::node::post_erase_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -389,7 +415,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_erase_left_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -397,7 +428,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_erase_right_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -405,7 +441,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_rotate_left_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -413,7 +454,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_rotate_right_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_update_height();
+                            this->_update_height(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -432,7 +478,43 @@ namespace odds_and_ends { namespace node { namespace tree {
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
 
                     private:
-                        void _update_height()
+                        static inline IntType _get_height(typename traits::const_pointer p)
+                        {
+                            return p->height();
+                        }
+
+                        void _update_height(::std::false_type)
+                        {
+                            typename traits::child_iterator itr;
+
+                            for (
+                                typename traits::pointer p = (
+                                    ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                        this->derived()
+                                    )
+                                );
+                                p;
+                                p = p->parent()
+                            )
+                            {
+                                p->_height = ::boost::initialized_value;
+
+                                for (itr = p->begin(); itr != p->end(); ++itr)
+                                {
+                                    if (p->_height < _result::_get_height(itr->second))
+                                    {
+                                        p->_height = _result::_get_height(itr->second);
+                                    }
+                                }
+
+                                if (p->begin() != p->end())
+                                {
+                                    ++p->_height;
+                                }
+                            }
+                        }
+
+                        void _update_height(::std::true_type)
                         {
                             typename traits::child_iterator itr;
 

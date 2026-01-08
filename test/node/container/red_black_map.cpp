@@ -4,7 +4,6 @@
 #include <functional>
 #include <initializer_list>
 #include <string>
-#include <cstring>
 #include <odds_and_ends/node/container/map.hpp>
 #include <odds_and_ends/node/balancer/left_leaning_red_black_tree.hpp>
 #include <odds_and_ends/node/red_black.hpp>
@@ -139,6 +138,8 @@ void output_tree(node_itr itr)
         ::std::cout << ", and has size " << itr->size() << '.' << ::std::endl;
     }
 }
+
+#include <cstring>
 
 bool your_str_equal(char const* lhs, ::std::string const& rhs)
 {

@@ -8,6 +8,7 @@
 #include <odds_and_ends/node/container/stack.hpp>
 #include <odds_and_ends/node/traversal_state.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_forward_iterator.hpp>
+#include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/placeholders.hpp>
@@ -30,6 +31,7 @@ namespace odds_and_ends { namespace node {
         };
 
     public:
+        typedef ::odds_and_ends::node::pre_order_tree_iterator<Node,IsReverse,StackGen> type;
         typedef ::std::forward_iterator_tag iterator_category;
         typedef Node value_type;
         typedef typename ::boost::mpl::if_<
@@ -162,6 +164,8 @@ namespace odds_and_ends { namespace node {
         pre_order_tree_iterator operator++(int);
 
     private:
+        static pointer _get(_child_iterator itr, ::boost::mpl::true_);
+        static pointer _get(_child_iterator itr, ::boost::mpl::false_);
         void _push(::boost::mpl::false_);
         void _push(::boost::mpl::true_);
         void _clear_itr_stack(::boost::mpl::false_);
@@ -437,6 +441,20 @@ namespace odds_and_ends { namespace node {
         return this->_current_ptr;
     }
 
+    template <typename Node, typename IsR, typename SG>
+    inline typename pre_order_tree_iterator<Node,IsR,SG>::pointer
+        pre_order_tree_iterator<Node,IsR,SG>::_get(_child_iterator itr, ::boost::mpl::true_)
+    {
+        return ::std::pointer_traits<pointer>::pointer_to(*itr);
+    }
+
+    template <typename Node, typename IsR, typename SG>
+    inline typename pre_order_tree_iterator<Node,IsR,SG>::pointer
+        pre_order_tree_iterator<Node,IsR,SG>::_get(_child_iterator itr, ::boost::mpl::false_)
+    {
+        return itr->second;
+    }
+
     template <typename Node, typename IsReverse, typename StackGen>
     inline pre_order_tree_iterator<Node,IsReverse,StackGen>&
         pre_order_tree_iterator<Node,IsReverse,StackGen>::operator++()
@@ -480,8 +498,10 @@ namespace odds_and_ends { namespace node {
                         this->_itr_stack.pop();
                         this->_node_stack.push(this->_current_ptr);
                         this->_itr_stack.push(this->_current_itr);
-                        this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(
-                            *this->_current_itr
+                        this->_current_ptr = type::_get(
+                            this->_current_itr,
+                            ::odds_and_ends::static_introspection::nested_type
+                            ::has_traits<typename _child_iterator::value_type>()
                         );
                         this->_push(IsReverse());
                         is_post_order = false;
@@ -492,8 +512,10 @@ namespace odds_and_ends { namespace node {
         else
         {
             this->_node_stack.push(this->_current_ptr);
-            this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(
-                *(this->_current_itr = this->_itr_stack.top())
+            this->_current_ptr = type::_get(
+                (this->_current_itr = this->_itr_stack.top()),
+                ::odds_and_ends::static_introspection::nested_type
+                ::has_traits<typename _child_iterator::value_type>()
             );
             this->_push(IsReverse());
         }

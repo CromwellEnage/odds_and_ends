@@ -3,6 +3,7 @@
 #ifndef ODDS_AND_ENDS__NODE__DATA_HPP
 #define ODDS_AND_ENDS__NODE__DATA_HPP
 
+#include <type_traits>
 #include <utility>
 #include <memory>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
@@ -21,6 +22,7 @@
 #include <odds_and_ends/composite_type/event/move_assignment.hpp>
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
+#include <boost/mpl/if.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 
 namespace odds_and_ends { namespace node {
@@ -41,12 +43,12 @@ namespace odds_and_ends { namespace node {
                         Derived
                     >::type _composite_parent_t;
 
-                    class _result : public _composite_parent_t
+                    class _with_mutable_T : public _composite_parent_t
                     {
                         T _data;
 
                     protected:
-                        inline explicit _result(
+                        inline explicit _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::default_constructor_1st_stage_event const& e
                         ) : _composite_parent_t(e), _data()
@@ -63,7 +65,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename Alloc, typename ...Args>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::std::allocator_arg_t const& o,
                             Alloc const& alloc,
                             Args&& ...args
@@ -89,7 +91,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename A0, typename ...Args>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::variadic_constructor_1st_stage_event const& e,
                             A0&& a0,
@@ -120,7 +122,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename ArgumentPack>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::arg_pack_constructor_1st_stage_event const& e,
                             ArgumentPack const& arg_pack
@@ -140,14 +142,13 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename Arg>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::conversion_constructor_1st_stage_event const& e,
                             Arg const& arg
                         ) : _composite_parent_t(e, arg), _data(arg)
                         {
                         }
-
 
                         template <typename Arg>
                         inline bool
@@ -161,7 +162,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename Copy>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::coercive_copy_constructor_event const& e,
                             Copy const& copy
@@ -170,7 +171,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename Copy, typename Alloc>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::coercive_copy_constructor_event const& e,
                             Copy const& copy,
@@ -228,7 +229,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename Source>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::coercive_move_constructor_event const& e,
                             Source&& source
@@ -238,7 +239,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                         template <typename Source, typename Alloc>
-                        inline _result(
+                        inline _with_mutable_T(
                             ::odds_and_ends::composite_type
                             ::coercive_move_constructor_event const& e,
                             Source&& source,
@@ -309,7 +310,7 @@ namespace odds_and_ends { namespace node {
                         }
 
                     public:
-                        inline ~_result()
+                        inline ~_with_mutable_T()
                         {
                         }
 
@@ -328,11 +329,299 @@ namespace odds_and_ends { namespace node {
                             return this->_data;
                         }
 
-                        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
+                        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_with_mutable_T)
+                    };
+
+                    class _with_const_T : public _composite_parent_t
+                    {
+                        T _data;
+
+                    protected:
+                        inline explicit _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::default_constructor_1st_stage_event const& e
+                        ) : _composite_parent_t(e), _data()
+                        {
+                        }
+
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::default_constructor_2nd_stage_event const& e
+                            )
+                        {
+                            return _composite_parent_t::post_construct(e);
+                        }
+
+                        template <typename Alloc, typename ...Args>
+                        inline _with_const_T(
+                            ::std::allocator_arg_t const& o,
+                            Alloc const& alloc,
+                            Args&& ...args
+                        ) : _composite_parent_t(o, alloc, ::std::forward<Args>(args)...),
+                            _data(::std::forward<Args>(args)...)
+                        {
+                        }
+
+                        template <typename Alloc, typename ...Args>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::allocator_constructor_2nd_stage_event const& e,
+                                Alloc const& alloc,
+                                Args&& ...args
+                            )
+                        {
+                            return _composite_parent_t::post_construct(
+                                e,
+                                alloc,
+                                ::std::forward<Args>(args)...
+                            );
+                        }
+
+                        template <typename A0, typename ...Args>
+                        inline _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::variadic_constructor_1st_stage_event const& e,
+                            A0&& a0,
+                            Args&& ...args
+                        ) : _composite_parent_t(
+                                e,
+                                ::std::forward<A0>(a0),
+                                ::std::forward<Args>(args)...
+                            ),
+                            _data(::std::forward<A0>(a0), ::std::forward<Args>(args)...)
+                        {
+                        }
+
+                        template <typename A0, typename ...Args>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::variadic_constructor_2nd_stage_event const& e,
+                                A0&& a0,
+                                Args&&... args
+                            )
+                        {
+                            return _composite_parent_t::post_construct(
+                                e,
+                                ::std::forward<A0>(a0),
+                                ::std::forward<Args>(args)...
+                            );
+                        }
+
+                        template <typename ArgumentPack>
+                        inline _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::arg_pack_constructor_1st_stage_event const& e,
+                            ArgumentPack const& arg_pack
+                        ) : _composite_parent_t(e, arg_pack), _data(arg_pack)
+                        {
+                        }
+
+                        template <typename ArgumentPack>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::arg_pack_constructor_2nd_stage_event const& e,
+                                ArgumentPack const& arg_pack
+                            )
+                        {
+                            return _composite_parent_t::post_construct(e, arg_pack);
+                        }
+
+                        template <typename Arg>
+                        inline _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::conversion_constructor_1st_stage_event const& e,
+                            Arg const& arg
+                        ) : _composite_parent_t(e, arg), _data(arg)
+                        {
+                        }
+
+                        template <typename Arg>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_constructor_2nd_stage_event const& e,
+                                Arg const& arg
+                            )
+                        {
+                            return _composite_parent_t::post_construct(e, arg);
+                        }
+
+                        template <typename Copy>
+                        inline _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::coercive_copy_constructor_event const& e,
+                            Copy const& copy
+                        ) : _composite_parent_t(e, copy), _data(*copy)
+                        {
+                        }
+
+                        template <typename Copy, typename Alloc>
+                        inline _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::coercive_copy_constructor_event const& e,
+                            Copy const& copy,
+                            Alloc const& alloc
+                        ) : _composite_parent_t(e, copy, alloc), _data(*copy)
+                        {
+                        }
+
+                        template <typename Copy>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_assignment_event const& e,
+                                Copy const& copy
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(e, copy);
+                            this->_data = *copy;
+                            return result;
+                        }
+
+                        template <typename Copy, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_assignment_event const& e,
+                                Copy const& copy,
+                                Alloc const& alloc
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, copy, alloc)
+                            );
+                            this->_data = *copy;
+                            return result;
+                        }
+
+                        template <typename Copy>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_2nd_stage_event const& e,
+                                Copy const& copy
+                            )
+                        {
+                            return _composite_parent_t::post_construct(e, copy);
+                        }
+
+                        template <typename Copy, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::copy_2nd_stage_event const& e,
+                                Copy const& copy,
+                                Alloc const& alloc
+                            )
+                        {
+                            return _composite_parent_t::post_construct(e, copy, alloc);
+                        }
+
+                        template <typename Source>
+                        inline _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::coercive_move_constructor_event const& e,
+                            Source&& source
+                        ) : _composite_parent_t(e, static_cast<Source&&>(source)),
+                            _data(*source)
+                        {
+                        }
+
+                        template <typename Source, typename Alloc>
+                        inline _with_const_T(
+                            ::odds_and_ends::composite_type
+                            ::coercive_move_constructor_event const& e,
+                            Source&& source,
+                            Alloc const& alloc
+                        ) : _composite_parent_t(e, static_cast<Source&&>(source), alloc),
+                            _data(*source)
+                        {
+                        }
+
+                        template <typename Source>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_assignment_event const& e,
+                                Source&& source
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source)
+                            );
+                            this->_data = ::std::move(*source);
+                            return result;
+                        }
+
+                        template <typename Source, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_assignment_event const& e,
+                                Source&& source,
+                                Alloc const& alloc
+                            )
+                        {
+                            bool const result = _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source),
+                                alloc
+                            );
+                            this->_data = ::std::move(*source);
+                            return result;
+                        }
+
+                        template <typename Source>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_2nd_stage_event const& e,
+                                Source&& source
+                            )
+                        {
+                            return _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source)
+                            );
+                        }
+
+                        template <typename Source, typename Alloc>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type::move_2nd_stage_event const& e,
+                                Source&& source,
+                                Alloc const& alloc
+                            )
+                        {
+                            return _composite_parent_t::post_construct(
+                                e,
+                                static_cast<Source&&>(source),
+                                alloc
+                            );
+                        }
+
+                    public:
+                        inline ~_with_const_T()
+                        {
+                        }
+
+                        struct traits : _composite_parent_t::traits
+                        {
+                            typedef T value_type;
+                        };
+
+                        inline T& operator*() const
+                        {
+                            return this->_data;
+                        }
+
+                        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_with_const_T)
                     };
 
                 public:
-                    typedef _result type;
+                    typedef typename ::boost::mpl::if_<
+                        ::std::is_const<T>,
+                        _with_const_T,
+                        _with_mutable_T
+                    >::type type;
                 };
             };
         };

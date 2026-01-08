@@ -8,6 +8,7 @@
 #include <odds_and_ends/node/container/stack.hpp>
 #include <odds_and_ends/node/traversal_state.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_bidirectional_iterator.hpp>
+#include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/placeholders.hpp>
@@ -47,6 +48,7 @@ namespace odds_and_ends { namespace node {
         >::type _child_iterator;
 
     public:
+        typedef ::odds_and_ends::node::depth_first_tree_iterator<Node,IsReverse,StackGen> type;
         typedef typename ::boost::mpl::if_<
             ::odds_and_ends::static_introspection::concept
             ::is_legacy_bidirectional_iterator<_child_iterator>,
@@ -165,6 +167,12 @@ namespace odds_and_ends { namespace node {
         depth_first_tree_iterator operator--(int);
 
     private:
+        static pointer _get(_child_iterator itr, ::boost::mpl::true_);
+        static pointer _get(_child_iterator itr, ::boost::mpl::false_);
+        static ::odds_and_ends::node::traversal_state _inc_state(::boost::mpl::true_);
+        static ::odds_and_ends::node::traversal_state _inc_state(::boost::mpl::false_);
+        static ::odds_and_ends::node::traversal_state _dec_state(::boost::mpl::true_);
+        static ::odds_and_ends::node::traversal_state _dec_state(::boost::mpl::false_);
         _child_iterator _current_begin(::boost::mpl::false_);
         _child_iterator _current_begin(::boost::mpl::true_);
         _child_iterator _current_end(::boost::mpl::false_);
@@ -196,6 +204,34 @@ namespace odds_and_ends { namespace node {
 namespace odds_and_ends { namespace node {
 
     template <typename Node, typename IsReverse, typename StackGen>
+    inline ::odds_and_ends::node::traversal_state
+        depth_first_tree_iterator<Node,IsReverse,StackGen>::_inc_state(::boost::mpl::true_)
+    {
+        return ::odds_and_ends::node::pre_order_traversal;
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
+    inline ::odds_and_ends::node::traversal_state
+        depth_first_tree_iterator<Node,IsReverse,StackGen>::_inc_state(::boost::mpl::false_)
+    {
+        return ::odds_and_ends::node::post_order_traversal;
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
+    inline ::odds_and_ends::node::traversal_state
+        depth_first_tree_iterator<Node,IsReverse,StackGen>::_dec_state(::boost::mpl::true_)
+    {
+        return ::odds_and_ends::node::post_order_traversal;
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
+    inline ::odds_and_ends::node::traversal_state
+        depth_first_tree_iterator<Node,IsReverse,StackGen>::_dec_state(::boost::mpl::false_)
+    {
+        return ::odds_and_ends::node::pre_order_traversal;
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
     template <typename ...Args>
     depth_first_tree_iterator<Node,IsReverse,StackGen>::depth_first_tree_iterator(
         reference node,
@@ -205,11 +241,7 @@ namespace odds_and_ends { namespace node {
         _itr_stack(::std::forward<Args>(args)...),
         _current_ptr(is_end ? nullptr : ::std::pointer_traits<pointer>::pointer_to(node)),
         _root_ptr(::std::pointer_traits<pointer>::pointer_to(node)),
-        _state(
-            is_end ?
-            ::odds_and_ends::node::no_traversal :
-            ::odds_and_ends::node::pre_order_traversal
-        )
+        _state(is_end ? ::odds_and_ends::node::no_traversal : type::_dec_state(IsReverse()))
     {
     }
 
@@ -396,28 +428,46 @@ namespace odds_and_ends { namespace node {
         return this->_current_ptr;
     }
 
+    template <typename Node, typename IsR, typename SG>
+    inline typename depth_first_tree_iterator<Node,IsR,SG>::pointer
+        depth_first_tree_iterator<Node,IsR,SG>::_get(_child_iterator itr, ::boost::mpl::true_)
+    {
+        return ::std::pointer_traits<pointer>::pointer_to(*itr);
+    }
+
+    template <typename Node, typename IsR, typename SG>
+    inline typename depth_first_tree_iterator<Node,IsR,SG>::pointer
+        depth_first_tree_iterator<Node,IsR,SG>::_get(_child_iterator itr, ::boost::mpl::false_)
+    {
+        return itr->second;
+    }
+
     template <typename Node, typename IsReverse, typename StackGen>
     inline depth_first_tree_iterator<Node,IsReverse,StackGen>&
         depth_first_tree_iterator<Node,IsReverse,StackGen>::operator++()
     {
-        if (::odds_and_ends::node::pre_order_traversal == this->_state)
+        if (type::_dec_state(IsReverse()) == this->_state)
         {
             _child_iterator itr = this->_current_begin(IsReverse());
 
             if (itr == this->_current_end(IsReverse()))
             {
                 // No children: change state.
-                this->_state = ::odds_and_ends::node::post_order_traversal;
+                this->_state = type::_inc_state(IsReverse());
             }
             else
             {
                 // Go deeper.
                 this->_node_stack.push(this->_current_ptr);
-                this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*itr);
+                this->_current_ptr = type::_get(
+                    itr,
+                    ::odds_and_ends::static_introspection::nested_type
+                    ::has_traits<typename _child_iterator::value_type>()
+                );
                 this->_itr_stack.push(itr);
             }
         }
-        else if (::odds_and_ends::node::post_order_traversal == this->_state)
+        else if (type::_inc_state(IsReverse()) == this->_state)
         {
             if (this->_node_stack.empty())
             {
@@ -439,9 +489,13 @@ namespace odds_and_ends { namespace node {
                 if (++itr != this->_current_end(IsReverse()))
                 {
                     // Traverse the next sibling.
-                    this->_state = ::odds_and_ends::node::pre_order_traversal;
+                    this->_state = type::_dec_state(IsReverse());
                     this->_node_stack.push(this->_current_ptr);
-                    this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*itr);
+                    this->_current_ptr = type::_get(
+                        itr,
+                        ::odds_and_ends::static_introspection::nested_type
+                        ::has_traits<typename _child_iterator::value_type>()
+                    );
                     this->_itr_stack.push(itr);
                 }
             }
@@ -467,24 +521,28 @@ namespace odds_and_ends { namespace node {
     inline depth_first_tree_iterator<Node,IsReverse,StackGen>&
         depth_first_tree_iterator<Node,IsReverse,StackGen>::operator--()
     {
-        if (::odds_and_ends::node::post_order_traversal == this->_state)
+        if (type::_inc_state(IsReverse()) == this->_state)
         {
             _child_iterator itr = this->_current_end(IsReverse());
 
             if (itr == this->_current_begin(IsReverse()))
             {
                 // No children: change state.
-                this->_state = ::odds_and_ends::node::pre_order_traversal;
+                this->_state = type::_dec_state(IsReverse());
             }
             else
             {
                 // Go deeper.
                 this->_node_stack.push(this->_current_ptr);
-                this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*(--itr));
+                this->_current_ptr = type::_get(
+                    (--itr),
+                    ::odds_and_ends::static_introspection::nested_type
+                    ::has_traits<typename _child_iterator::value_type>()
+                );
                 this->_itr_stack.push(itr);
             }
         }
-        else if (::odds_and_ends::node::pre_order_traversal == this->_state)
+        else if (type::_dec_state(IsReverse()) == this->_state)
         {
             if (this->_node_stack.empty())
             {
@@ -506,9 +564,13 @@ namespace odds_and_ends { namespace node {
                 if (this->_current_begin(IsReverse()) != itr)
                 {
                     // Traverse the previous sibling.
-                    this->_state = ::odds_and_ends::node::post_order_traversal;
+                    this->_state = type::_inc_state(IsReverse());
                     this->_node_stack.push(this->_current_ptr);
-                    this->_current_ptr = ::std::pointer_traits<pointer>::pointer_to(*(--itr));
+                    this->_current_ptr = type::_get(
+                        (--itr),
+                        ::odds_and_ends::static_introspection::nested_type
+                        ::has_traits<typename _child_iterator::value_type>()
+                    );
                     this->_itr_stack.push(itr);
                 }
             }
@@ -517,7 +579,7 @@ namespace odds_and_ends { namespace node {
         {
             BOOST_ASSERT_MSG(this->_root_ptr, "Do not decrement past-the-end of nullptr!");
             this->_current_ptr = this->_root_ptr;
-            this->_state = ::odds_and_ends::node::post_order_traversal;
+            this->_state = type::_inc_state(IsReverse());
         }
 
         return *this;

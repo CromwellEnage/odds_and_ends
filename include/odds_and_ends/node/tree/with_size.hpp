@@ -4,6 +4,7 @@
 #define ODDS_AND_ENDS__NODE__TREE__WITH_SIZE_HPP
 
 #include <cstddef>
+#include <type_traits>
 #include <utility>
 #include <memory>
 #include <odds_and_ends/node/event/pre_clear.hpp>
@@ -351,7 +352,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                         bool listen_to(::odds_and_ends::node::post_insert_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_post_insert_update_size();
+                            this->_post_insert_update_size(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -359,7 +365,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_insert_left_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_post_insert_update_size();
+                            this->_post_insert_update_size(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -367,7 +378,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                             listen_to(::odds_and_ends::node::post_insert_right_tree_event const& e)
                         {
                             bool const result = _composite_parent_t::listen_to(e);
-                            this->_post_insert_update_size();
+                            this->_post_insert_update_size(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -441,7 +457,37 @@ namespace odds_and_ends { namespace node { namespace tree {
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)
 
                     private:
-                        void _post_insert_update_size()
+                        static inline IntType _get_size(typename traits::const_pointer p)
+                        {
+                            return p->size();
+                        }
+
+                        void _post_insert_update_size(::std::false_type)
+                        {
+                            typename traits::child_iterator itr;
+
+                            for (
+                                typename traits::pointer p = (
+                                    ::std::pointer_traits<typename traits::pointer>::pointer_to(
+                                        this->derived()
+                                    )
+                                );
+                                p;
+                                p = p->parent()
+                            )
+                            {
+                                p->_size = ::boost::initialized_value;
+
+                                for (itr = p->begin(); itr != p->end(); ++itr)
+                                {
+                                    p->_size += _result::_get_size(itr->second);
+                                }
+
+                                ++p->_size;
+                            }
+                        }
+
+                        void _post_insert_update_size(::std::true_type)
                         {
                             typename traits::child_iterator itr;
 

@@ -8,7 +8,8 @@
 #include <odds_and_ends/node/container/stack.hpp>
 #include <odds_and_ends/node/traversal_state.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_forward_iterator.hpp>
-#include <odds_and_ends/static_introspection/member_function/has_get_allocator.hpp>
+#include <odds_and_ends/static_introspection/concept/is_runtime_pair.hpp>
+#include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/placeholders.hpp>
@@ -31,6 +32,7 @@ namespace odds_and_ends { namespace node {
         };
 
     public:
+        typedef ::odds_and_ends::node::post_order_tree_iterator<Node,IsReverse,StackGen> type;
         typedef ::std::forward_iterator_tag iterator_category;
         typedef Node value_type;
         typedef typename ::boost::mpl::if_<
@@ -144,6 +146,12 @@ namespace odds_and_ends { namespace node {
         post_order_tree_iterator operator++(int);
 
     private:
+        template <typename Itr>
+        static pointer _get(Itr itr, ::boost::mpl::true_);
+
+        template <typename Itr>
+        static pointer _get(Itr itr, ::boost::mpl::false_);
+
         template <typename S>
         void _init(S&, ::boost::mpl::false_);
 
@@ -176,6 +184,7 @@ namespace odds_and_ends { namespace node {
 
 #include <utility>
 #include <memory>
+#include <odds_and_ends/static_introspection/member_function/has_get_allocator.hpp>
 
 namespace odds_and_ends { namespace node {
 
@@ -451,6 +460,22 @@ namespace odds_and_ends { namespace node {
     }
 
     template <typename Node, typename IsReverse, typename StackGen>
+    template <typename Itr>
+    inline typename post_order_tree_iterator<Node,IsReverse,StackGen>::pointer
+        post_order_tree_iterator<Node,IsReverse,StackGen>::_get(Itr itr, ::boost::mpl::true_)
+    {
+        return ::std::pointer_traits<pointer>::pointer_to(*itr);
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
+    template <typename Itr>
+    inline typename post_order_tree_iterator<Node,IsReverse,StackGen>::pointer
+        post_order_tree_iterator<Node,IsReverse,StackGen>::_get(Itr itr, ::boost::mpl::false_)
+    {
+        return itr->second;
+    }
+
+    template <typename Node, typename IsReverse, typename StackGen>
     template <typename S>
     void post_order_tree_iterator<Node,IsReverse,StackGen>::_init(S& s, ::boost::mpl::false_)
     {
@@ -469,7 +494,14 @@ namespace odds_and_ends { namespace node {
                     s.push(itr);
                 }
 
-                this->_stack.push(::std::pointer_traits<pointer>::pointer_to(*s.top()));
+                this->_stack.push(
+                    type::_get(
+                        s.top(),
+                        ::odds_and_ends::static_introspection::nested_type::has_traits<
+                            typename ::std::remove_const<typename S::value_type>::type::value_type
+                        >()
+                    )
+                );
                 s.pop();
 
                 if (s.empty())
@@ -513,7 +545,14 @@ namespace odds_and_ends { namespace node {
                     s.push(itr);
                 }
 
-                this->_stack.push(::std::pointer_traits<pointer>::pointer_to(*s.top()));
+                this->_stack.push(
+                    type::_get(
+                        s.top(),
+                        ::odds_and_ends::static_introspection::nested_type::has_traits<
+                            typename ::std::remove_const<typename S::value_type>::type::value_type
+                        >()
+                    )
+                );
                 s.pop();
 
                 if (s.empty())
