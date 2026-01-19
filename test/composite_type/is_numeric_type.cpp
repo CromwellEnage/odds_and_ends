@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <boost/mpl/deque.hpp>
 #include <boost/mpl/quote.hpp>
@@ -30,22 +30,33 @@ typedef ::odds_and_ends::composite_type::composite_type<
     >
 > foo;
 
-/*
 #include <odds_and_ends/static_introspection/concept/is_math_real_type.hpp>
 
 void test_math_real_type()
 {
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_math_real_type<foo>::value
+        ::odds_and_ends::static_introspection::concept::is_math_real_type<foo>::value,
+        "'foo' is a Real Type."
     );
 }
 
 #include <odds_and_ends/static_introspection/concept/is_math_rational_type.hpp>
+#include <odds_and_ends/static_introspection/free_function/has_numerator.hpp>
+#include <odds_and_ends/static_introspection/free_function/has_denominator.hpp>
 
 void test_math_rational_type()
 {
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_math_rational_type<foo>::value
+        !::odds_and_ends::static_introspection::concept::is_math_rational_type<foo>::value,
+        "'foo' is not a Rational Type."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::free_function::has_numerator<foo>::value,
+        "'foo' specializes the free function has_numerator()."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::free_function::has_denominator<foo>::value,
+        "'foo' specializes the free function has_denominator()."
     );
 }
 
@@ -54,7 +65,8 @@ void test_math_rational_type()
 void test_math_mixed_numeric_type()
 {
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_math_mixed_numeric_type<foo>::value
+        ::odds_and_ends::static_introspection::concept::is_math_mixed_numeric_type<foo>::value,
+        "'foo' is a Mixed Numeric Type."
     );
 }
 
@@ -65,20 +77,15 @@ void test_math_mixed_numeric_type()
 void test_math_complex_type()
 {
     static_assert(
-        !::odds_and_ends::static_introspection::concept::is_math_complex_type<foo>::value
-    );
-    static_assert(
-        ::odds_and_ends::static_introspection::concept::is_math_complex_type<
-            ::std::complex<foo>,
-            ::boost::mpl::true_
-        >::value
+        ::odds_and_ends::static_introspection::concept
+        ::is_math_complex_type< ::std::complex<foo>,::boost::mpl::true_>::value,
+        "'foo' is a strict Complex Type."
     );
 }
-*/
 
 #include <boost/core/lightweight_test.hpp>
 
-int main(int argc, char** argv)
+void test_00()
 {
     foo unit(1, 0, 1);
 
@@ -123,6 +130,7 @@ int main(int argc, char** argv)
     BOOST_TEST(shoe_size == shoe_size_minus_1 + unit);
     BOOST_TEST(shoe_size * shoe_size_inverse == unit);
     BOOST_TEST(shoe_size / shoe_size == unit);
+    BOOST_TEST(-shoe_size / shoe_size == -unit);
 
     using ::std::swap;
     swap(shoe_size, shoe_size_inverse);
@@ -132,11 +140,51 @@ int main(int argc, char** argv)
     BOOST_TEST(4 == shoe_size_inverse.integral_part());
     BOOST_TEST(5 == numerator(shoe_size_inverse.fractional_part()));
     BOOST_TEST(8 == denominator(shoe_size_inverse.fractional_part()));
+}
 
-//    test_math_real_type();
-//    test_math_rational_type();
-//    test_math_mixed_numeric_type();
-//    test_math_complex_type();
+void test_01()
+{
+    ::boost::multiprecision::cpp_rational r_p_8_7(8, 7);
+    foo m(r_p_8_7);
+
+    BOOST_TEST(1 == m.integral_part());
+    BOOST_TEST(1 == numerator(m.fractional_part()));
+    BOOST_TEST(7 == denominator(m.fractional_part()));
+
+    m = -r_p_8_7;
+
+    BOOST_TEST(-1 == m.integral_part());
+    BOOST_TEST(-1 == numerator(m.fractional_part()));
+    BOOST_TEST(7 == denominator(m.fractional_part()));
+}
+
+#include <boost/rational.hpp>
+
+void test_02()
+{
+    ::boost::rational<int> r_p_8_7(8, 7);
+    foo m(r_p_8_7);
+
+    BOOST_TEST(1 == m.integral_part());
+    BOOST_TEST(1 == numerator(m.fractional_part()));
+    BOOST_TEST(7 == denominator(m.fractional_part()));
+
+    m = -r_p_8_7;
+
+    BOOST_TEST(-1 == m.integral_part());
+    BOOST_TEST(-1 == numerator(m.fractional_part()));
+    BOOST_TEST(7 == denominator(m.fractional_part()));
+}
+
+int main(int argc, char** argv)
+{
+    test_math_real_type();
+    test_math_rational_type();
+    test_math_mixed_numeric_type();
+    test_math_complex_type();
+    test_00();
+    test_01();
+    test_02();
     return ::boost::report_errors();
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <odds_and_ends/node/data.hpp>
 #include <odds_and_ends/node/tree/base.hpp>

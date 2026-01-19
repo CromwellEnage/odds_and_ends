@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_DIVISION_ASSIGNABLE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_DIVISION_ASSIGNABLE_HPP
@@ -10,14 +10,14 @@
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T, typename Divisor, typename ResultPlaceholderExpr>
-    struct is_division_assignable_impl :
-        ::boost::mpl::apply1<
+    struct is_division_assignable_impl
+    {
+        typedef typename ::boost::mpl::apply1<
             ResultPlaceholderExpr,
             decltype(
                 ::odds_and_ends::static_introspection::declmref<T>() /= ::std::declval<Divisor>()
             )
-        >::type
-    {
+        >::type type;
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
@@ -54,7 +54,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
 #include <odds_and_ends/static_introspection/remove_vref.hpp>
-#include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
@@ -65,15 +65,15 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
             typename ::odds_and_ends::static_introspection::remove_vref<T>::type
         >::type
     >
-    struct is_division_assignable_nvt :
-        ::boost::mpl::if_<
+    struct is_division_assignable_nvt
+    {
+        typedef typename ::boost::mpl::eval_if<
             typename ::odds_and_ends::static_introspection::concept
             ::_detail::has_division_assignable_expr<T,Divisor>::type,
             ::odds_and_ends::static_introspection::concept::_detail
             ::is_division_assignable_impl<T,Divisor,ResultPlaceholderExpr>,
             ::boost::mpl::false_
-        >::type
-    {
+        >::type type;
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
@@ -90,23 +90,23 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
             typename ::odds_and_ends::static_introspection::remove_vref<T>::type
         >::type
     >
-    struct is_division_assignable_wvt :
-        ::boost::mpl::if_<
+    class is_division_assignable_wvt
+    {
+        typedef typename ::odds_and_ends::static_introspection
+        ::nested_type::value_type_of<T>::type _T_value;
+
+    public:
+        typedef typename ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept::_detail::is_division_assignable_nvt<
-                typename ::odds_and_ends::static_introspection
-                ::nested_type::value_type_of<T>::type,
-                ::odds_and_ends::static_introspection::is_lvalue_reference_of<
-                    ::boost::mpl::_,
-                    typename ::odds_and_ends::static_introspection
-                    ::nested_type::value_type_of<T>::type
-                >,
+                _T_value,
+                ::odds_and_ends::static_introspection
+                ::is_lvalue_reference_of< ::boost::mpl::_,_T_value>,
                 Divisor
             >,
             ::odds_and_ends::static_introspection::concept::_detail
             ::is_division_assignable_nvt<T,ResultPlaceholderExpr,Divisor>,
             ::boost::mpl::false_
-        >::type
-    {
+        >::type type;
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
@@ -117,7 +117,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
 
     template <typename T, typename Divisor, typename ResultPlaceholderExpr>
     struct is_division_assignable :
-        ::boost::mpl::if_<
+        ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection
             ::concept::_detail::is_ublas_expression<T>,
             ::odds_and_ends::static_introspection::concept::_detail
@@ -138,7 +138,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
         T,
         ::odds_and_ends::use_default_policy,
         ResultPlaceholderExpr
-    > : ::boost::mpl::if_<
+    > : ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection
             ::concept::_detail::is_ublas_expression<T>,
             ::odds_and_ends::static_introspection::concept::_detail

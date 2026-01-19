@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <odds_and_ends/static_introspection/concept/is_value_generator.hpp>
 #include <boost/random/linear_congruential.hpp>

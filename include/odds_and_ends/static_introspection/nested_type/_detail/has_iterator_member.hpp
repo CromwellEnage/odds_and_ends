@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2025 Cromwell D. Enage
+// Copyright (C) 2011-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__DETAIL__HAS_ITERATOR_MEMBER_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__DETAIL__HAS_ITERATOR_MEMBER_HPP
@@ -15,7 +15,7 @@ namespace _detail {
 }}}  // namespace odds_and_ends::static_introspection::nested_type
 
 #include <type_traits>
-#include <odds_and_ends/static_introspection/concept/_detail/has_iterator_ops.hpp>
+#include <odds_and_ends/static_introspection/concept/_detail/has_iterator_operators.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
 
@@ -31,7 +31,7 @@ namespace _detail {
         typedef typename ::boost::mpl::if_<
             ::std::is_void<_T_i>,
             ::boost::mpl::false_,
-            ::odds_and_ends::static_introspection::concept::_detail::has_iterator_ops<_T_i>
+            ::odds_and_ends::static_introspection::concept::_detail::has_iterator_operators<_T_i>
         >::type type;
     };
 
@@ -44,7 +44,7 @@ namespace _detail {
         typedef typename ::boost::mpl::if_<
             ::std::is_void<_T_i>,
             ::boost::mpl::false_,
-            ::odds_and_ends::static_introspection::concept::_detail::has_iterator_ops<_T_i>
+            ::odds_and_ends::static_introspection::concept::_detail::has_iterator_operators<_T_i>
         >::type type;
     };
 }  // namespace _detail

@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION_FWD_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION_FWD_HPP
@@ -657,7 +657,7 @@ namespace odds_and_ends { namespace static_introspection { namespace nested_type
     template <typename T1, typename T2>
     struct is_element_of;
 
-    template <typename T, typename ResultPlaceholderExpr>
+    template <typename T>
     struct has_index;
 
     template <typename T>
@@ -1268,16 +1268,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_random_access_range;
 
     template <typename T>
-    struct is_indexable_container;
-
-    template <typename T>
-    struct maybe_contiguous_container;
-
-    template <typename T>
     struct is_multi_array_index_range;
-
-    template <typename T>
-    struct is_multi_array;
 
     template <typename T>
     struct is_legacy_associative_container;
@@ -1337,7 +1328,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_queue;
 
     template <typename T>
-    struct is_stack_or_std_heap;
+    struct is_stack_or_heap;
 
     template <typename T>
     struct is_boost_heap;
@@ -1501,14 +1492,7 @@ namespace odds_and_ends { namespace static_introspection { namespace member_data
         typename PlaceholderExpr =
         ::odds_and_ends::static_introspection::nested_type::is_size_type_of< ::boost::mpl::_,T>
     >
-    struct has_max_size_static_const;
-
-    template <
-        typename T,
-        typename PlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_size_type_of< ::boost::mpl::_,T>
-    >
-    struct has_dimensionality_static_const;
+    struct has_dimensionality;
 }}}  // namespace odds_and_ends::static_introspection::member_data
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
@@ -1555,20 +1539,6 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
         ::odds_and_ends::static_introspection::nested_type::is_int_type_of< ::boost::mpl::_,T>
     >
     struct has_denominator;
-
-    template <
-        typename T,
-        typename ResultPlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_int_type_of< ::boost::mpl::_,T>
-    >
-    struct has_integral_part;
-
-    template <
-        typename T,
-        typename ResultPlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_int_type_of< ::boost::mpl::_,T>
-    >
-    struct has_fractional_part;
 
     template <
         typename T,
@@ -1848,6 +1818,13 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
         typename PlaceholderExpr = ::odds_and_ends
         ::static_introspection::is_convertible_to_cref_of< ::boost::mpl::_,T>
     >
+    struct is_math_integral_type;
+
+    template <
+        typename T,
+        typename PlaceholderExpr = ::odds_and_ends
+        ::static_introspection::is_convertible_to_cref_of< ::boost::mpl::_,T>
+    >
     struct is_math_real_type;
 
     template <
@@ -1856,13 +1833,6 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
         ::odds_and_ends::static_introspection::nested_type::is_int_type_of< ::boost::mpl::_,T>
     >
     struct is_math_rational_type;
-
-    template <
-        typename T,
-        typename PlaceholderExpr =
-        ::odds_and_ends::static_introspection::nested_type::is_int_type_of< ::boost::mpl::_,T>
-    >
-    struct is_math_mixed_numeric_type;
 }}}  // namespace odds_and_ends::static_introspection::concept
 
 #include <odds_and_ends/use_default_policy.hpp>
@@ -2189,6 +2159,21 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
     struct has_get_finish;
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
+namespace odds_and_ends { namespace static_introspection { namespace free_function {
+
+    template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
+    struct has_numerator;
+
+    template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
+    struct has_denominator;
+
+    template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
+    struct has_integral_part;
+
+    template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
+    struct has_fractional_part;
+}}}  // namespace odds_and_ends::static_introspection::free_function
+
 namespace odds_and_ends { namespace static_introspection { namespace concept {
 
     template <typename T, typename U = ::odds_and_ends::use_default_policy>
@@ -2243,6 +2228,9 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
 
     template <typename T, typename ResultPlaceholderExpr = ::odds_and_ends::use_default_policy>
     struct is_value_distribution_with_param;
+
+    template <typename T, typename PlaceholderExpr = ::odds_and_ends::use_default_policy>
+    struct is_math_mixed_numeric_type;
 
     template <typename T, typename Value = ::odds_and_ends::use_default_policy>
     struct is_writable_iterator;
@@ -2417,10 +2405,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_indexable_traversal_iterator;
 
     template <typename T, typename IsStrict = ::boost::mpl::false_>
-    struct is_container;
-
-    template <typename T, typename IsStrict = ::boost::mpl::false_>
-    struct is_reversible_container;
+    struct is_multi_array;
 
     template <typename T, typename IsStrict = ::boost::mpl::false_>
     struct is_ublas_matrix;
@@ -2432,6 +2417,18 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
 #include <boost/mpl/integral_c.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept {
+
+    template <typename T, typename StrictnessLevel = ::boost::mpl::integral_c<unsigned int,0> >
+    struct is_container;
+
+    template <typename T, typename StrictnessLevel = ::boost::mpl::integral_c<unsigned int,0> >
+    struct is_reversible_container;
+
+    template <typename T, typename StrictnessLevel = ::boost::mpl::integral_c<unsigned int,0> >
+    struct is_indexable_container;
+
+    template <typename T, typename StrictnessLevel = ::boost::mpl::integral_c<unsigned int,0> >
+    struct maybe_contiguous_container;
 
     template <typename T, typename StrictnessLevel = ::boost::mpl::integral_c<unsigned int,0> >
     struct is_allocator_aware_container;

@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_ALLOCATOR_AWARE_CONTAINER_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_ALLOCATOR_AWARE_CONTAINER_HPP
@@ -29,7 +29,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
                     ::odds_and_ends::static_introspection::concept::_detail::is_base_container,
                     ::odds_and_ends::static_introspection::concept::_detail::is_mutable_container,
                     ::odds_and_ends::static_introspection::concept
-                    ::_detail::is_const_allocator_aware_container_lvl_4,
+                    ::_detail::is_immutable_allocator_aware_container_lvl_4,
                     ::odds_and_ends::static_introspection::concept::_detail::has_container_iterator
                 >,
                 ::odds_and_ends::static_introspection::concept::_detail::is_container<
@@ -39,7 +39,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
                     ::odds_and_ends::static_introspection::concept::_detail::is_base_container,
                     ::odds_and_ends::static_introspection::concept::_detail::is_mutable_container,
                     ::odds_and_ends::static_introspection::concept
-                    ::_detail::is_const_allocator_aware_container_lvl_2,
+                    ::_detail::is_immutable_allocator_aware_container_lvl_2,
                     ::odds_and_ends::static_introspection::concept::_detail::has_container_iterator
                 >
             >,
@@ -52,7 +52,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
                     ::odds_and_ends::static_introspection::concept::_detail::is_base_container,
                     ::odds_and_ends::static_introspection::concept::_detail::is_mutable_container,
                     ::odds_and_ends::static_introspection::concept
-                    ::_detail::is_const_allocator_aware_container_lvl_1,
+                    ::_detail::is_immutable_allocator_aware_container_lvl_1,
                     ::odds_and_ends::static_introspection::concept::_detail::has_container_iterator
                 >,
                 ::odds_and_ends::static_introspection::concept::_detail::is_container<
@@ -62,7 +62,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
                     ::odds_and_ends::static_introspection::concept::_detail::is_base_container,
                     ::odds_and_ends::static_introspection::concept::_detail::is_mutable_container,
                     ::odds_and_ends::static_introspection::concept
-                    ::_detail::is_const_allocator_aware_container_lvl_1,
+                    ::_detail::is_immutable_allocator_aware_container_lvl_1,
                     ::odds_and_ends::static_introspection::concept::_detail::has_container_iterator
                 >
             >

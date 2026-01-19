@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2025 Cromwell D. Enage
+// Copyright (C) 2011-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__NODE__TREE__ASSOCIATIVE_HPP
 #define ODDS_AND_ENDS__NODE__TREE__ASSOCIATIVE_HPP
@@ -16,6 +16,7 @@
 #include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/conversion_assignment.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/copy_assignment.hpp>
 #include <odds_and_ends/composite_type/event/copy_2nd_stage.hpp>
@@ -24,6 +25,7 @@
 #include <odds_and_ends/composite_type/event/move_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/swap.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
+#include <odds_and_ends/static_introspection/concept/is_legacy_hashed_associative_container.hpp>
 #include <boost/container/map.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/value_init.hpp>
@@ -43,7 +45,6 @@ namespace odds_and_ends { namespace node { namespace tree {
         typename ContainerGenerator = typename ::boost::mpl::lambda<
             ::boost::container::map< ::boost::mpl::_1,::boost::mpl::_2>
         >::type,
-        typename StoresKeyInOptional = ::boost::mpl::true_,
         typename XForm = ::boost::mpl::quote1< ::std::add_pointer>
     >
     struct associative
@@ -67,7 +68,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         _pointer_t
                     >::type _children_t;
 
-                    class _result_with_optional : public _composite_parent_t
+                    class _result_sorted : public _composite_parent_t
                     {
                         typedef ::boost::optional<Key> _key_store_t;
 
@@ -75,7 +76,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         _children_t _children;
 
                     protected:
-                        inline explicit _result_with_optional(
+                        inline explicit _result_sorted(
                             ::odds_and_ends::composite_type
                             ::default_constructor_1st_stage_event const& e
                         ) : _composite_parent_t(e), _key(), _children()
@@ -92,7 +93,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename Alloc, typename ...Args>
-                        inline _result_with_optional(
+                        inline _result_sorted(
                             ::std::allocator_arg_t const& o,
                             Alloc const& alloc,
                             Args&& ...args
@@ -119,7 +120,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename A0, typename ...Args>
-                        inline _result_with_optional(
+                        inline _result_sorted(
                             ::odds_and_ends::composite_type
                             ::variadic_constructor_1st_stage_event const& e,
                             A0&& a0,
@@ -132,6 +133,19 @@ namespace odds_and_ends { namespace node { namespace tree {
                             _key(),
                             _children()
                         {
+                        }
+
+                        template <typename Arg>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            return (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
                         }
 
                         template <typename A0, typename ...Args>
@@ -151,7 +165,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename ArgumentPack>
-                        inline _result_with_optional(
+                        inline _result_sorted(
                             ::odds_and_ends::composite_type
                             ::arg_pack_constructor_1st_stage_event const& e,
                             ArgumentPack const& arg_pack
@@ -171,7 +185,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename Copy>
-                        inline _result_with_optional(
+                        inline _result_sorted(
                             ::odds_and_ends::composite_type
                             ::coercive_copy_constructor_event const& e,
                             Copy const& copy
@@ -200,7 +214,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename Source>
-                        inline _result_with_optional(
+                        inline _result_sorted(
                             ::odds_and_ends::composite_type
                             ::coercive_move_constructor_event const& e,
                             Source&& source
@@ -237,7 +251,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                     public:
-                        inline ~_result_with_optional()
+                        inline ~_result_sorted()
                         {
                         }
 
@@ -258,6 +272,26 @@ namespace odds_and_ends { namespace node { namespace tree {
                         inline Key const& key() const
                         {
                             return *this->_key;
+                        }
+
+                        void clear()
+                        {
+                            this->handle(::odds_and_ends::node::pre_clear_event());
+
+                            for (
+                                typename _children_t::iterator itr = this->_children.begin();
+                                itr != this->_children.end();
+                                ++itr
+                            )
+                            {
+                                _result_sorted::_set_parent(
+                                    itr->second,
+                                    static_cast<typename traits::pointer>(nullptr)
+                                );
+                            }
+
+                            this->_children.clear();
+                            this->handle(::odds_and_ends::node::post_clear_event());
                         }
 
                         inline typename traits::child_const_iterator cbegin() const
@@ -359,7 +393,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             else
                             {
                                 BOOST_ASSERT(!!itr->second);
-                                _result_with_optional::_pre_erase(itr->second);
+                                _result_sorted::_pre_erase(itr->second);
                                 this->_children.erase(itr);
                                 this->handle(::odds_and_ends::node::post_erase_event());
                                 return true;
@@ -383,7 +417,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             else
                             {
                                 BOOST_ASSERT(!!itr->second);
-                                _result_with_optional::_pre_erase(itr->second);
+                                _result_sorted::_pre_erase(itr->second);
                                 itr->second = nullptr;
                                 this->handle(::odds_and_ends::node::post_erase_event());
                                 itr->second = p;
@@ -396,26 +430,6 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 )
                             );
                             this->handle(::odds_and_ends::node::post_insert_event());
-                        }
-
-                        void clear()
-                        {
-                            this->handle(::odds_and_ends::node::pre_clear_event());
-
-                            for (
-                                typename _children_t::iterator itr = this->_children.begin();
-                                itr != this->_children.end();
-                                ++itr
-                            )
-                            {
-                                _result_with_optional::_set_parent(
-                                    itr->second,
-                                    static_cast<typename traits::pointer>(nullptr)
-                                );
-                            }
-
-                            this->_children.clear();
-                            this->handle(::odds_and_ends::node::post_clear_event());
                         }
 
                         inline void
@@ -461,7 +475,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_with_optional::_set_parent(
+                                    _result_sorted::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -487,7 +501,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     }
                                     else
                                     {
-                                        _result_with_optional::_set_parent(
+                                        _result_sorted::_set_parent(
                                             itr->second,
                                             ::std::pointer_traits<
                                                 typename traits::pointer
@@ -524,7 +538,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_with_optional::_set_parent(
+                                    _result_sorted::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -550,7 +564,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     }
                                     else
                                     {
-                                        _result_with_optional::_set_parent(
+                                        _result_sorted::_set_parent(
                                             itr->second,
                                             ::std::pointer_traits<
                                                 typename traits::pointer
@@ -592,7 +606,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_with_optional::_set_parent(
+                                    _result_sorted::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -606,7 +620,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_with_optional::_set_parent(
+                                    _result_sorted::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -657,23 +671,23 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(
-                            _result_with_optional
+                            _result_sorted
                         )
-                        friend class _result_with_optional;
+                        friend class _result_sorted;
                     };
 
-                    class _result_sans_optional : public _composite_parent_t
+                    class _result_hashed : public _composite_parent_t
                     {
-                        typedef Key _key_store_t;
+                        typedef ::boost::optional<Key> _key_store_t;
 
                         _key_store_t _key;
                         _children_t _children;
 
                     protected:
-                        inline explicit _result_sans_optional(
+                        inline explicit _result_hashed(
                             ::odds_and_ends::composite_type
                             ::default_constructor_1st_stage_event const& e
-                        ) : _composite_parent_t(e), _key(::boost::initialized_value), _children()
+                        ) : _composite_parent_t(e), _key(), _children()
                         {
                         }
 
@@ -687,12 +701,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename Alloc, typename ...Args>
-                        inline _result_sans_optional(
+                        inline _result_hashed(
                             ::std::allocator_arg_t const& o,
                             Alloc const& alloc,
                             Args&& ...args
                         ) : _composite_parent_t(o, alloc, ::std::forward<Args>(args)...),
-                            _key(::boost::initialized_value),
+                            _key(),
                             _children(alloc)
                         {
                         }
@@ -714,7 +728,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename A0, typename ...Args>
-                        inline _result_sans_optional(
+                        inline _result_hashed(
                             ::odds_and_ends::composite_type
                             ::variadic_constructor_1st_stage_event const& e,
                             A0&& a0,
@@ -724,7 +738,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 ::std::forward<A0>(a0),
                                 ::std::forward<Args>(args)...
                             ),
-                            _key(::boost::initialized_value),
+                            _key(),
                             _children()
                         {
                         }
@@ -746,13 +760,11 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename ArgumentPack>
-                        inline _result_sans_optional(
+                        inline _result_hashed(
                             ::odds_and_ends::composite_type
                             ::arg_pack_constructor_1st_stage_event const& e,
                             ArgumentPack const& arg_pack
-                        ) : _composite_parent_t(e, arg_pack),
-                            _key(::boost::initialized_value),
-                            _children()
+                        ) : _composite_parent_t(e, arg_pack), _key(), _children()
                         {
                         }
 
@@ -768,13 +780,11 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename Copy>
-                        inline _result_sans_optional(
+                        inline _result_hashed(
                             ::odds_and_ends::composite_type
                             ::coercive_copy_constructor_event const& e,
                             Copy const& copy
-                        ) : _composite_parent_t(e, copy),
-                            _key(::boost::initialized_value),
-                            _children()
+                        ) : _composite_parent_t(e, copy), _key(), _children()
                         {
                         }
 
@@ -799,12 +809,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                         template <typename Source>
-                        inline _result_sans_optional(
+                        inline _result_hashed(
                             ::odds_and_ends::composite_type
                             ::coercive_move_constructor_event const& e,
                             Source&& source
                         ) : _composite_parent_t(e, static_cast<Source&&>(source)),
-                            _key(::boost::initialized_value),
+                            _key(),
                             _children()
                         {
                         }
@@ -836,7 +846,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         }
 
                     public:
-                        inline ~_result_sans_optional()
+                        inline ~_result_hashed()
                         {
                         }
 
@@ -844,9 +854,9 @@ namespace odds_and_ends { namespace node { namespace tree {
                         {
                             typedef typename _children_t::iterator child_iterator;
                             typedef typename _children_t::const_iterator child_const_iterator;
-                            typedef typename _children_t::reverse_iterator child_reverse_iterator;
+                            typedef typename _children_t::local_iterator child_local_iterator;
                             typedef typename _children_t
-                            ::const_reverse_iterator child_const_reverse_iterator;
+                            ::const_local_iterator child_const_local_iterator;
                         };
 
                         inline bool is_leaf() const
@@ -856,7 +866,27 @@ namespace odds_and_ends { namespace node { namespace tree {
 
                         inline Key const& key() const
                         {
-                            return this->_key;
+                            return *this->_key;
+                        }
+
+                        void clear()
+                        {
+                            this->handle(::odds_and_ends::node::pre_clear_event());
+
+                            for (
+                                typename _children_t::iterator itr = this->_children.begin();
+                                itr != this->_children.end();
+                                ++itr
+                            )
+                            {
+                                _result_hashed::_set_parent(
+                                    itr->second,
+                                    static_cast<typename traits::pointer>(nullptr)
+                                );
+                            }
+
+                            this->_children.clear();
+                            this->handle(::odds_and_ends::node::post_clear_event());
                         }
 
                         inline typename traits::child_const_iterator cbegin() const
@@ -889,34 +919,62 @@ namespace odds_and_ends { namespace node { namespace tree {
                             return this->_children.end();
                         }
 
-                        inline typename traits::child_const_reverse_iterator crbegin() const
+                        inline typename _children_t::size_type bucket_count() const
                         {
-                            return this->_children.crbegin();
+                            return this->_children.bucket_count();
                         }
 
-                        inline typename traits::child_const_reverse_iterator rbegin() const
+                        inline typename _children_t::size_type bucket(Key const& key) const
                         {
-                            return this->_children.rbegin();
+                            return this->_children.bucket(key);
                         }
 
-                        inline typename traits::child_reverse_iterator rbegin()
+                        template <typename K>
+                        inline typename _children_t::size_type bucket(K const& key) const
                         {
-                            return this->_children.rbegin();
+                            return this->_children.bucket(key);
                         }
 
-                        inline typename traits::child_const_reverse_iterator crend() const
+                        inline typename _children_t::size_type
+                            bucket_size(typename _children_t::size_type bucket) const
                         {
-                            return this->_children.crend();
+                            return this->_children.bucket_size(bucket);
                         }
 
-                        inline typename traits::child_const_reverse_iterator rend() const
+                        inline typename traits::child_const_local_iterator
+                            cbegin(typename _children_t::size_type bucket) const
                         {
-                            return this->_children.rend();
+                            return this->_children.cbegin(bucket);
                         }
 
-                        inline typename traits::child_reverse_iterator rend()
+                        inline typename traits::child_const_local_iterator
+                            begin(typename _children_t::size_type bucket) const
                         {
-                            return this->_children.rend();
+                            return this->_children.begin(bucket);
+                        }
+
+                        inline typename traits::child_local_iterator
+                            begin(typename _children_t::size_type bucket)
+                        {
+                            return this->_children.begin(bucket);
+                        }
+
+                        inline typename traits::child_const_local_iterator
+                            cend(typename _children_t::size_type bucket) const
+                        {
+                            return this->_children.cend(bucket);
+                        }
+
+                        inline typename traits::child_const_local_iterator
+                            end(typename _children_t::size_type bucket) const
+                        {
+                            return this->_children.end(bucket);
+                        }
+
+                        inline typename traits::child_local_iterator
+                            end(typename _children_t::size_type bucket)
+                        {
+                            return this->_children.end(bucket);
                         }
 
                         inline typename traits::const_pointer
@@ -958,7 +1016,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             else
                             {
                                 BOOST_ASSERT(!!itr->second);
-                                _result_sans_optional::_pre_erase(itr->second);
+                                _result_hashed::_pre_erase(itr->second);
                                 this->_children.erase(itr);
                                 this->handle(::odds_and_ends::node::post_erase_event());
                                 return true;
@@ -982,7 +1040,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                             else
                             {
                                 BOOST_ASSERT(!!itr->second);
-                                _result_sans_optional::_pre_erase(itr->second);
+                                _result_hashed::_pre_erase(itr->second);
                                 itr->second = nullptr;
                                 this->handle(::odds_and_ends::node::post_erase_event());
                                 itr->second = p;
@@ -1003,26 +1061,6 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 key,
                                 ::std::pointer_traits<typename traits::pointer>::pointer_to(d)
                             );
-                        }
-
-                        void clear()
-                        {
-                            this->handle(::odds_and_ends::node::pre_clear_event());
-
-                            for (
-                                typename _children_t::iterator itr = this->_children.begin();
-                                itr != this->_children.end();
-                                ++itr
-                            )
-                            {
-                                _result_sans_optional::_set_parent(
-                                    itr->second,
-                                    static_cast<typename traits::pointer>(nullptr)
-                                );
-                            }
-
-                            this->_children.clear();
-                            this->handle(::odds_and_ends::node::post_clear_event());
                         }
 
                     protected:
@@ -1056,7 +1094,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_sans_optional::_set_parent(
+                                    _result_hashed::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -1082,7 +1120,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     }
                                     else
                                     {
-                                        _result_sans_optional::_set_parent(
+                                        _result_hashed::_set_parent(
                                             itr->second,
                                             ::std::pointer_traits<
                                                 typename traits::pointer
@@ -1119,7 +1157,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_sans_optional::_set_parent(
+                                    _result_hashed::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -1145,7 +1183,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     }
                                     else
                                     {
-                                        _result_sans_optional::_set_parent(
+                                        _result_hashed::_set_parent(
                                             itr->second,
                                             ::std::pointer_traits<
                                                 typename traits::pointer
@@ -1187,7 +1225,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_sans_optional::_set_parent(
+                                    _result_hashed::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -1201,7 +1239,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                                     ++itr
                                 )
                                 {
-                                    _result_sans_optional::_set_parent(
+                                    _result_hashed::_set_parent(
                                         itr->second,
                                         ::std::pointer_traits<
                                             typename traits::pointer
@@ -1251,17 +1289,16 @@ namespace odds_and_ends { namespace node { namespace tree {
                             }
                         }
 
-                        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(
-                            _result_sans_optional
-                        )
-                        friend class _result_sans_optional;
+                        ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result_hashed)
+                        friend class _result_hashed;
                     };
 
                 public:
                     typedef typename ::boost::mpl::if_<
-                        StoresKeyInOptional,
-                        _result_with_optional,
-                        _result_sans_optional
+                        ::odds_and_ends::static_introspection::concept
+                        ::is_legacy_hashed_associative_container<_children_t>,
+                        _result_hashed,
+                        _result_sorted
                     >::type type;
                 };
             };

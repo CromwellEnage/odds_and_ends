@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_COMPARABLE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_COMPARABLE_HPP
@@ -42,17 +42,6 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     {
         template <typename L, typename R>
         static ::boost::type_traits::yes_type
-            _check_le(
-                typename ::std::add_pointer<
-                    decltype(::std::declval<L>() <= ::std::declval<R>())
-                >::type
-            );
-
-        template <typename L, typename R>
-        static ::boost::type_traits::no_type _check_le(...);
-
-        template <typename L, typename R>
-        static ::boost::type_traits::yes_type
             _check_gt(
                 typename ::std::add_pointer<
                     decltype(::std::declval<L>() > ::std::declval<R>())
@@ -78,11 +67,6 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
             (
                 sizeof(
                     ::odds_and_ends::static_introspection::concept::_detail
-                    ::has_comparable_operators<T,U>::template _check_le<T,U>(nullptr)
-                ) == sizeof(::boost::type_traits::yes_type)
-            ) && (
-                sizeof(
-                    ::odds_and_ends::static_introspection::concept::_detail
                     ::has_comparable_operators<T,U>::template _check_gt<T,U>(nullptr)
                 ) == sizeof(::boost::type_traits::yes_type)
             ) && (
@@ -99,6 +83,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/concept/is_less_than_comparable.hpp>
+#include <odds_and_ends/static_introspection/concept/_detail/has_less_than_or_equal_to_operator.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept {
 
@@ -106,7 +91,18 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_comparable :
         ::boost::mpl::eval_if<
             typename ::boost::mpl::eval_if<
-                ::odds_and_ends::static_introspection::concept::is_less_than_comparable<T,U>,
+                typename ::boost::mpl::eval_if<
+                    typename ::boost::mpl::eval_if<
+                        ::odds_and_ends::static_introspection
+                        ::concept::is_less_than_comparable<T,U>,
+                        ::odds_and_ends::static_introspection::concept
+                        ::_detail::has_less_than_or_equal_to_operator<T,U>,
+                        ::boost::mpl::false_
+                    >::type,
+                    ::odds_and_ends::static_introspection::concept
+                    ::_detail::has_less_than_or_equal_to_operator<U,T>,
+                    ::boost::mpl::false_
+                >::type,
                 ::odds_and_ends::static_introspection::concept
                 ::_detail::has_comparable_operators<T,U>,
                 ::boost::mpl::false_
@@ -126,7 +122,12 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     template <typename T>
     struct is_comparable<T,::odds_and_ends::use_default_policy> :
         ::boost::mpl::eval_if<
-            ::odds_and_ends::static_introspection::concept::is_less_than_comparable<T>,
+            typename ::boost::mpl::eval_if<
+                ::odds_and_ends::static_introspection::concept::is_less_than_comparable<T>,
+                ::odds_and_ends::static_introspection::concept
+                ::_detail::has_less_than_or_equal_to_operator<T,T>,
+                ::boost::mpl::false_
+            >::type,
             ::odds_and_ends::static_introspection::concept
             ::_detail::has_comparable_operators<T,T>,
             ::boost::mpl::false_

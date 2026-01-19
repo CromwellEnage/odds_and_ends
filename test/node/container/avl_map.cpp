@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <utility>
 #include <functional>
@@ -8,6 +8,8 @@
 #include <odds_and_ends/node/container/map.hpp>
 #include <odds_and_ends/node/balancer/adelson_velskii_landis_tree.hpp>
 #include <odds_and_ends/node/with_balance_factor.hpp>
+#include <odds_and_ends/static_introspection/concept/is_legacy_sorted_associative_container.hpp>
+#include <odds_and_ends/static_introspection/concept/is_legacy_pair_associative_container.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/core/lightweight_test.hpp>
@@ -21,6 +23,17 @@ void test_map_00()
         ::boost::mpl::deque< ::odds_and_ends::node::with_balance_factor>,
         ::odds_and_ends::node::adelson_velskii_landis_tree_balancer
     > SMap;
+
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_legacy_sorted_associative_container<SMap>::value,
+        "::odds_and_ends::node::container::map is a Legacy Sorted Associative Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_legacy_pair_associative_container<SMap>::value,
+        "::odds_and_ends::node::container::map is a Legacy Pair Associative Container."
+    );
 
     SMap heights;
     ::std::pair<SMap::iterator,bool> ins_result = heights.emplace("Hinata", 162.8);
@@ -51,6 +64,17 @@ void test_multimap_00()
         ::odds_and_ends::node::adelson_velskii_landis_tree_balancer,
         ::std::greater<int>
     > MMap;
+
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_legacy_sorted_associative_container<MMap>::value,
+        "::odds_and_ends::node::container::map is a Legacy Sorted Associative Container."
+    );
+    static_assert(
+        ::odds_and_ends::static_introspection::concept
+        ::is_legacy_pair_associative_container<MMap>::value,
+        "::odds_and_ends::node::container::map is a Legacy Pair Associative Container."
+    );
 
     MMap mmap = {{2, "foo"}, {2, "bar"}, {3, "baz"}, {1, "abc"}, {5, "def"}};
 

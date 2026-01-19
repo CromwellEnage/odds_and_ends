@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef OODS_AND_ENDS__COMPOSITE_TYPE__MEMBER_FACADE__MIXED_NUMERIC_HPP
 #define OODS_AND_ENDS__COMPOSITE_TYPE__MEMBER_FACADE__MIXED_NUMERIC_HPP
@@ -13,7 +13,7 @@
 #include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_2nd_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
+#include <odds_and_ends/composite_type/event/conversion_assignment.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/copy_assignment.hpp>
 #include <odds_and_ends/composite_type/event/copy_2nd_stage.hpp>
@@ -24,10 +24,16 @@
 #include <odds_and_ends/composite_type/parameter/integral_part.hpp>
 #include <odds_and_ends/composite_type/parameter/fractional_part.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
-//#include <odds_and_ends/static_introspection/concept/is_math_mixed_numeric_type.hpp>
+#include <odds_and_ends/static_introspection/concept/is_math_mixed_numeric_type.hpp>
+#include <odds_and_ends/static_introspection/concept/is_math_rational_type.hpp>
+#include <odds_and_ends/static_introspection/free_function/has_numerator.hpp>
+#include <odds_and_ends/static_introspection/free_function/has_denominator.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/rational_adaptor.hpp>
 #include <boost/core/enable_if.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/utility/value_init.hpp>
 
@@ -82,7 +88,7 @@ namespace odds_and_ends { namespace composite_type {
                             ::default_constructor_1st_stage_event const& e
                         ) : _composite_parent_t(e),
                             _integral_part(::boost::initialized_value),
-                            _fractional_part()
+                            _fractional_part(::boost::initialized_value)
                         {
                         }
 
@@ -95,19 +101,242 @@ namespace odds_and_ends { namespace composite_type {
                             return _composite_parent_t::post_construct(e);
                         }
 
-                        template <typename A0, typename ...Args>
+                        template <typename Arg>
+                        inline _result(
+                            ::odds_and_ends::composite_type
+                            ::variadic_constructor_1st_stage_event const& e,
+                            Arg&& arg,
+                            typename ::boost::enable_if<
+                                ::std::is_convertible<Arg,typename traits::integral_part>,
+                                _enabler
+                            >::type = _enabler()
+                        ) : _composite_parent_t(e, ::std::forward<Arg>(arg)),
+                            _integral_part(::std::forward<Arg>(arg)),
+                            _fractional_part(::boost::initialized_value)
+                        {
+                        }
+
+                        template <typename Arg>
+                        inline typename ::boost::enable_if<
+                            ::std::is_convertible<Arg,typename traits::integral_part>,
+                            bool
+                        >::type
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
+                            this->_integral_part = ::std::forward<Arg>(arg);
+                            this->_fractional_part = ::boost::initialized_value;
+                            return result;
+                        }
+
+                        template <typename Arg>
+                        inline _result(
+                            ::odds_and_ends::composite_type
+                            ::variadic_constructor_1st_stage_event const& e,
+                            Arg&& arg,
+                            typename ::boost::enable_if<
+                                ::odds_and_ends::static_introspection
+                                ::concept::is_math_rational_type<Arg>,
+                                _enabler
+                            >::type = _enabler()
+                        ) : _composite_parent_t(e, ::std::forward<Arg>(arg)),
+                            _integral_part(arg.numerator() / arg.denominator()),
+                            _fractional_part(
+                                arg.numerator() % arg.denominator(),
+                                arg.denominator()
+                            )
+                        {
+                        }
+
+                        template <typename Arg>
+                        inline typename ::boost::enable_if<
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_math_rational_type<Arg>,
+                            bool
+                        >::type
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
+                            this->_integral_part = arg.numerator() / arg.denominator();
+                            this->_fractional_part = typename traits::fractional_part(
+                                arg.numerator() % arg.denominator(),
+                                arg.denominator()
+                            );
+                            return result;
+                        }
+
+                        template <typename Arg>
+                        inline _result(
+                            ::odds_and_ends::composite_type
+                            ::variadic_constructor_1st_stage_event const& e,
+                            Arg&& arg,
+                            typename ::boost::enable_if<
+                                typename ::boost::mpl::eval_if<
+                                    ::odds_and_ends::static_introspection
+                                    ::concept::is_math_mixed_numeric_type<Arg>,
+                                    ::boost::mpl::false_,
+                                    ::boost::mpl::if_<
+                                        ::odds_and_ends::static_introspection
+                                        ::free_function::has_numerator<Arg>,
+                                        ::odds_and_ends::static_introspection
+                                        ::free_function::has_denominator<Arg>,
+                                        ::boost::mpl::false_
+                                    >
+                                >::type,
+                                _enabler
+                            >::type = _enabler()
+                        ) : _composite_parent_t(e, ::std::forward<Arg>(arg)),
+                            _integral_part(numerator(arg) / denominator(arg)),
+                            _fractional_part(numerator(arg) % denominator(arg), denominator(arg))
+                        {
+                        }
+
+                        template <typename Arg>
+                        inline typename ::boost::enable_if<
+                            typename ::boost::mpl::eval_if<
+                                ::odds_and_ends::static_introspection
+                                ::concept::is_math_mixed_numeric_type<Arg>,
+                                ::boost::mpl::false_,
+                                ::boost::mpl::if_<
+                                    ::odds_and_ends::static_introspection
+                                    ::free_function::has_numerator<Arg>,
+                                    ::odds_and_ends::static_introspection
+                                    ::free_function::has_denominator<Arg>,
+                                    ::boost::mpl::false_
+                                >
+                            >::type,
+                            bool
+                        >::type
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
+                            this->_integral_part = numerator(arg) / denominator(arg);
+                            this->_fractional_part = typename traits::fractional_part(
+                                numerator(arg) % denominator(arg),
+                                denominator(arg)
+                            );
+                            return result;
+                        }
+
+                        template <typename Arg>
+                        inline _result(
+                            ::odds_and_ends::composite_type
+                            ::variadic_constructor_1st_stage_event const& e,
+                            Arg&& arg,
+                            typename ::boost::enable_if<
+                                ::std::is_base_of<
+                                    ::std::integral_constant<
+                                        int,
+                                        ::boost::multiprecision::number_kind_rational
+                                    >,
+                                    ::boost::multiprecision::number_category<Arg>
+                                >,
+                                _enabler
+                            >::type = _enabler()
+                        ) : _composite_parent_t(e, ::std::forward<Arg>(arg)),
+                            _integral_part(numerator(arg) / denominator(arg)),
+                            _fractional_part(numerator(arg) % denominator(arg), denominator(arg))
+                        {
+                        }
+
+                        template <typename Arg>
+                        inline typename ::boost::enable_if<
+                            ::std::is_base_of<
+                                ::std::integral_constant<
+                                    int,
+                                    ::boost::multiprecision::number_kind_rational
+                                >,
+                                ::boost::multiprecision::number_category<Arg>
+                            >,
+                            bool
+                        >::type
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
+                            typename traits::fractional_part const tmp_arg(arg);
+                            this->_integral_part = numerator(tmp_arg) / denominator(tmp_arg);
+                            this->_fractional_part = typename traits::fractional_part(
+                                numerator(tmp_arg) % denominator(tmp_arg),
+                                denominator(tmp_arg)
+                            );
+                            return result;
+                        }
+
+                        template <typename Arg>
+                        inline _result(
+                            ::odds_and_ends::composite_type
+                            ::variadic_constructor_1st_stage_event const& e,
+                            Arg&& arg,
+                            typename ::boost::enable_if<
+                                ::odds_and_ends::static_introspection
+                                ::concept::is_math_mixed_numeric_type<Arg>,
+                                _enabler
+                            >::type = _enabler()
+                        ) : _composite_parent_t(e, ::std::forward<Arg>(arg)),
+                            _integral_part(arg.integral_part()),
+                            _fractional_part(arg.fractional_part())
+                        {
+                        }
+
+                        template <typename Arg>
+                        inline typename ::boost::enable_if<
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_math_mixed_numeric_type<Arg>,
+                            bool
+                        >::type
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
+                            this->_integral_part = arg.integral_part();
+                            this->_fractional_part = arg.fractional_part();
+                            return result;
+                        }
+
+                        template <typename A0, typename A1, typename ...Args>
                         inline _result(
                             ::odds_and_ends::composite_type
                             ::variadic_constructor_1st_stage_event const& e,
                             A0&& a0,
+                            A1&& a1,
                             Args&& ...args
                         ) : _composite_parent_t(
                                 e,
                                 ::std::forward<A0>(a0),
+                                ::std::forward<A1>(a1),
                                 ::std::forward<Args>(args)...
                             ),
                             _integral_part(::std::forward<A0>(a0)),
-                            _fractional_part(::std::forward<Args>(args)...)
+                            _fractional_part(::std::forward<A1>(a1), ::std::forward<Args>(args)...)
                         {
                         }
 
@@ -131,7 +360,7 @@ namespace odds_and_ends { namespace composite_type {
                         inline _result(::std::allocator_arg_t const& o, Alloc const& alloc) :
                             _composite_parent_t(o, alloc),
                             _integral_part(::boost::initialized_value),
-                            _fractional_part()
+                            _fractional_part(::boost::initialized_value)
                         {
                         }
 
@@ -200,29 +429,16 @@ namespace odds_and_ends { namespace composite_type {
                             return result;
                         }
 
-                        template <typename Arg>
-                        inline _result(
-                            ::odds_and_ends::composite_type
-                            ::conversion_constructor_1st_stage_event const& e,
-                            Arg const& arg,
-                            typename ::boost::enable_if<
-                                ::std::is_convertible<Arg,typename traits::integral_part>,
-                                _enabler
-                            >::type = _enabler()
-                        ) : _composite_parent_t(e, arg), _integral_part(arg), _fractional_part()
-                        {
-                        }
-
                         template <typename Copy>
                         inline _result(
                             ::odds_and_ends::composite_type
                             ::coercive_copy_constructor_event const& e,
-                            Copy const& copy/*,
+                            Copy const& copy,
                             typename ::boost::enable_if<
                                 ::odds_and_ends::static_introspection
                                 ::concept::is_math_mixed_numeric_type<Copy>,
                                 _enabler
-                            >::type = _enabler()*/
+                            >::type = _enabler()
                         ) : _composite_parent_t(e, copy),
                             _integral_part(copy.integral_part()),
                             _fractional_part(copy.fractional_part())
@@ -234,12 +450,12 @@ namespace odds_and_ends { namespace composite_type {
                             ::odds_and_ends::composite_type
                             ::coercive_copy_constructor_event const& e,
                             Copy const& copy,
-                            Alloc const& alloc/*,
+                            Alloc const& alloc,
                             typename ::boost::enable_if<
                                 ::odds_and_ends::static_introspection
                                 ::concept::is_math_mixed_numeric_type<Copy>,
                                 _enabler
-                            >::type = _enabler()*/
+                            >::type = _enabler()
                         ) : _composite_parent_t(e, copy, alloc),
                             _integral_part(copy.integral_part()),
                             _fractional_part(copy.fractional_part())
@@ -247,7 +463,11 @@ namespace odds_and_ends { namespace composite_type {
                         }
 
                         template <typename Copy>
-                        inline bool
+                        inline typename ::boost::enable_if<
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_math_mixed_numeric_type<Copy>,
+                            bool
+                        >::type
                             post_construct(
                                 ::odds_and_ends::composite_type::copy_assignment_event const& e,
                                 Copy const& copy
@@ -260,7 +480,11 @@ namespace odds_and_ends { namespace composite_type {
                         }
 
                         template <typename Copy, typename Alloc>
-                        inline bool
+                        inline typename ::boost::enable_if<
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_math_mixed_numeric_type<Copy>,
+                            bool
+                        >::type
                             post_construct(
                                 ::odds_and_ends::composite_type::copy_assignment_event const& e,
                                 Copy const& copy,
@@ -306,12 +530,12 @@ namespace odds_and_ends { namespace composite_type {
                         inline _result(
                             ::odds_and_ends::composite_type
                             ::coercive_move_constructor_event const& e,
-                            Source&& source/*,
+                            Source&& source,
                             typename ::boost::enable_if<
                                 ::odds_and_ends::static_introspection
                                 ::concept::is_math_mixed_numeric_type<Source>,
                                 _enabler
-                            >::type = _enabler()*/
+                            >::type = _enabler()
                         ) : _composite_parent_t(e, static_cast<Source&&>(source)),
                             _integral_part(::std::move(source.integral_part_reference())),
                             _fractional_part(::std::move(source.fractional_part_reference()))
@@ -323,12 +547,12 @@ namespace odds_and_ends { namespace composite_type {
                             ::odds_and_ends::composite_type
                             ::coercive_move_constructor_event const& e,
                             Source&& source,
-                            Alloc const& alloc/*,
+                            Alloc const& alloc,
                             typename ::boost::enable_if<
                                 ::odds_and_ends::static_introspection
                                 ::concept::is_math_mixed_numeric_type<Source>,
                                 _enabler
-                            >::type = _enabler()*/
+                            >::type = _enabler()
                         ) : _composite_parent_t(e, static_cast<Source&&>(source), alloc),
                             _integral_part(::std::move(source.integral_part_reference())),
                             _fractional_part(::std::move(source.fractional_part_reference()))
@@ -336,7 +560,11 @@ namespace odds_and_ends { namespace composite_type {
                         }
 
                         template <typename Source>
-                        inline bool
+                        inline typename ::boost::enable_if<
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_math_mixed_numeric_type<Source>,
+                            bool
+                        >::type
                             post_construct(
                                 ::odds_and_ends::composite_type::move_assignment_event const& e,
                                 Source&& source
@@ -354,7 +582,11 @@ namespace odds_and_ends { namespace composite_type {
                         }
 
                         template <typename Source, typename Alloc>
-                        inline bool
+                        inline typename ::boost::enable_if<
+                            ::odds_and_ends::static_introspection
+                            ::concept::is_math_mixed_numeric_type<Source>,
+                            bool
+                        >::type
                             post_construct(
                                 ::odds_and_ends::composite_type::move_assignment_event const& e,
                                 Source&& source,
@@ -577,19 +809,31 @@ namespace odds_and_ends { namespace composite_type {
                             return this->_fractional_part;
                         }
 
-                        inline Derived operator+() const
+                        friend inline typename traits::integral_part const&
+                            integral_part(Derived const& operand)
                         {
-                            return Derived(this->derived());
+                            return operand.integral_part();
                         }
 
-                        inline Derived operator-() const
+                        friend inline typename traits::fractional_part const&
+                            fractional_part(Derived const& operand)
                         {
-                            return Derived(
+                            return operand.fractional_part();
+                        }
+
+                        friend inline Derived operator+(Derived const& operand)
+                        {
+                            return Derived(operand);
+                        }
+
+                        friend inline Derived operator-(Derived const& operand)
+                        {
+                            return Derived((
                                 ::odds_and_ends::composite_type::parameter
-                                ::integral_part = -this->integral_part(),
+                                ::integral_part = -operand.integral_part(),
                                 ::odds_and_ends::composite_type::parameter
-                                ::fractional_part = -this->fractional_part()
-                            );
+                                ::fractional_part = -operand.fractional_part()
+                            ));
                         }
 
                         friend inline bool operator==(Derived const& lhs, Derived const& rhs)
@@ -643,14 +887,14 @@ namespace odds_and_ends { namespace composite_type {
                         friend inline typename traits::integral_part numerator(Derived const& n)
                         {
                             return (
-                                denominator(n._fractional_part) * n._integral_part +
-                                numerator(n._fractional_part)
+                                denominator(n.fractional_part()) * n.integral_part() +
+                                numerator(n.fractional_part())
                             );
                         }
 
                         friend inline typename traits::integral_part denominator(Derived const& n)
                         {
-                            return denominator(n._fractional_part);
+                            return denominator(n.fractional_part());
                         }
 
                         ODDS_AND_ENDS__COMPOSITE_TYPE__NONCOPYABLE_NONMOVABLE_BODY(_result)

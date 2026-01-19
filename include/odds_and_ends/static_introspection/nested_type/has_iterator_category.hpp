@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__HAS_ITERATOR_CATEGORY_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__HAS_ITERATOR_CATEGORY_HPP
@@ -43,7 +43,11 @@ namespace _detail {
             ::_detail::has_iterator_category_void_or_not<T>::type,
             ::odds_and_ends::static_introspection::nested_type
             ::_detail::has_iterator_category_non_void<T>,
-            ::boost::mpl::false_
+            ::boost::mpl::if_<
+                ::std::is_pointer<T>,
+                ::boost::mpl::true_,
+                ::boost::mpl::false_
+            >
         >::type
     {
     };
@@ -52,16 +56,13 @@ namespace _detail {
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/remove_cvref.hpp>
-#include <iterator>
 
 namespace odds_and_ends { namespace static_introspection { namespace nested_type {
 
     template <typename T>
     struct has_iterator_category :
         ::odds_and_ends::static_introspection::nested_type::_detail::has_iterator_category<
-            ::std::iterator_traits<
-                typename ::odds_and_ends::static_introspection::remove_cvref<T>::type
-            >
+            typename ::odds_and_ends::static_introspection::remove_cvref<T>::type
         >
     {
     };

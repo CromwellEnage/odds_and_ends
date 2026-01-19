@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2025 Cromwell D. Enage
+// Copyright (C) 2011-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__NODE__TREE__BINARY_HPP
 #define ODDS_AND_ENDS__NODE__TREE__BINARY_HPP
@@ -24,8 +24,7 @@
 #include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_2nd_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/conversion_assignment.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/copy_assignment.hpp>
 #include <odds_and_ends/composite_type/event/copy_2nd_stage.hpp>
@@ -122,6 +121,19 @@ namespace odds_and_ends { namespace node { namespace tree {
                         {
                         }
 
+                        template <typename Arg>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            return (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
+                        }
+
                         template <typename A0, typename ...Args>
                         inline bool
                             post_construct(
@@ -156,27 +168,6 @@ namespace odds_and_ends { namespace node { namespace tree {
                             )
                         {
                             return _composite_parent_t::post_construct(e, arg_pack);
-                        }
-
-                        template <typename Arg>
-                        inline _result(
-                            ::odds_and_ends::composite_type
-                            ::conversion_constructor_1st_stage_event const& e,
-                            Arg const& arg
-                        ) : _composite_parent_t(e, arg), _left(nullptr), _right(nullptr)
-                        {
-                        }
-
-
-                        template <typename Arg>
-                        inline bool
-                            post_construct(
-                                ::odds_and_ends::composite_type
-                                ::conversion_constructor_2nd_stage_event const& e,
-                                Arg const& arg
-                            )
-                        {
-                            return _composite_parent_t::post_construct(e, arg);
                         }
 
                         template <typename Copy>

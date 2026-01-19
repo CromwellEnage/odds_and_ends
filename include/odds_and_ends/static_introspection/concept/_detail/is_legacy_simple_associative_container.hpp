@@ -1,7 +1,9 @@
-// Copyright (C) 2016-2025 Cromwell D. Enage
+// Copyright (C) 2016-2026 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_SIMPLE_ASSOC_CONTAINER_HPP
-#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_SIMPLE_ASSOC_CONTAINER_HPP
+#ifndef \
+ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_SIMPLE_ASSOCIATIVE_CONTAINER_HPP
+#define \
+ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_SIMPLE_ASSOCIATIVE_CONTAINER_HPP
 
 #include <type_traits>
 #include <odds_and_ends/static_introspection/nested_type/key_type_of.hpp>
@@ -66,5 +68,6 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
-#endif  // ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_SIMPLE_ASSOC_CONTAINER_HPP
+#endif
+// ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_SIMPLE_ASSOCIATIVE_CONTAINER_HPP
 

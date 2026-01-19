@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__NODE__CONTAINER__DEQUE_HPP
 #define ODDS_AND_ENDS__NODE__CONTAINER__DEQUE_HPP
@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <memory>
-//#include <initializer_list>
+#include <initializer_list>
 #include <odds_and_ends/node/data.hpp>
 #include <odds_and_ends/node/tree/base.hpp>
 #include <odds_and_ends/node/tree/binary.hpp>
@@ -23,10 +23,7 @@
 #include <boost/mpl/push_front.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/mpl/quote.hpp>
-
-#if !defined BOOST_NO_LIMITS
 #include <boost/limits.hpp>
-#endif
 
 namespace odds_and_ends { namespace node { namespace container {
 
@@ -99,6 +96,16 @@ namespace odds_and_ends { namespace node { namespace container {
     public:
         template <typename Alloc>
         deque(
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename Alloc>
+        deque(
+            ::std::initializer_list<value_type> l,
             Alloc const& alloc,
             typename ::boost::enable_if<
                 ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
@@ -192,9 +199,11 @@ namespace odds_and_ends { namespace node { namespace container {
         deque();
         explicit deque(size_type n);
         deque(size_type n, const_reference t);
+        deque(::std::initializer_list<value_type> l);
         deque(deque const& copy);
         deque(deque&& source);
         ~deque();
+        deque& operator=(::std::initializer_list<value_type> l);
         deque& operator=(deque const& copy);
         deque& operator=(deque&& source);
         allocator_type get_allocator() const;
@@ -212,7 +221,7 @@ namespace odds_and_ends { namespace node { namespace container {
         const_reverse_iterator rend() const;
         reverse_iterator rend();
         bool empty() const;
-        size_type size() const;
+        size_type const& size() const;
         const_reference back() const;
         reference back();
         const_reference front() const;
@@ -241,6 +250,8 @@ namespace odds_and_ends { namespace node { namespace container {
         template <typename ...Args>
         iterator emplace(const_iterator pos, Args&& ...args);
 
+        const_reference at(size_type index) const;
+        reference at(size_type index);
         const_reference operator[](size_type index) const;
         reference operator[](size_type index);
         iterator erase(const_iterator pos);
@@ -251,10 +262,7 @@ namespace odds_and_ends { namespace node { namespace container {
         void clear();
         void resize(size_type n);
         void resize(size_type n, value_type const& t);
-
-#if !defined BOOST_NO_LIMITS
         static size_type max_size();
-#endif
 
     private:
         static void _fill_construct(allocator_type& alloc, _node_ptr_t& root_ptr, size_type n);
@@ -288,9 +296,9 @@ namespace odds_and_ends { namespace node { namespace container {
 
 #include <tuple>
 #include <utility>
-#include <algorithm>
 #include <odds_and_ends/node/iterator/breadth_first_tree.hpp>
 #include <odds_and_ends/node/iterator/post_order_tree.hpp>
+#include <odds_and_ends/node/algorithm/add_distance.hpp>
 #include <odds_and_ends/node/algorithm/binary_tree_descendant_at_index.hpp>
 #include <odds_and_ends/node/algorithm/is_ancestor_of.hpp>
 #include <odds_and_ends/node/algorithm/increment_in_binary_tree.hpp>
@@ -478,7 +486,9 @@ namespace odds_and_ends { namespace node { namespace container {
             Iterator itr_end
         )
     {
-        size_type const n = static_cast<size_type>(::std::distance(itr, itr_end));
+        size_type n = ::boost::initialized_value;
+
+        ::odds_and_ends::node::algorithm::add_distance(n, itr, itr_end);
 
         if (n)
         {
@@ -490,6 +500,44 @@ namespace odds_and_ends { namespace node { namespace container {
                 ++itr;
             }
         }
+    }
+
+    template <
+        typename T,
+        typename NPGList,
+        typename Balancer,
+        typename Size,
+        typename Diff,
+        typename PtrXForm,
+        typename AllocXForm
+    >
+    inline deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::deque(
+        ::std::initializer_list<value_type> l
+    ) : _alloc(), _root_ptr(nullptr)
+    {
+        type::_fill_construct(this->_alloc, this->_root_ptr, l.begin(), l.end());
+    }
+
+    template <
+        typename T,
+        typename NPGList,
+        typename Balancer,
+        typename Size,
+        typename Diff,
+        typename PtrXForm,
+        typename AllocXForm
+    >
+    template <typename Alloc>
+    inline deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::deque(
+        ::std::initializer_list<value_type> l,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _alloc(alloc), _root_ptr(nullptr)
+    {
+        type::_fill_construct(this->_alloc, this->_root_ptr, l.begin(), l.end());
     }
 
     template <
@@ -789,6 +837,25 @@ namespace odds_and_ends { namespace node { namespace container {
         typename PtrXForm,
         typename AllocXForm
     >
+    inline deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>&
+        deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::operator=(
+            ::std::initializer_list<value_type> l
+        )
+    {
+        this->clear();
+        type::_fill_construct(this->_alloc, this->_root_ptr, l.begin(), l.end());
+        return *this;
+    }
+
+    template <
+        typename T,
+        typename NPGList,
+        typename Balancer,
+        typename Size,
+        typename Diff,
+        typename PtrXForm,
+        typename AllocXForm
+    >
     inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::allocator_type
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::get_allocator() const
     {
@@ -1043,14 +1110,13 @@ namespace odds_and_ends { namespace node { namespace container {
         typename PtrXForm,
         typename AllocXForm
     >
-    inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::size_type
+    inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::size_type const&
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::size() const
     {
         static size_type const z = ::boost::initialized_value;
         return this->_root_ptr ? this->_root_ptr->size() : z;
     }
 
-#if !defined BOOST_NO_LIMITS
     template <
         typename T,
         typename NPGList,
@@ -1065,7 +1131,6 @@ namespace odds_and_ends { namespace node { namespace container {
     {
         return (::std::numeric_limits<size_type>::max)();
     }
-#endif
 
     template <
         typename T,
@@ -1229,6 +1294,21 @@ namespace odds_and_ends { namespace node { namespace container {
         typename AllocXForm
     >
     inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::const_reference
+        deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::at(size_type index) const
+    {
+        return **this->_at(index);
+    }
+
+    template <
+        typename T,
+        typename NPGList,
+        typename Balancer,
+        typename Size,
+        typename Diff,
+        typename PtrXForm,
+        typename AllocXForm
+    >
+    inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::const_reference
         deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::operator[](size_type index) const
     {
         return **this->_at(index);
@@ -1252,6 +1332,21 @@ namespace odds_and_ends { namespace node { namespace container {
             this->_root_ptr,
             index
         );
+    }
+
+    template <
+        typename T,
+        typename NPGList,
+        typename Balancer,
+        typename Size,
+        typename Diff,
+        typename PtrXForm,
+        typename AllocXForm
+    >
+    inline typename deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::reference
+        deque<T,NPGList,Balancer,Size,Diff,PtrXForm,AllocXForm>::at(size_type index)
+    {
+        return **this->_at(index);
     }
 
     template <

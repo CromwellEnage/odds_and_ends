@@ -1,7 +1,7 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_ITERATOR_OPS_HPP
-#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_ITERATOR_OPS_HPP
+#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_ITERATOR_OPERATORS_HPP
+#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_ITERATOR_OPERATORS_HPP
 
 #include <odds_and_ends/static_introspection/concept/_detail/has_dereference_operator.hpp>
 #include <odds_and_ends/static_introspection/concept/_detail/has_indirection_operator.hpp>
@@ -12,7 +12,7 @@
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct has_iterator_ops :
+    struct has_iterator_operators :
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept
             ::_detail::has_dereference_operator<T>,
@@ -29,5 +29,5 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
-#endif  // ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_ITERATOR_OPS_HPP
+#endif  // ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_ITERATOR_OPERATORS_HPP
 

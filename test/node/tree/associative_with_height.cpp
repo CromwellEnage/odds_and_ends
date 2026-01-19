@@ -9,17 +9,17 @@
 #include <boost/mpl/quote.hpp>
 #include <boost/core/lightweight_test.hpp>
 
-typedef ::odds_and_ends::composite_type::composite_type<
-    ::boost::mpl::deque<
-        ::odds_and_ends::node::data<int const>,
-        ::odds_and_ends::node::tree::base<>,
-        ::odds_and_ends::node::tree::associative<char>,
-        ::odds_and_ends::node::tree::with_height<>
-    >
-> associative_tree_node;
-
 void test_00()
 {
+    typedef ::odds_and_ends::composite_type::composite_type<
+        ::boost::mpl::deque<
+            ::odds_and_ends::node::data<int const>,
+            ::odds_and_ends::node::tree::base<>,
+            ::odds_and_ends::node::tree::associative<char>,
+            ::odds_and_ends::node::tree::with_height<>
+        >
+    > associative_tree_node;
+
     associative_tree_node atn_n03(-3);
     associative_tree_node atn_n02(-2);
     associative_tree_node atn_n01(-1);
@@ -829,9 +829,1144 @@ void test_00()
     BOOST_TEST(3 == atn_o00.height());
 }
 
+#include <cstring>
+#include <algorithm>
+#include <boost/unordered/unordered_map.hpp>
+#include <boost/mpl/placeholders.hpp>
+#include <boost/mpl/lambda.hpp>
+
+void test_01()
+{
+    typedef ::odds_and_ends::composite_type::composite_type<
+        ::boost::mpl::deque<
+            ::odds_and_ends::node::data<int const>,
+            ::odds_and_ends::node::tree::base<>,
+            ::odds_and_ends::node::tree::associative<
+                char const*,
+                ::boost::mpl::lambda<
+                    ::boost::unordered::unordered_map< ::boost::mpl::_1,::boost::mpl::_2>
+                >::type
+            >,
+            ::odds_and_ends::node::tree::with_height<>
+        >
+    > associative_tree_node;
+
+    associative_tree_node atn_n09(-9);
+    associative_tree_node atn_n08(-8);
+    associative_tree_node atn_n07(-7);
+    associative_tree_node atn_n06(-6);
+    associative_tree_node atn_n05(-5);
+    associative_tree_node atn_n04(-4);
+    associative_tree_node atn_n03(-3);
+    associative_tree_node atn_n02(-2);
+    associative_tree_node atn_n01(-1);
+    associative_tree_node atn_o00(0);
+    associative_tree_node atn_p01(1);
+    associative_tree_node atn_p02(2);
+    associative_tree_node atn_p03(3);
+    associative_tree_node atn_p04(4);
+    associative_tree_node atn_p05(5);
+    associative_tree_node atn_p06(6);
+    associative_tree_node atn_p07(7);
+    associative_tree_node atn_p08(8);
+    associative_tree_node atn_p09(9);
+    associative_tree_node atn_p10(10);
+    associative_tree_node atn_p11(11);
+    associative_tree_node atn_p12(12);
+    associative_tree_node atn_p13(13);
+    associative_tree_node atn_p14(14);
+    associative_tree_node atn_p15(15);
+    associative_tree_node atn_p16(16);
+
+    BOOST_TEST(-9 == *atn_n09);
+    BOOST_TEST(!atn_n09.parent());
+    BOOST_TEST(atn_n09.cbegin() == atn_n09.cend());
+    BOOST_TEST(0 == atn_n09.height());
+    BOOST_TEST(-8 == *atn_n08);
+    BOOST_TEST(!atn_n08.parent());
+    BOOST_TEST(atn_n08.cbegin() == atn_n08.cend());
+    BOOST_TEST(0 == atn_n08.height());
+    BOOST_TEST(-7 == *atn_n07);
+    BOOST_TEST(!atn_n07.parent());
+    BOOST_TEST(atn_n07.cbegin() == atn_n07.cend());
+    BOOST_TEST(0 == atn_n07.height());
+    BOOST_TEST(-6 == *atn_n06);
+    BOOST_TEST(!atn_n06.parent());
+    BOOST_TEST(atn_n06.cbegin() == atn_n06.cend());
+    BOOST_TEST(0 == atn_n06.height());
+    BOOST_TEST(-5 == *atn_n05);
+    BOOST_TEST(!atn_n05.parent());
+    BOOST_TEST(atn_n05.cbegin() == atn_n05.cend());
+    BOOST_TEST(0 == atn_n05.height());
+    BOOST_TEST(-4 == *atn_n04);
+    BOOST_TEST(!atn_n04.parent());
+    BOOST_TEST(atn_n04.cbegin() == atn_n04.cend());
+    BOOST_TEST(0 == atn_n04.height());
+    BOOST_TEST(-3 == *atn_n03);
+    BOOST_TEST(!atn_n03.parent());
+    BOOST_TEST(atn_n03.cbegin() == atn_n03.cend());
+    BOOST_TEST(0 == atn_n03.height());
+    BOOST_TEST(-2 == *atn_n02);
+    BOOST_TEST(!atn_n02.parent());
+    BOOST_TEST(atn_n02.cbegin() == atn_n02.cend());
+    BOOST_TEST(0 == atn_n02.height());
+    BOOST_TEST(-1 == *atn_n01);
+    BOOST_TEST(!atn_n01.parent());
+    BOOST_TEST(atn_n01.cbegin() == atn_n01.cend());
+    BOOST_TEST(0 == atn_n01.height());
+    BOOST_TEST(0 == *atn_o00);
+    BOOST_TEST(!atn_o00.parent());
+    BOOST_TEST(atn_o00.cbegin() == atn_o00.cend());
+    BOOST_TEST(0 == atn_o00.height());
+    BOOST_TEST(1 == *atn_p01);
+    BOOST_TEST(!atn_p01.parent());
+    BOOST_TEST(atn_p01.cbegin() == atn_p01.cend());
+    BOOST_TEST(0 == atn_p01.height());
+    BOOST_TEST(2 == *atn_p02);
+    BOOST_TEST(!atn_p02.parent());
+    BOOST_TEST(atn_p02.cbegin() == atn_p02.cend());
+    BOOST_TEST(0 == atn_p02.height());
+    BOOST_TEST(3 == *atn_p03);
+    BOOST_TEST(!atn_p03.parent());
+    BOOST_TEST(atn_p03.cbegin() == atn_p03.cend());
+    BOOST_TEST(0 == atn_p03.height());
+    BOOST_TEST(4 == *atn_p04);
+    BOOST_TEST(!atn_p04.parent());
+    BOOST_TEST(atn_p04.cbegin() == atn_p04.cend());
+    BOOST_TEST(0 == atn_p04.height());
+    BOOST_TEST(5 == *atn_p05);
+    BOOST_TEST(!atn_p05.parent());
+    BOOST_TEST(atn_p05.cbegin() == atn_p05.cend());
+    BOOST_TEST(0 == atn_p05.height());
+    BOOST_TEST(6 == *atn_p06);
+    BOOST_TEST(!atn_p06.parent());
+    BOOST_TEST(atn_p06.cbegin() == atn_p06.cend());
+    BOOST_TEST(0 == atn_p06.height());
+    BOOST_TEST(7 == *atn_p07);
+    BOOST_TEST(!atn_p07.parent());
+    BOOST_TEST(atn_p07.cbegin() == atn_p07.cend());
+    BOOST_TEST(0 == atn_p07.height());
+    BOOST_TEST(8 == *atn_p08);
+    BOOST_TEST(!atn_p08.parent());
+    BOOST_TEST(atn_p08.cbegin() == atn_p08.cend());
+    BOOST_TEST(0 == atn_p08.height());
+    BOOST_TEST(9 == *atn_p09);
+    BOOST_TEST(!atn_p09.parent());
+    BOOST_TEST(atn_p09.cbegin() == atn_p09.cend());
+    BOOST_TEST(0 == atn_p09.height());
+    BOOST_TEST(10 == *atn_p10);
+    BOOST_TEST(!atn_p10.parent());
+    BOOST_TEST(atn_p10.cbegin() == atn_p10.cend());
+    BOOST_TEST(0 == atn_p10.height());
+    BOOST_TEST(11 == *atn_p11);
+    BOOST_TEST(!atn_p11.parent());
+    BOOST_TEST(atn_p11.cbegin() == atn_p11.cend());
+    BOOST_TEST(0 == atn_p11.height());
+    BOOST_TEST(12 == *atn_p12);
+    BOOST_TEST(!atn_p12.parent());
+    BOOST_TEST(atn_p12.cbegin() == atn_p12.cend());
+    BOOST_TEST(0 == atn_p12.height());
+    BOOST_TEST(13 == *atn_p13);
+    BOOST_TEST(!atn_p13.parent());
+    BOOST_TEST(atn_p13.cbegin() == atn_p13.cend());
+    BOOST_TEST(0 == atn_p13.height());
+    BOOST_TEST(14 == *atn_p14);
+    BOOST_TEST(!atn_p14.parent());
+    BOOST_TEST(atn_p14.cbegin() == atn_p14.cend());
+    BOOST_TEST(0 == atn_p14.height());
+    BOOST_TEST(15 == *atn_p15);
+    BOOST_TEST(!atn_p15.parent());
+    BOOST_TEST(atn_p15.cbegin() == atn_p15.cend());
+    BOOST_TEST(0 == atn_p15.height());
+    BOOST_TEST(16 == *atn_p16);
+    BOOST_TEST(!atn_p16.parent());
+    BOOST_TEST(atn_p16.cbegin() == atn_p16.cend());
+    BOOST_TEST(0 == atn_p16.height());
+    atn_o00.set("P", atn_n01);
+    BOOST_TEST(-1 == **atn_o00.get("P"));
+    BOOST_TEST(0 == **atn_n01.parent());
+    BOOST_TEST(!::std::strcmp("P", atn_n01.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "P",
+            ::std::find_if(
+                atn_o00.cbegin(),
+                atn_o00.cend(),
+                [](auto p){return !::std::strcmp("P", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -1 == **::std::find_if(
+            atn_o00.cbegin(),
+            atn_o00.cend(),
+            [](auto p){return !::std::strcmp("P", p.first);}
+        )->second
+    );
+    BOOST_TEST(1 == atn_o00.height());
+    atn_o00.set("T", atn_n04);
+    BOOST_TEST(-4 == **atn_o00.get("T"));
+    BOOST_TEST(0 == **atn_n04.parent());
+    BOOST_TEST(!::std::strcmp("T", atn_n04.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "T",
+            ::std::find_if(
+                atn_o00.cbegin(),
+                atn_o00.cend(),
+                [](auto p){return !::std::strcmp("T", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -4 == **::std::find_if(
+            atn_o00.cbegin(),
+            atn_o00.cend(),
+            [](auto p){return !::std::strcmp("T", p.first);}
+        )->second
+    );
+    BOOST_TEST(1 == atn_o00.height());
+    atn_o00.set("s", atn_n07);
+    BOOST_TEST(-7 == **atn_o00.get("s"));
+    BOOST_TEST(0 == **atn_n07.parent());
+    BOOST_TEST(!::std::strcmp("s", atn_n07.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "s",
+            ::std::find_if(
+                atn_o00.cbegin(),
+                atn_o00.cend(),
+                [](auto p){return !::std::strcmp("s", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -7 == **::std::find_if(
+            atn_o00.cbegin(),
+            atn_o00.cend(),
+            [](auto p){return !::std::strcmp("s", p.first);}
+        )->second
+    );
+    BOOST_TEST(1 == atn_o00.height());
+    atn_n01.set("e", atn_n02);
+    BOOST_TEST(-2 == **atn_n01.get("e"));
+    BOOST_TEST(-1 == **atn_n02.parent());
+    BOOST_TEST(!::std::strcmp("e", atn_n02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "e",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("e", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -2 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("e", p.first);}
+        )->second
+    );
+    BOOST_TEST(2 == atn_o00.height());
+    BOOST_TEST(1 == atn_n01.height());
+    atn_n01.set("i", atn_n03);
+    BOOST_TEST(-3 == **atn_n01.get("i"));
+    BOOST_TEST(-1 == **atn_n03.parent());
+    BOOST_TEST(!::std::strcmp("i", atn_n03.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "i",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("i", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -3 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("i", p.first);}
+        )->second
+    );
+    BOOST_TEST(2 == atn_o00.height());
+    BOOST_TEST(1 == atn_n01.height());
+    atn_n02.set("ter", atn_p01);
+    BOOST_TEST(1 == **atn_n02.get("ter"));
+    BOOST_TEST(-2 == **atn_p01.parent());
+    BOOST_TEST(!::std::strcmp("ter", atn_p01.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ter",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("ter", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        1 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("ter", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n01.height());
+    BOOST_TEST(1 == atn_n02.height());
+    atn_n02.set("ck", atn_p02);
+    BOOST_TEST(2 == **atn_n02.get("ck"));
+    BOOST_TEST(-2 == **atn_p02.parent());
+    BOOST_TEST(!::std::strcmp("ck", atn_p02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ck",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("ck", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        2 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("ck", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n01.height());
+    BOOST_TEST(1 == atn_n02.height());
+    atn_n02.set("ppers", atn_p03);
+    BOOST_TEST(3 == **atn_n02.get("ppers"));
+    BOOST_TEST(-2 == **atn_p03.parent());
+    BOOST_TEST(!::std::strcmp("ppers", atn_p03.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ppers",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("ppers", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        3 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("ppers", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n01.height());
+    BOOST_TEST(1 == atn_n02.height());
+    atn_n03.set("per", atn_p04);
+    BOOST_TEST(4 == **atn_n03.get("per"));
+    BOOST_TEST(-3 == **atn_p04.parent());
+    BOOST_TEST(!::std::strcmp("per", atn_p04.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "per",
+            ::std::find_if(
+                atn_n03.cbegin(),
+                atn_n03.cend(),
+                [](auto p){return !::std::strcmp("per", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        4 == **::std::find_if(
+            atn_n03.cbegin(),
+            atn_n03.cend(),
+            [](auto p){return !::std::strcmp("per", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n01.height());
+    BOOST_TEST(1 == atn_n03.height());
+    atn_n03.set("ck", atn_p07);
+    BOOST_TEST(7 == **atn_n03.get("ck"));
+    BOOST_TEST(-3 == **atn_p07.parent());
+    BOOST_TEST(!::std::strcmp("ck", atn_p07.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ck",
+            ::std::find_if(
+                atn_n03.cbegin(),
+                atn_n03.cend(),
+                [](auto p){return !::std::strcmp("ck", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        7 == **::std::find_if(
+            atn_n03.cbegin(),
+            atn_n03.cend(),
+            [](auto p){return !::std::strcmp("ck", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n01.height());
+    BOOST_TEST(1 == atn_n03.height());
+    atn_n04.set("h", atn_n05);
+    BOOST_TEST(-5 == **atn_n04.get("h"));
+    BOOST_TEST(-4 == **atn_n05.parent());
+    BOOST_TEST(!::std::strcmp("h", atn_n05.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "h",
+            ::std::find_if(
+                atn_n04.cbegin(),
+                atn_n04.cend(),
+                [](auto p){return !::std::strcmp("h", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -5 == **::std::find_if(
+            atn_n04.cbegin(),
+            atn_n04.cend(),
+            [](auto p){return !::std::strcmp("h", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(1 == atn_n04.height());
+    atn_n04.set("'is", atn_p08);
+    BOOST_TEST(8 == **atn_n04.get("'is"));
+    BOOST_TEST(-4 == **atn_p08.parent());
+    BOOST_TEST(!::std::strcmp("'is", atn_p08.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "'is",
+            ::std::find_if(
+                atn_n04.cbegin(),
+                atn_n04.cend(),
+                [](auto p){return !::std::strcmp("'is", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        8 == **::std::find_if(
+            atn_n04.cbegin(),
+            atn_n04.cend(),
+            [](auto p){return !::std::strcmp("'is", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(1 == atn_n04.height());
+    atn_n04.set("rumps", atn_p12);
+    BOOST_TEST(12 == **atn_n04.get("rumps"));
+    BOOST_TEST(-4 == **atn_p12.parent());
+    BOOST_TEST(!::std::strcmp("rumps", atn_p12.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "rumps",
+            ::std::find_if(
+                atn_n04.cbegin(),
+                atn_n04.cend(),
+                [](auto p){return !::std::strcmp("rumps", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        12 == **::std::find_if(
+            atn_n04.cbegin(),
+            atn_n04.cend(),
+            [](auto p){return !::std::strcmp("rumps", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(1 == atn_n04.height());
+    atn_n05.set("e", atn_p09);
+    BOOST_TEST(9 == **atn_n05.get("e"));
+    BOOST_TEST(-5 == **atn_p09.parent());
+    BOOST_TEST(!::std::strcmp("e", atn_p09.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "e",
+            ::std::find_if(
+                atn_n05.cbegin(),
+                atn_n05.cend(),
+                [](auto p){return !::std::strcmp("e", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        9 == **::std::find_if(
+            atn_n05.cbegin(),
+            atn_n05.cend(),
+            [](auto p){return !::std::strcmp("e", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n04.height());
+    BOOST_TEST(1 == atn_n05.height());
+    atn_n05.set("ought", atn_p10);
+    BOOST_TEST(10 == **atn_n05.get("ought"));
+    BOOST_TEST(-5 == **atn_p10.parent());
+    BOOST_TEST(!::std::strcmp("ought", atn_p10.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ought",
+            ::std::find_if(
+                atn_n05.cbegin(),
+                atn_n05.cend(),
+                [](auto p){return !::std::strcmp("ought", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        10 == **::std::find_if(
+            atn_n05.cbegin(),
+            atn_n05.cend(),
+            [](auto p){return !::std::strcmp("ought", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n04.height());
+    BOOST_TEST(1 == atn_n05.height());
+    atn_n05.set("at", atn_p11);
+    BOOST_TEST(11 == **atn_n05.get("at"));
+    BOOST_TEST(-5 == **atn_p11.parent());
+    BOOST_TEST(!::std::strcmp("at", atn_p11.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "at",
+            ::std::find_if(
+                atn_n05.cbegin(),
+                atn_n05.cend(),
+                [](auto p){return !::std::strcmp("at", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        11 == **::std::find_if(
+            atn_n05.cbegin(),
+            atn_n05.cend(),
+            [](auto p){return !::std::strcmp("at", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n04.height());
+    BOOST_TEST(1 == atn_n05.height());
+    atn_n07.set("he", atn_n08);
+    BOOST_TEST(-8 == **atn_n07.get("he"));
+    BOOST_TEST(-7 == **atn_n08.parent());
+    BOOST_TEST(!::std::strcmp("he", atn_n08.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "he",
+            ::std::find_if(
+                atn_n07.cbegin(),
+                atn_n07.cend(),
+                [](auto p){return !::std::strcmp("he", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -8 == **::std::find_if(
+            atn_n07.cbegin(),
+            atn_n07.cend(),
+            [](auto p){return !::std::strcmp("he", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(1 == atn_n07.height());
+    atn_n07.set("i", atn_n09);
+    BOOST_TEST(-9 == **atn_n07.get("i"));
+    BOOST_TEST(-7 == **atn_n09.parent());
+    BOOST_TEST(!::std::strcmp("i", atn_n09.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "i",
+            ::std::find_if(
+                atn_n07.cbegin(),
+                atn_n07.cend(),
+                [](auto p){return !::std::strcmp("i", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -9 == **::std::find_if(
+            atn_n07.cbegin(),
+            atn_n07.cend(),
+            [](auto p){return !::std::strcmp("i", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(1 == atn_n07.height());
+    atn_n08.set("ep's", atn_p13);
+    BOOST_TEST(13 == **atn_n08.get("ep's"));
+    BOOST_TEST(-8 == **atn_p13.parent());
+    BOOST_TEST(!::std::strcmp("ep's", atn_p13.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ep's",
+            ::std::find_if(
+                atn_n08.cbegin(),
+                atn_n08.cend(),
+                [](auto p){return !::std::strcmp("ep's", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        13 == **::std::find_if(
+            atn_n08.cbegin(),
+            atn_n08.cend(),
+            [](auto p){return !::std::strcmp("ep's", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n07.height());
+    BOOST_TEST(1 == atn_n08.height());
+    atn_n08.set("ik's", atn_p14);
+    BOOST_TEST(14 == **atn_n08.get("ik's"));
+    BOOST_TEST(-8 == **atn_p14.parent());
+    BOOST_TEST(!::std::strcmp("ik's", atn_p14.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ik's",
+            ::std::find_if(
+                atn_n08.cbegin(),
+                atn_n08.cend(),
+                [](auto p){return !::std::strcmp("ik's", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        14 == **::std::find_if(
+            atn_n08.cbegin(),
+            atn_n08.cend(),
+            [](auto p){return !::std::strcmp("ik's", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n07.height());
+    BOOST_TEST(1 == atn_n08.height());
+    atn_n09.set("xth", atn_p15);
+    BOOST_TEST(15 == **atn_n09.get("xth"));
+    BOOST_TEST(-9 == **atn_p15.parent());
+    BOOST_TEST(!::std::strcmp("xth", atn_p15.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "xth",
+            ::std::find_if(
+                atn_n09.cbegin(),
+                atn_n09.cend(),
+                [](auto p){return !::std::strcmp("xth", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        15 == **::std::find_if(
+            atn_n09.cbegin(),
+            atn_n09.cend(),
+            [](auto p){return !::std::strcmp("xth", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n07.height());
+    BOOST_TEST(1 == atn_n09.height());
+    atn_n09.set("ck", atn_p16);
+    BOOST_TEST(16 == **atn_n09.get("ck"));
+    BOOST_TEST(-9 == **atn_p16.parent());
+    BOOST_TEST(!::std::strcmp("ck", atn_p16.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ck",
+            ::std::find_if(
+                atn_n09.cbegin(),
+                atn_n09.cend(),
+                [](auto p){return !::std::strcmp("ck", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        16 == **::std::find_if(
+            atn_n09.cbegin(),
+            atn_n09.cend(),
+            [](auto p){return !::std::strcmp("ck", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == atn_o00.height());
+    BOOST_TEST(2 == atn_n07.height());
+    BOOST_TEST(1 == atn_n09.height());
+    atn_p07.set("ed", atn_p05);
+    BOOST_TEST(5 == **atn_p07.get("ed"));
+    BOOST_TEST(7 == **atn_p05.parent());
+    BOOST_TEST(!::std::strcmp("ed", atn_p05.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ed",
+            ::std::find_if(
+                atn_p07.cbegin(),
+                atn_p07.cend(),
+                [](auto p){return !::std::strcmp("ed", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        5 == **::std::find_if(
+            atn_p07.cbegin(),
+            atn_p07.cend(),
+            [](auto p){return !::std::strcmp("ed", p.first);}
+        )->second
+    );
+    BOOST_TEST(4 == atn_o00.height());
+    BOOST_TEST(3 == atn_n01.height());
+    BOOST_TEST(2 == atn_n03.height());
+    BOOST_TEST(1 == atn_p07.height());
+    atn_p07.set("led", atn_p06);
+    BOOST_TEST(6 == **atn_p07.get("led"));
+    BOOST_TEST(7 == **atn_p06.parent());
+    BOOST_TEST(!::std::strcmp("led", atn_p06.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "led",
+            ::std::find_if(
+                atn_p07.cbegin(),
+                atn_p07.cend(),
+                [](auto p){return !::std::strcmp("led", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        6 == **::std::find_if(
+            atn_p07.cbegin(),
+            atn_p07.cend(),
+            [](auto p){return !::std::strcmp("led", p.first);}
+        )->second
+    );
+    BOOST_TEST(4 == atn_o00.height());
+    BOOST_TEST(3 == atn_n01.height());
+    BOOST_TEST(2 == atn_n03.height());
+    BOOST_TEST(1 == atn_p07.height());
+    atn_n01.swap(atn_n02);
+    BOOST_TEST(-2 == **atn_o00.get("P"));
+    BOOST_TEST(0 == **atn_n02.parent());
+    BOOST_TEST(!::std::strcmp("P", atn_n02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "P",
+            ::std::find_if(
+                atn_o00.cbegin(),
+                atn_o00.cend(),
+                [](auto p){return !::std::strcmp("P", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -2 == **::std::find_if(
+            atn_o00.cbegin(),
+            atn_o00.cend(),
+            [](auto p){return !::std::strcmp("P", p.first);}
+        )->second
+    );
+    BOOST_TEST(-1 == **atn_n02.get("e"));
+    BOOST_TEST(-2 == **atn_n01.parent());
+    BOOST_TEST(!::std::strcmp("e", atn_n01.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "e",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("e", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -1 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("e", p.first);}
+        )->second
+    );
+    BOOST_TEST(-3 == **atn_n02.get("i"));
+    BOOST_TEST(-2 == **atn_n03.parent());
+    BOOST_TEST(!::std::strcmp("i", atn_n03.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "i",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("i", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -3 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("i", p.first);}
+        )->second
+    );
+    BOOST_TEST(1 == **atn_n01.get("ter"));
+    BOOST_TEST(-1 == **atn_p01.parent());
+    BOOST_TEST(!::std::strcmp("ter", atn_p01.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ter",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("ter", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        1 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("ter", p.first);}
+        )->second
+    );
+    BOOST_TEST(2 == **atn_n01.get("ck"));
+    BOOST_TEST(-1 == **atn_p02.parent());
+    BOOST_TEST(!::std::strcmp("ck", atn_p02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ck",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("ck", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        2 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("ck", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == **atn_n01.get("ppers"));
+    BOOST_TEST(-1 == **atn_p03.parent());
+    BOOST_TEST(!::std::strcmp("ppers", atn_p03.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ppers",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("ppers", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        3 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("ppers", p.first);}
+        )->second
+    );
+    BOOST_TEST(4 == atn_o00.height());
+    BOOST_TEST(1 == atn_n01.height());
+    BOOST_TEST(3 == atn_n02.height());
+    atn_n01.swap(atn_n02);
+    BOOST_TEST(-1 == **atn_o00.get("P"));
+    BOOST_TEST(0 == **atn_n01.parent());
+    BOOST_TEST(!::std::strcmp("P", atn_n01.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "P",
+            ::std::find_if(
+                atn_o00.cbegin(),
+                atn_o00.cend(),
+                [](auto p){return !::std::strcmp("P", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -1 == **::std::find_if(
+            atn_o00.cbegin(),
+            atn_o00.cend(),
+            [](auto p){return !::std::strcmp("P", p.first);}
+        )->second
+    );
+    BOOST_TEST(-2 == **atn_n01.get("e"));
+    BOOST_TEST(-1 == **atn_n02.parent());
+    BOOST_TEST(!::std::strcmp("e", atn_n02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "e",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("e", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -2 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("e", p.first);}
+        )->second
+    );
+    BOOST_TEST(-3 == **atn_n01.get("i"));
+    BOOST_TEST(-1 == **atn_n03.parent());
+    BOOST_TEST(!::std::strcmp("i", atn_n03.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "i",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("i", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -3 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("i", p.first);}
+        )->second
+    );
+    BOOST_TEST(1 == **atn_n02.get("ter"));
+    BOOST_TEST(-2 == **atn_p01.parent());
+    BOOST_TEST(!::std::strcmp("ter", atn_p01.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ter",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("ter", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        1 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("ter", p.first);}
+        )->second
+    );
+    BOOST_TEST(2 == **atn_n02.get("ck"));
+    BOOST_TEST(-2 == **atn_p02.parent());
+    BOOST_TEST(!::std::strcmp("ck", atn_p02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ck",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("ck", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        2 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("ck", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == **atn_n02.get("ppers"));
+    BOOST_TEST(-2 == **atn_p03.parent());
+    BOOST_TEST(!::std::strcmp("ppers", atn_p03.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ppers",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("ppers", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        3 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("ppers", p.first);}
+        )->second
+    );
+    BOOST_TEST(4 == atn_o00.height());
+    BOOST_TEST(3 == atn_n01.height());
+    BOOST_TEST(1 == atn_n02.height());
+    atn_n02.swap(atn_n05);
+    BOOST_TEST(-5 == **atn_n01.get("e"));
+    BOOST_TEST(-1 == **atn_n05.parent());
+    BOOST_TEST(!::std::strcmp("e", atn_n05.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "e",
+            ::std::find_if(
+                atn_n01.cbegin(),
+                atn_n01.cend(),
+                [](auto p){return !::std::strcmp("e", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -5 == **::std::find_if(
+            atn_n01.cbegin(),
+            atn_n01.cend(),
+            [](auto p){return !::std::strcmp("e", p.first);}
+        )->second
+    );
+    BOOST_TEST(1 == **atn_n05.get("ter"));
+    BOOST_TEST(-5 == **atn_p01.parent());
+    BOOST_TEST(!::std::strcmp("ter", atn_p01.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ter",
+            ::std::find_if(
+                atn_n05.cbegin(),
+                atn_n05.cend(),
+                [](auto p){return !::std::strcmp("ter", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        1 == **::std::find_if(
+            atn_n05.cbegin(),
+            atn_n05.cend(),
+            [](auto p){return !::std::strcmp("ter", p.first);}
+        )->second
+    );
+    BOOST_TEST(2 == **atn_n05.get("ck"));
+    BOOST_TEST(-5 == **atn_p02.parent());
+    BOOST_TEST(!::std::strcmp("ck", atn_p02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ck",
+            ::std::find_if(
+                atn_n05.cbegin(),
+                atn_n05.cend(),
+                [](auto p){return !::std::strcmp("ck", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        2 == **::std::find_if(
+            atn_n05.cbegin(),
+            atn_n05.cend(),
+            [](auto p){return !::std::strcmp("ck", p.first);}
+        )->second
+    );
+    BOOST_TEST(3 == **atn_n05.get("ppers"));
+    BOOST_TEST(-5 == **atn_p03.parent());
+    BOOST_TEST(!::std::strcmp("ppers", atn_p03.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ppers",
+            ::std::find_if(
+                atn_n05.cbegin(),
+                atn_n05.cend(),
+                [](auto p){return !::std::strcmp("ppers", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        3 == **::std::find_if(
+            atn_n05.cbegin(),
+            atn_n05.cend(),
+            [](auto p){return !::std::strcmp("ppers", p.first);}
+        )->second
+    );
+    BOOST_TEST(-2 == **atn_n04.get("h"));
+    BOOST_TEST(-4 == **atn_n02.parent());
+    BOOST_TEST(!::std::strcmp("h", atn_n02.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "h",
+            ::std::find_if(
+                atn_n04.cbegin(),
+                atn_n04.cend(),
+                [](auto p){return !::std::strcmp("h", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        -2 == **::std::find_if(
+            atn_n04.cbegin(),
+            atn_n04.cend(),
+            [](auto p){return !::std::strcmp("h", p.first);}
+        )->second
+    );
+    BOOST_TEST(9 == **atn_n02.get("e"));
+    BOOST_TEST(-2 == **atn_p09.parent());
+    BOOST_TEST(!::std::strcmp("e", atn_p09.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "e",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("e", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        9 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("e", p.first);}
+        )->second
+    );
+    BOOST_TEST(10 == **atn_n02.get("ought"));
+    BOOST_TEST(-2 == **atn_p10.parent());
+    BOOST_TEST(!::std::strcmp("ought", atn_p10.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "ought",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("ought", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        10 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("ought", p.first);}
+        )->second
+    );
+    BOOST_TEST(11 == **atn_n02.get("at"));
+    BOOST_TEST(-2 == **atn_p11.parent());
+    BOOST_TEST(!::std::strcmp("at", atn_p11.key()));
+    BOOST_TEST(
+        !::std::strcmp(
+            "at",
+            ::std::find_if(
+                atn_n02.cbegin(),
+                atn_n02.cend(),
+                [](auto p){return !::std::strcmp("at", p.first);}
+            )->first
+        )
+    );
+    BOOST_TEST(
+        11 == **::std::find_if(
+            atn_n02.cbegin(),
+            atn_n02.cend(),
+            [](auto p){return !::std::strcmp("at", p.first);}
+        )->second
+    );
+    BOOST_TEST(4 == atn_o00.height());
+    BOOST_TEST(3 == atn_n01.height());
+    BOOST_TEST(1 == atn_n02.height());
+    BOOST_TEST(2 == atn_n04.height());
+    BOOST_TEST(1 == atn_n05.height());
+}
+
 int main(int argc, char** argv)
 {
     test_00();
+    test_01();
     return ::boost::report_errors();
 }
 

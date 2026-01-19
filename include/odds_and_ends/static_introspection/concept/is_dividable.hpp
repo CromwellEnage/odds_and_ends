@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_DIVIDABLE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_DIVIDABLE_HPP
@@ -12,16 +12,16 @@
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T, typename Divisor, typename Quotient>
-    struct is_dividable_impl :
-        ::boost::mpl::if_<
+    struct is_dividable_impl
+    {
+        typedef typename ::boost::mpl::if_<
             ::std::is_convertible<
                 decltype(::std::declval<T>() / ::std::declval<Divisor>()),
                 typename ::odds_and_ends::static_introspection::remove_cvref<Quotient>::type
             >,
             ::boost::mpl::true_,
             ::boost::mpl::false_
-        >::type
-    {
+        >::type type;
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
@@ -30,7 +30,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T, typename Divisor>
-    class has_division_op
+    class has_division_operator
     {
         template <typename B, typename D>
         static ::boost::type_traits::yes_type
@@ -47,27 +47,31 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
         typedef ::boost::mpl::bool_<
             sizeof(
                 ::odds_and_ends::static_introspection::concept::_detail
-                ::has_division_op<T,Divisor>::template _check<T,Divisor>(nullptr)
+                ::has_division_operator<T,Divisor>::template _check<T,Divisor>(nullptr)
             ) == sizeof(::boost::type_traits::yes_type)
         > type;
     };
+}}}}  // namespace odds_and_ends::static_introspection::concept::_detail
+
+#include <boost/mpl/eval_if.hpp>
+
+namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T, typename Divisor, typename Quotient>
-    struct is_dividable :
-        ::boost::mpl::if_<
-            typename ::odds_and_ends::static_introspection
-            ::concept::_detail::has_division_op<T,Divisor>::type,
+    struct is_dividable
+    {
+        typedef typename ::boost::mpl::eval_if<
+            typename ::odds_and_ends::static_introspection::concept
+            ::_detail::has_division_operator<T,Divisor>::type,
             ::odds_and_ends::static_introspection::concept
             ::_detail::is_dividable_impl<T,Divisor,Quotient>,
             ::boost::mpl::false_
-        >::type
-    {
+        >::type type;
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
 #include <odds_and_ends/static_introspection/concept/is_division_assignable.hpp>
 #include <odds_and_ends/use_default_policy.hpp>
-#include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 

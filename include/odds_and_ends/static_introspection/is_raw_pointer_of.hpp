@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__IS_RAW_POINTER_OF_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__IS_RAW_POINTER_OF_HPP
@@ -34,8 +34,8 @@ namespace odds_and_ends { namespace static_introspection { namespace _detail {
                 typename ::std::add_pointer<
                     typename ::std::add_const<
                         typename ::std::remove_reference<T2>::type
-                    >::type,
-                >::type
+                    >::type
+                >::type,
                 typename ::std::remove_reference<T1>::type
             >::type,
             ::boost::mpl::true_,

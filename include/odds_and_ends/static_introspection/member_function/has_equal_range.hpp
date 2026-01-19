@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_EQUAL_RANGE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_EQUAL_RANGE_HPP
@@ -26,6 +26,7 @@ namespace _detail {
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 #include <odds_and_ends/static_introspection/concept/_detail/is_range_or_pair.hpp>
+#include <odds_and_ends/static_introspection/concept/_detail/has_minimal_range_members.hpp>
 #include <odds_and_ends/static_introspection/nested_type/is_iterator_of.hpp>
 #include <odds_and_ends/use_default_policy.hpp>
 #include <boost/mpl/bool.hpp>

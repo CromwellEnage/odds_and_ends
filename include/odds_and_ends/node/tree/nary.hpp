@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2025 Cromwell D. Enage
+// Copyright (C) 2011-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__NODE__TREE__NARY_HPP
 #define ODDS_AND_ENDS__NODE__TREE__NARY_HPP
@@ -17,6 +17,7 @@
 #include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/conversion_assignment.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/copy_assignment.hpp>
 #include <odds_and_ends/composite_type/event/copy_2nd_stage.hpp>
@@ -115,6 +116,19 @@ namespace odds_and_ends { namespace node { namespace tree {
                             ),
                             _children()
                         {
+                        }
+
+                        template <typename Arg>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            return (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
                         }
 
                         template <typename A0, typename ...Args>

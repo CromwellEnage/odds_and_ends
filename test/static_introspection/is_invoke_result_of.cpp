@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <odds_and_ends/static_introspection/is_invoke_result_of.hpp>
 #include <boost/core/lightweight_test.hpp>

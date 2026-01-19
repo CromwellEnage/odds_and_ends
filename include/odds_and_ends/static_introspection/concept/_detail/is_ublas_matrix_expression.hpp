@@ -1,10 +1,10 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_UBLAS_MATRIX_EXPRESSION_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_UBLAS_MATRIX_EXPRESSION_HPP
 
 #include <odds_and_ends/static_introspection/concept/_detail/is_ublas_matrix_minimal_expression.hpp>
-#include <odds_and_ends/static_introspection/concept/_detail/has_computed_assignment_ops.hpp>
+#include <odds_and_ends/static_introspection/concept/_detail/has_computed_assignment_operators.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
 
@@ -16,7 +16,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
             ::odds_and_ends::static_introspection::concept::_detail
             ::is_mutable_ublas_matrix_minimal_expression<T>,
             ::odds_and_ends::static_introspection::concept
-            ::_detail::has_computed_assignment_ops<T>,
+            ::_detail::has_computed_assignment_operators<T>,
             ::boost::mpl::false_
         >::type
     {

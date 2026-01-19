@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__NODE__TREE__WITH_SIZE_HPP
 #define ODDS_AND_ENDS__NODE__TREE__WITH_SIZE_HPP
@@ -25,8 +25,7 @@
 #include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_2nd_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/conversion_assignment.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/copy_assignment.hpp>
 #include <odds_and_ends/composite_type/event/copy_2nd_stage.hpp>
@@ -122,6 +121,21 @@ namespace odds_and_ends { namespace node { namespace tree {
                         {
                         }
 
+                        template <typename Arg>
+                        inline bool
+                            post_construct(
+                                ::odds_and_ends::composite_type
+                                ::conversion_assignment_event const& e,
+                                Arg&& arg
+                            )
+                        {
+                            bool const result = (
+                                _composite_parent_t::post_construct(e, ::std::forward<Arg>(arg))
+                            );
+                            this->_size = ::boost::initialized_value;
+                            return result;
+                        }
+
                         template <typename A0, typename ...Args>
                         inline bool
                             post_construct(
@@ -136,7 +150,12 @@ namespace odds_and_ends { namespace node { namespace tree {
                                 ::std::forward<A0>(a0),
                                 ::std::forward<Args>(args)...
                             );
-                            ++this->_size;
+                            this->_post_insert_update_size(
+                                ::std::is_same<
+                                    typename traits::child_iterator::pointer,
+                                    typename traits::pointer
+                                >()
+                            );
                             return result;
                         }
 
@@ -158,29 +177,6 @@ namespace odds_and_ends { namespace node { namespace tree {
                             )
                         {
                             bool const result = _composite_parent_t::post_construct(e, arg_pack);
-                            ++this->_size;
-                            return result;
-                        }
-
-                        template <typename Arg>
-                        inline _result(
-                            ::odds_and_ends::composite_type
-                            ::conversion_constructor_1st_stage_event const& e,
-                            Arg const& arg
-                        ) : _composite_parent_t(e, arg), _size(::boost::initialized_value)
-                        {
-                        }
-
-
-                        template <typename Arg>
-                        inline bool
-                            post_construct(
-                                ::odds_and_ends::composite_type
-                                ::conversion_constructor_2nd_stage_event const& e,
-                                Arg const& arg
-                            )
-                        {
-                            bool const result = _composite_parent_t::post_construct(e, arg);
                             ++this->_size;
                             return result;
                         }

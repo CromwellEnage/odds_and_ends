@@ -1,10 +1,10 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <string>
 #include <odds_and_ends/node/container/deque.hpp>
 #include <odds_and_ends/node/balancer/left_leaning_red_black_tree.hpp>
 #include <odds_and_ends/node/red_black.hpp>
-#include <odds_and_ends/static_introspection/concept/is_container.hpp>
+#include <odds_and_ends/static_introspection/concept/is_indexable_container.hpp>
 #include <boost/mpl/deque.hpp>
 #include <boost/core/lightweight_test.hpp>
 
@@ -16,12 +16,12 @@ typedef ::odds_and_ends::node::container::deque<
 
 void test_char_deque_00()
 {
-/*
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_container<CharDeque>::value,
-        ""
+        ::odds_and_ends::static_introspection::concept
+        ::is_indexable_container<CharDeque,::boost::mpl::integral_c<unsigned int,3> >::value,
+        "::odds_and_ends::node::container::deque is an Indexable Container with empty(), max_size(), c[r]begin() and c[r]end()."
     );
-*/
+
     CharDeque char_deque;
     CharDeque::const_iterator c_itr = char_deque.begin();
     CharDeque::const_reverse_iterator c_r_itr = char_deque.rbegin();

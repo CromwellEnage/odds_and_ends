@@ -1,8 +1,9 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_ASSIGN_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_ASSIGN_HPP
 
+#include <utility>
 #include <odds_and_ends/static_introspection/declref.hpp>
 #include <boost/mpl/apply.hpp>
 
@@ -15,7 +16,7 @@ namespace _detail {
             ResultPlaceholderExpr,
             decltype(
                 ::odds_and_ends::static_introspection::declmref<T>().assign(
-                    ::odds_and_ends::static_introspection::declref<Value>()
+                    ::std::declval<Value>()
                 )
             )
         >::type
@@ -63,7 +64,7 @@ namespace _detail {
                 typename ::std::add_pointer<
                     decltype(
                         ::odds_and_ends::static_introspection::declmref<B>().assign(
-                            ::odds_and_ends::static_introspection::declref<V>()
+                            ::std::declval<V>()
                         )
                     )
                 >::type

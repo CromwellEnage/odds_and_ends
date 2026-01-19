@@ -1,3 +1,5 @@
+// Copyright (C) 2025-2026 Cromwell D. Enage
+
 // Based on "possible implementation code" from
 // <https://en.cppreference.com/w/cpp/types/result_of.html>
 

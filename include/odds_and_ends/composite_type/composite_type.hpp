@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__COMPOSITE_TYPE__COMPOSITE_TYPE_HPP
 #define ODDS_AND_ENDS__COMPOSITE_TYPE__COMPOSITE_TYPE_HPP
@@ -62,8 +62,6 @@ namespace odds_and_ends { namespace composite_type {
         {
         };
 
-        composite_type();
-
         template <typename ArgPack>
         explicit composite_type(
             ArgPack const& arg_pack,
@@ -86,27 +84,14 @@ namespace odds_and_ends { namespace composite_type {
             >::type = _enabler()
         );
 
-        template <typename CPGL>
-        composite_type(
-            composite_type<CPGL> const& source,
-            typename ::boost::disable_if<
-                ::std::is_same<CompositeParentGeneratorList,CPGL>,
-                _enabler
-            >::type = _enabler()
-        );
-
-        template <typename Arg0>
+        template <typename Arg>
         explicit composite_type(
-            Arg0&& arg0,
+            Arg&& arg,
             typename ::boost::disable_if<
-                typename ::boost::mpl::eval_if<
-                    ::std::is_base_of< ::odds_and_ends::composite_type::composite_base<Arg0>,Arg0>,
+                typename ::boost::mpl::if_<
+                    ::boost::parameter::is_argument_pack<Arg>,
                     ::boost::mpl::true_,
-                    ::boost::mpl::if_<
-                        ::boost::parameter::is_argument_pack<Arg0>,
-                        ::boost::mpl::true_,
-                        ::odds_and_ends::static_introspection::concept::is_allocator<Arg0>
-                    >
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Arg>
                 >::type,
                 _enabler
             >::type = _enabler()
@@ -115,20 +100,23 @@ namespace odds_and_ends { namespace composite_type {
         template <typename Arg0, typename Arg1, typename ...Args>
         composite_type(Arg0&& arg0, Arg1&& arg1, Args&& ...args);
 
-        composite_type(composite_type const& copy);
-
         template <typename Alloc>
         composite_type(composite_type const& copy, Alloc const& alloc);
-
-        composite_type(composite_type&& source);
 
         template <typename Alloc>
         composite_type(composite_type&& source, Alloc const& alloc);
 
+        composite_type(composite_type const& copy);
+        composite_type(composite_type&& source);
+        composite_type();
         ~composite_type();
         composite_type& operator=(composite_type const& copy);
         composite_type& operator=(composite_type&& source);
         void swap(composite_type& other);
+
+        template <typename Arg>
+        typename ::boost::disable_if< ::std::is_same<Arg,composite_type>,composite_type&>::type
+            operator=(Arg&& arg);
 
     private:
         void _assign(composite_type const& copy, ::boost::mpl::true_);
@@ -151,8 +139,7 @@ namespace odds_and_ends { namespace composite_type {
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_2nd_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_2nd_stage.hpp>
+#include <odds_and_ends/composite_type/event/conversion_assignment.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/copy_assignment.hpp>
 #include <odds_and_ends/composite_type/event/copy_2nd_stage.hpp>
@@ -212,48 +199,25 @@ namespace odds_and_ends { namespace composite_type {
     }
 
     template <typename CompositeParentGeneratorList>
-    template <typename CPGL>
+    template <typename Arg>
     inline composite_type<CompositeParentGeneratorList>::composite_type(
-        composite_type<CPGL> const& source,
+        Arg&& arg,
         typename ::boost::disable_if<
-            ::std::is_same<CompositeParentGeneratorList,CPGL>,
-            _enabler
-        >::type
-    ) : _composite_parent_t(
-            ::odds_and_ends::composite_type::conversion_constructor_1st_stage_event(),
-            source
-        )
-    {
-        _composite_parent_t::post_construct(
-            ::odds_and_ends::composite_type::conversion_constructor_2nd_stage_event(),
-            source
-        );
-    }
-
-    template <typename CompositeParentGeneratorList>
-    template <typename Arg0>
-    inline composite_type<CompositeParentGeneratorList>::composite_type(
-        Arg0&& arg0,
-        typename ::boost::disable_if<
-            typename ::boost::mpl::eval_if<
-                ::std::is_base_of< ::odds_and_ends::composite_type::composite_base<Arg0>,Arg0>,
+            typename ::boost::mpl::if_<
+                ::boost::parameter::is_argument_pack<Arg>,
                 ::boost::mpl::true_,
-                ::boost::mpl::if_<
-                    ::boost::parameter::is_argument_pack<Arg0>,
-                    ::boost::mpl::true_,
-                    ::odds_and_ends::static_introspection::concept::is_allocator<Arg0>
-                >
+                ::odds_and_ends::static_introspection::concept::is_allocator<Arg>
             >::type,
             _enabler
         >::type
     ) : _composite_parent_t(
             ::odds_and_ends::composite_type::variadic_constructor_1st_stage_event(),
-            ::std::forward<Arg0>(arg0)
+            ::std::forward<Arg>(arg)
         )
     {
         _composite_parent_t::post_construct(
             ::odds_and_ends::composite_type::variadic_constructor_2nd_stage_event(),
-            ::std::forward<Arg0>(arg0)
+            ::std::forward<Arg>(arg)
         );
     }
 
@@ -355,6 +319,25 @@ namespace odds_and_ends { namespace composite_type {
     template <typename CompositeParentGeneratorList>
     inline composite_type<CompositeParentGeneratorList>::~composite_type()
     {
+    }
+
+    template <typename CompositeParentGeneratorList>
+    template <typename Arg>
+    inline typename ::boost::disable_if<
+        ::std::is_same<Arg,composite_type<CompositeParentGeneratorList> >,
+        composite_type<CompositeParentGeneratorList>&
+    >::type
+        composite_type<CompositeParentGeneratorList>::operator=(Arg&& arg)
+    {
+        _composite_parent_t::post_construct(
+            ::odds_and_ends::composite_type::conversion_assignment_event(),
+            ::std::forward<Arg>(arg)
+        );
+        _composite_parent_t::post_construct(
+            ::odds_and_ends::composite_type::variadic_constructor_2nd_stage_event(),
+            ::std::forward<Arg>(arg)
+        );
+        return *this;
     }
 
     template <typename CompositeParentGeneratorList>

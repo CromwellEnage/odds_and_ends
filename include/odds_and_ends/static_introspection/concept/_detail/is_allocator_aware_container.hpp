@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_CONTAINER_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_ALLOCATOR_AWARE_CONTAINER_HPP
@@ -13,7 +13,7 @@
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    class is_const_allocator_aware_container_lvl_0
+    class is_immutable_allocator_aware_container_lvl_0
     {
         typedef typename ::odds_and_ends
         ::static_introspection::nested_type::allocator_type_of<T>::type _T_alloc;
@@ -43,9 +43,9 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct is_const_allocator_aware_container_lvl_1 :
+    struct is_immutable_allocator_aware_container_lvl_1 :
         ::boost::mpl::if_<
-            ::odds_and_ends::static_introspection::concept::_detail::is_const_container<T>,
+            ::odds_and_ends::static_introspection::concept::_detail::is_immutable_container<T>,
             ::odds_and_ends::static_introspection::member_function::has_get_allocator<T>,
             ::boost::mpl::false_
         >::type
@@ -53,12 +53,12 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     };
 
     template <typename T>
-    struct is_const_allocator_aware_container_lvl_2 :
+    struct is_immutable_allocator_aware_container_lvl_2 :
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept
-            ::_detail::is_const_allocator_aware_container_lvl_1<T>,
+            ::_detail::is_immutable_allocator_aware_container_lvl_1<T>,
             ::odds_and_ends::static_introspection::concept
-            ::_detail::is_const_allocator_aware_container_lvl_0<T>,
+            ::_detail::is_immutable_allocator_aware_container_lvl_0<T>,
             ::boost::mpl::false_
         >::type
     {
@@ -71,10 +71,10 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct is_const_allocator_aware_container_lvl_4 :
+    struct is_immutable_allocator_aware_container_lvl_4 :
         ::boost::mpl::if_<
             ::odds_and_ends::static_introspection::concept
-            ::_detail::is_const_allocator_aware_container_lvl_1<T>,
+            ::_detail::is_immutable_allocator_aware_container_lvl_1<T>,
             ::odds_and_ends::static_introspection::member_function::has_get_allocator<
                 T,
                 ::odds_and_ends::static_introspection::concept::is_allocator< ::boost::mpl::_>

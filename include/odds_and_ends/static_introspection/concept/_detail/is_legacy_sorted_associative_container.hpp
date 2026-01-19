@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_SORTED_ASSOC_CONTAINER_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_SORTED_ASSOC_CONTAINER_HPP
@@ -40,13 +40,13 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct is_const_legacy_sorted_associative_container :
+    struct is_immutable_legacy_sorted_associative_container :
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept
-            ::_detail::is_const_legacy_associative_container<T>,
+            ::_detail::is_immutable_legacy_associative_container<T>,
             ::boost::mpl::eval_if<
                 ::odds_and_ends::static_introspection::concept
-                ::_detail::is_const_reversible_container<T>,
+                ::_detail::is_immutable_reversible_container<T>,
                 ::boost::mpl::eval_if<
                     ::odds_and_ends::static_introspection::member_function::has_key_comp<T>,
                     ::odds_and_ends::static_introspection::member_function::has_value_comp<T>,

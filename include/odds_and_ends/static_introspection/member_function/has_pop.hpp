@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_POP_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_POP_HPP
@@ -12,13 +12,13 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
 namespace _detail {
 
     template <typename T>
-    class has_pop_expr
+    class has_pop
     {
         template <typename B>
         static ::boost::type_traits::yes_type
             _check(
                 typename ::std::add_pointer<
-                    decltype(::odds_and_ends::static_introspection::declref<B>().pop())
+                    decltype(::odds_and_ends::static_introspection::declmref<B>().pop())
                 >::type
             );
 
@@ -29,7 +29,7 @@ namespace _detail {
         typedef ::boost::mpl::bool_<
             sizeof(
                 ::odds_and_ends::static_introspection::member_function
-                ::_detail::has_pop_expr<T>::_check<T>(nullptr)
+                ::_detail::has_pop<T>::_check<T>(nullptr)
             ) == sizeof(::boost::type_traits::yes_type)
         > type;
     };
@@ -37,14 +37,12 @@ namespace _detail {
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
-#include <odds_and_ends/static_introspection/remove_vref.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 
     template <typename T>
     struct has_pop :
-        ::odds_and_ends::static_introspection::member_function::_detail
-        ::has_pop_expr<typename ::odds_and_ends::static_introspection::remove_vref<T>::type>::type
+        ::odds_and_ends::static_introspection::member_function::_detail::has_pop<T>::type
     {
     };
 }}}  // namespace odds_and_ends::static_introspection::member_function

@@ -1,7 +1,9 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_UNORDERED_ASSOC_CONTAINER_HPP
-#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_UNORDERED_ASSOC_CONTAINER_HPP
+#ifndef \
+ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_HASHED_ASSOCIATIVE_CONTAINER_HPP
+#define \
+ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_HASHED_ASSOCIATIVE_CONTAINER_HPP
 
 #include <odds_and_ends/static_introspection/concept/_detail/is_legacy_associative_container.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_begin_bucket.hpp>
@@ -13,7 +15,7 @@
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct is_base_legacy_unordered_associative_container :
+    struct is_base_legacy_hashed_associative_container :
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept
             ::_detail::is_base_legacy_associative_container<T>,
@@ -39,10 +41,10 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct is_const_legacy_unordered_associative_container :
+    struct is_immutable_legacy_hashed_associative_container :
         ::boost::mpl::eval_if<
-            ::odds_and_ends::static_introspection::concept
-            ::_detail::is_const_legacy_associative_container<T>,
+            ::odds_and_ends::static_introspection::concept::_detail
+            ::is_immutable_legacy_associative_container<T>,
             ::boost::mpl::eval_if<
                 ::odds_and_ends::static_introspection::member_function::has_max_bucket_count<T>,
                 ::boost::mpl::eval_if<
@@ -79,5 +81,5 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
 #endif
-// ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_UNORDERED_ASSOC_CONTAINER_HPP
+// ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_LEGACY_HASHED_ASSOCIATIVE_CONTAINER_HPP
 

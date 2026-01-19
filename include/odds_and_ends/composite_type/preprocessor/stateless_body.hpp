@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__COMPOSITE_TYPE__PP__STATELESS_BODY_HPP
 #define ODDS_AND_ENDS__COMPOSITE_TYPE__PP__STATELESS_BODY_HPP
@@ -7,7 +7,6 @@
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 
@@ -36,13 +35,6 @@
         ::odds_and_ends::composite_type::arg_pack_constructor_1st_stage_event const& e,          \
         ArgumentPack const& arg_pack                                                             \
     ) : Base(e, arg_pack)                                                                        \
-    {                                                                                            \
-    }                                                                                            \
-    template <typename Arg>                                                                      \
-    inline Type(                                                                                 \
-        ::odds_and_ends::composite_type::conversion_constructor_1st_stage_event const& e,        \
-        Arg const& arg                                                                           \
-    ) : Base(e, arg)                                                                             \
     {                                                                                            \
     }                                                                                            \
     template <typename Copy>                                                                     \

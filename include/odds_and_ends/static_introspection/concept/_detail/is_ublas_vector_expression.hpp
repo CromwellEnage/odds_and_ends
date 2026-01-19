@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_UBLAS_VECTOR_EXPRESSION_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_UBLAS_VECTOR_EXPRESSION_HPP
@@ -30,7 +30,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
-#include <odds_and_ends/static_introspection/concept/_detail/has_computed_assignment_ops.hpp>
+#include <odds_and_ends/static_introspection/concept/_detail/has_computed_assignment_operators.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/apply.hpp>
 
@@ -48,7 +48,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
                 >::type,
                 ::boost::mpl::eval_if<
                     ::odds_and_ends::static_introspection::concept
-                    ::_detail::has_computed_assignment_ops<T>,
+                    ::_detail::has_computed_assignment_operators<T>,
                     ::boost::mpl::if_<
                         ::odds_and_ends::static_introspection::concept::_detail
                         ::has_ublas_vector_expression_element_operator<T>,

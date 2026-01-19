@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_MERGE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_MERGE_HPP
@@ -19,8 +19,8 @@ namespace _detail {
             _check(
                 typename ::std::add_pointer<
                     decltype(
-                        ::odds_and_ends::static_introspection::declref<B>().merge(
-                            ::odds_and_ends::static_introspection::declref<B>()
+                        ::odds_and_ends::static_introspection::declmref<B>().merge(
+                            ::odds_and_ends::static_introspection::declmref<B>()
                         )
                     )
                 >::type
@@ -41,15 +41,12 @@ namespace _detail {
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
-#include <odds_and_ends/static_introspection/remove_vref.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 
     template <typename T>
     struct has_merge :
-        ::odds_and_ends::static_introspection::member_function::_detail::has_merge<
-            typename ::odds_and_ends::static_introspection::remove_vref<T>::type
-        >::type
+        ::odds_and_ends::static_introspection::member_function::_detail::has_merge<T>::type
     {
     };
 }}}  // namespace odds_and_ends::static_introspection::member_function

@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <odds_and_ends/node/container/stack.hpp>
 #include <odds_and_ends/static_introspection/concept/is_stack_or_heap.hpp>

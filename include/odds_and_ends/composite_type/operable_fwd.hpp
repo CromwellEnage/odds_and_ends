@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__COMPOSITE_TYPE__OPERABLE_FWD_HPP
 #define ODDS_AND_ENDS__COMPOSITE_TYPE__OPERABLE_FWD_HPP

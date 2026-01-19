@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_UBLAS_VECTOR_MIN_EXPR_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_UBLAS_VECTOR_MIN_EXPR_HPP
@@ -63,7 +63,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
 #include <type_traits>
-#include <odds_and_ends/static_introspection/concept/_detail/has_computed_assignment_ops.hpp>
+#include <odds_and_ends/static_introspection/concept/_detail/has_computed_assignment_operators.hpp>
 #include <odds_and_ends/static_introspection/nested_type/is_type_category_of.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_size.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_swap.hpp>

@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_UBLAS_STORAGE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_UBLAS_STORAGE_HPP
@@ -22,7 +22,8 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
             ::odds_and_ends::static_introspection::concept::_detail::is_base_reversible_container,
             ::odds_and_ends::static_introspection::concept
             ::_detail::is_mutable_resizable_container,
-            ::odds_and_ends::static_introspection::concept::_detail::is_const_reversible_container,
+            ::odds_and_ends::static_introspection::concept
+            ::_detail::is_immutable_reversible_container,
             ::odds_and_ends::static_introspection::concept::_detail::has_container_reverse_iterator
         >
     {

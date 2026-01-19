@@ -1,4 +1,4 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_REVERSIBLE_CONTAINER_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_REVERSIBLE_CONTAINER_HPP
@@ -26,7 +26,6 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
-#include <odds_and_ends/static_introspection/nested_type/has_reverse_iterator.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_rbegin.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_rend.hpp>
 #include <boost/mpl/bool.hpp>
@@ -38,13 +37,9 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     struct is_base_reversible_container :
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept::_detail::is_base_container<T>,
-            ::boost::mpl::eval_if<
-                ::odds_and_ends::static_introspection::nested_type::has_reverse_iterator<T>,
-                ::boost::mpl::if_<
-                    ::odds_and_ends::static_introspection::member_function::has_rbegin<T>,
-                    ::odds_and_ends::static_introspection::member_function::has_rend<T>,
-                    ::boost::mpl::false_
-                >,
+            ::boost::mpl::if_<
+                ::odds_and_ends::static_introspection::member_function::has_rbegin<T>,
+                ::odds_and_ends::static_introspection::member_function::has_rend<T>,
                 ::boost::mpl::false_
             >,
             ::boost::mpl::false_
@@ -59,9 +54,10 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct is_const_reversible_container :
+    struct is_immutable_reversible_container :
         ::boost::mpl::eval_if<
-            ::odds_and_ends::static_introspection::concept::_detail::is_const_container<T>,
+            ::odds_and_ends::static_introspection::concept
+            ::_detail::is_immutable_container_with_cfunctions<T>,
             ::boost::mpl::if_<
                 ::odds_and_ends::static_introspection::member_function::has_crbegin<T>,
                 ::odds_and_ends::static_introspection::member_function::has_crend<T>,

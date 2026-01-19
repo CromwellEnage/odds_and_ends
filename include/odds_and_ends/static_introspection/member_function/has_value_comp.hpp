@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_VALUE_COMP_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_VALUE_COMP_HPP
@@ -104,24 +104,25 @@ namespace _detail {
     };
 
     template <typename T, typename ResultPlaceholderExpr>
-    struct has_value_comp_ptr_container :
-        ::odds_and_ends::static_introspection::member_function::_detail::has_value_comp<
+    struct has_value_comp_ptr_container
+    {
+        typedef ::odds_and_ends::static_introspection::member_function::_detail::has_value_comp<
             decltype(::odds_and_ends::static_introspection::declmref<T>().base()),
             ResultPlaceholderExpr
-        >
-    {
+        > type;
     };
 }  // namespace _detail
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/concept/is_pointer_container.hpp>
+#include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 
     template <typename T, typename ResultPlaceholderExpr>
     struct has_value_comp :
-        ::boost::mpl::if_<
+        ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept::is_pointer_container<T>,
             ::odds_and_ends::static_introspection::member_function::_detail
             ::has_value_comp_ptr_container<T,ResultPlaceholderExpr>,

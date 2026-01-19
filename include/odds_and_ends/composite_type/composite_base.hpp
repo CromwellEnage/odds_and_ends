@@ -1,16 +1,15 @@
-// Copyright (C) 2011-2025 Cromwell D. Enage
+// Copyright (C) 2011-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__COMPOSITE_TYPE__COMPOSITE_BASE_HPP
 #define ODDS_AND_ENDS__COMPOSITE_TYPE__COMPOSITE_BASE_HPP
 
 #include <type_traits>
-#include <utility>
 #include <memory>
 #include <odds_and_ends/composite_type/composite_base_fwd.hpp>
 #include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
 #include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
+#include <odds_and_ends/composite_type/event/conversion_assignment.hpp>
 #include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
 #include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/event/constructor_2nd_stage.hpp>
@@ -52,12 +51,6 @@ namespace odds_and_ends { namespace composite_type {
             ArgumentPack const& arg_pack
         );
 
-        template <typename Arg>
-        composite_base(
-            ::odds_and_ends::composite_type::conversion_constructor_1st_stage_event const&,
-            Arg const& arg
-        );
-
         template <typename Copy>
         composite_base(
             ::odds_and_ends::composite_type::coercive_copy_constructor_event const&,
@@ -85,6 +78,13 @@ namespace odds_and_ends { namespace composite_type {
         );
 
         ~composite_base();
+
+        template <typename ...Args>
+        bool
+            post_construct(
+                ::odds_and_ends::composite_type::conversion_assignment_event const&,
+                Args&&...
+            );
 
         template <typename ...Args>
         bool
@@ -119,6 +119,7 @@ namespace odds_and_ends { namespace composite_type {
     };
 }}  // namespace odds_and_ends::composite_type
 
+#include <utility>
 
 namespace odds_and_ends { namespace composite_type {
 
@@ -149,15 +150,6 @@ namespace odds_and_ends { namespace composite_type {
     inline composite_base<Derived>::composite_base(
         ::odds_and_ends::composite_type::arg_pack_constructor_1st_stage_event const&,
         ArgumentPack const& arg_pack
-    )
-    {
-    }
-
-    template <typename Derived>
-    template <typename Arg>
-    inline composite_base<Derived>::composite_base(
-        ::odds_and_ends::composite_type::conversion_constructor_1st_stage_event const&,
-        Arg const& arg
     )
     {
     }
@@ -203,6 +195,17 @@ namespace odds_and_ends { namespace composite_type {
     template <typename Derived>
     inline composite_base<Derived>::~composite_base()
     {
+    }
+
+    template <typename Derived>
+    template <typename ...Args>
+    inline bool
+        composite_base<Derived>::post_construct(
+            ::odds_and_ends::composite_type::conversion_assignment_event const&,
+            Args&&...
+        )
+    {
+        return true;
     }
 
     template <typename Derived>

@@ -1788,16 +1788,16 @@ void test_01()
 
 #include <odds_and_ends/node/tree/associative.hpp>
 
-typedef ::odds_and_ends::composite_type::composite_type<
-    ::boost::mpl::deque<
-        ::odds_and_ends::node::data<int const>,
-        ::odds_and_ends::node::tree::base<>,
-        ::odds_and_ends::node::tree::associative<char>
-    >
-> associative_tree_node;
-
 void test_02()
 {
+    typedef ::odds_and_ends::composite_type::composite_type<
+        ::boost::mpl::deque<
+            ::odds_and_ends::node::data<int const>,
+            ::odds_and_ends::node::tree::base<>,
+            ::odds_and_ends::node::tree::associative<char>
+        >
+    > associative_tree_node;
+
     associative_tree_node atn_n03(-3);
     associative_tree_node atn_n02(-2);
     associative_tree_node atn_n01(-1);

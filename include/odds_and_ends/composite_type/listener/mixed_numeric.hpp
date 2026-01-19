@@ -1,24 +1,17 @@
-// Copyright (C) 2012-2025 Cromwell D. Enage
+// Copyright (C) 2012-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__COMPOSITE_TYPE__LISTENER__MIXED_NUMERIC_HPP
 #define ODDS_AND_ENDS__COMPOSITE_TYPE__LISTENER__MIXED_NUMERIC_HPP
 
 #include <type_traits>
 #include <odds_and_ends/composite_type/listener_fwd.hpp>
-#include <odds_and_ends/composite_type/event/default_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/variadic_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/arg_pack_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/conversion_ctor_1st_stage.hpp>
-#include <odds_and_ends/composite_type/event/coercive_copy_constructor.hpp>
-#include <odds_and_ends/composite_type/event/coercive_move_constructor.hpp>
 #include <odds_and_ends/composite_type/event/addition_assignment.hpp>
 #include <odds_and_ends/composite_type/event/subtraction_assignment.hpp>
 #include <odds_and_ends/composite_type/event/multiplication_assignment.hpp>
 #include <odds_and_ends/composite_type/event/division_assignment.hpp>
+#include <odds_and_ends/composite_type/event/function_call_broadcast.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
 #include <odds_and_ends/composite_type/preprocessor/stateless_body.hpp>
-#include <odds_and_ends/static_introspection/concept/is_pre_incrementable.hpp>
-#include <odds_and_ends/static_introspection/concept/is_pre_decrementable.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/mpl/empty_base.hpp>
@@ -176,6 +169,22 @@ namespace odds_and_ends { namespace composite_type {
                             d.reciprocate();
                             this->_multiply(d);
                             return result;
+                        }
+
+                        template <typename Event, typename ...Args>
+                        inline typename ::boost::enable_if<
+                            ::std::is_base_of<
+                                ::odds_and_ends::composite_type::function_call_broadcast_event,
+                                Event
+                            >,
+                            bool
+                        >::type
+                            listen_to(Event const& e, Args&& ...args)
+                        {
+                            return _composite_parent_t::listen_to(
+                                e,
+                                ::std::forward<Args>(args)...
+                            );
                         }
 
                         ODDS_AND_ENDS__COMPOSITE_TYPE__STATELESS_BODY(_result, _composite_parent_t)

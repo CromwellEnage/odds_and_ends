@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <iostream>
 #include <odds_and_ends/node/algorithm/avl_tree_test.hpp>

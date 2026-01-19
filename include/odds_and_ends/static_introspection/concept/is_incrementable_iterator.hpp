@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_INCREMENTABLE_ITERATOR_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_INCREMENTABLE_ITERATOR_HPP
@@ -14,7 +14,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_incrementable_iterator_ext :
         ::boost::mpl::if_<
             ::std::is_copy_constructible<T>,
-            ::std::is_copy_assignable<T>,
+            ::boost::mpl::true_/*::std::is_copy_assignable<T>*/,
             ::boost::mpl::false_
         >::type
     {

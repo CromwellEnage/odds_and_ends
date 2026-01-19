@@ -1,20 +1,20 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <string>
 #include <odds_and_ends/node/container/list.hpp>
-#include <odds_and_ends/static_introspection/concept/is_container.hpp>
+#include <odds_and_ends/static_introspection/concept/is_reversible_container.hpp>
 #include <boost/core/lightweight_test.hpp>
 
 typedef ::odds_and_ends::node::container::list<char> CharList;
 
 void test_char_list_00()
 {
-/*
     static_assert(
-        ::odds_and_ends::static_introspection::concept::is_container<CharList>::value,
-        ""
+        ::odds_and_ends::static_introspection::concept
+        ::is_reversible_container<CharList,::boost::mpl::integral_c<unsigned int,4> >::value,
+        "::odds_and_ends::node::container::list is a C++-Standard Reversible Container."
     );
-*/
+
     CharList char_list;
     CharList::const_iterator c_itr = char_list.begin();
     CharList::const_reverse_iterator c_r_itr = char_list.rbegin();

@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_SWAP_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_SWAP_HPP
@@ -41,15 +41,12 @@ namespace _detail {
 }}}  // namespace odds_and_ends::static_introspection::member_function
 
 #include <odds_and_ends/static_introspection_fwd.hpp>
-#include <odds_and_ends/static_introspection/remove_cvref.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace member_function {
 
     template <typename T>
     struct has_swap :
-        ::odds_and_ends::static_introspection::member_function::_detail::has_swap<
-            typename ::odds_and_ends::static_introspection::remove_cvref<T>::type
-        >::type
+        ::odds_and_ends::static_introspection::member_function::_detail::has_swap<T>::type
     {
     };
 }}}  // namespace odds_and_ends::static_introspection::member_function

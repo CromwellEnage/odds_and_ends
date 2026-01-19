@@ -1,7 +1,7 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
-#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_COMPUTED_ASSIGNMENT_OPS_HPP
-#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_COMPUTED_ASSIGNMENT_OPS_HPP
+#ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_COMPUTED_ASSIGNMENT_OPERATORS_HPP
+#define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_COMPUTED_ASSIGNMENT_OPERATORS_HPP
 
 #include <type_traits>
 #include <odds_and_ends/static_introspection/concept/is_addition_assignable.hpp>
@@ -13,15 +13,15 @@
 #include <odds_and_ends/static_introspection/is_convertible_to_cref_of.hpp>
 #include <odds_and_ends/static_introspection/nested_type/value_type_of.hpp>
 #include <odds_and_ends/use_default_policy.hpp>
-#include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/bool.hpp>
+#include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/eval_if.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
     template <typename T>
-    struct has_computed_assignment_ops :
+    struct has_computed_assignment_operators :
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept::is_multiplication_assignable<
                 T,
@@ -86,5 +86,6 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     };
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
-#endif  // ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_COMPUTED_ASSIGNMENT_OPS_HPP
+#endif
+// ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__HAS_COMPUTED_ASSIGNMENT_OPERATORS_HPP
 

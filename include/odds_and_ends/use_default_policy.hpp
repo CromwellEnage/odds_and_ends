@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__USE_DEFAULT_POLICY_HPP
 #define ODDS_AND_ENDS__USE_DEFAULT_POLICY_HPP

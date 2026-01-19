@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_LEGACY_PAIR_ASSOCIATIVE_CONTAINER_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_LEGACY_PAIR_ASSOCIATIVE_CONTAINER_HPP
@@ -22,7 +22,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
             ::odds_and_ends::static_introspection::concept::_detail
             ::is_mutable_legacy_pair_associative_container,
             ::odds_and_ends::static_introspection::concept
-            ::_detail::is_const_legacy_associative_container,
+            ::_detail::is_immutable_legacy_associative_container,
             ::odds_and_ends::static_introspection::concept::_detail::has_container_iterator
         >
     {

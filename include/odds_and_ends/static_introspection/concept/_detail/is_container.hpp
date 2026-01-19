@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2025 Cromwell D. Enage
+// Copyright (C) 2011-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_CONTAINER_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__DETAIL__IS_CONTAINER_HPP
@@ -34,7 +34,74 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 }}}}  // namespace odds_and_ends::static_introspection::concept::_detail
 
 #include <odds_and_ends/static_introspection/_detail/apply1_remove_cvref.hpp>
+
+namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
+
+    template <
+        typename T,
+        typename IteratorPlaceholderExpr,
+        template <typename> class BasePred,
+        template <typename> class MutablePred,
+        template <typename, typename> class IterPred
+    >
+    struct is_loose_container :
+        ::odds_and_ends::static_introspection::_detail::apply1_remove_cvref<
+            ::odds_and_ends::static_introspection::concept::_detail
+            ::container_policy<IteratorPlaceholderExpr,BasePred,MutablePred,IterPred>,
+            T
+        >::type
+    {
+    };
+}}}}  // namespace odds_and_ends::static_introspection::concept::_detail
+
 #include <odds_and_ends/static_introspection/_detail/apply1_remove_vref_add_const.hpp>
+
+namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
+
+    template <
+        typename T,
+        typename IteratorPlaceholderExpr,
+        template <typename> class BasePred,
+        template <typename> class ConstPred,
+        template <typename, typename> class IterPred
+    >
+    struct is_looser_container :
+        ::odds_and_ends::static_introspection::_detail::apply1_remove_vref_add_const<
+            ::odds_and_ends::static_introspection::concept::_detail
+            ::container_policy<IteratorPlaceholderExpr,BasePred,ConstPred,IterPred>,
+            T
+        >::type
+    {
+    };
+
+    template <
+        typename T,
+        typename IteratorPlaceholderExpr,
+        template <typename> class BasePred,
+        template <typename> class MutablePred,
+        template <typename> class ConstPred,
+        template <typename, typename> class IterPred
+    >
+    struct is_strict_container :
+        ::boost::mpl::eval_if<
+            typename ::odds_and_ends::static_introspection::_detail::apply1_remove_cvref<
+                ::odds_and_ends::static_introspection::concept::_detail
+                ::container_policy<IteratorPlaceholderExpr,BasePred,MutablePred,IterPred>,
+                T
+            >::type,
+            ::odds_and_ends::static_introspection::_detail::apply1_remove_vref_add_const<
+                ::odds_and_ends::static_introspection::concept::_detail
+                ::container_policy<IteratorPlaceholderExpr,BasePred,ConstPred,IterPred>,
+                T
+            >,
+            ::boost::mpl::false_
+        >::type
+    {
+    };
+}}}}  // namespace odds_and_ends::static_introspection::concept::_detail
+
+#include <type_traits>
+#include <odds_and_ends/static_introspection/remove_vref.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
@@ -48,10 +115,16 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
     >
     struct is_container :
         ::boost::mpl::eval_if<
-            typename ::odds_and_ends::static_introspection::_detail::apply1_remove_cvref<
-                ::odds_and_ends::static_introspection::concept::_detail
-                ::container_policy<IteratorPlaceholderExpr,BasePred,MutablePred,IterPred>,
-                T
+            typename ::boost::mpl::eval_if<
+                ::std::is_const<
+                    typename ::odds_and_ends::static_introspection::remove_vref<T>::type
+                >,
+                ::boost::mpl::true_,
+                ::odds_and_ends::static_introspection::_detail::apply1_remove_cvref<
+                    ::odds_and_ends::static_introspection::concept::_detail
+                    ::container_policy<IteratorPlaceholderExpr,BasePred,MutablePred,IterPred>,
+                    T
+                >
             >::type,
             ::odds_and_ends::static_introspection::_detail::apply1_remove_vref_add_const<
                 ::odds_and_ends::static_introspection::concept::_detail

@@ -1,11 +1,10 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__IS_ALLOCATOR_TYPE_OF_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__IS_ALLOCATOR_TYPE_OF_HPP
 
 #include <type_traits>
 #include <odds_and_ends/static_introspection/nested_type/allocator_type_of.hpp>
-#include <odds_and_ends/static_introspection/remove_cvref.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
 
@@ -13,16 +12,13 @@ namespace odds_and_ends { namespace static_introspection { namespace nested_type
 namespace _detail {
 
     template <typename T1, typename T2>
-    class is_allocator_type_of
+    struct is_allocator_type_of
     {
-        typedef typename ::odds_and_ends::static_introspection
-        ::nested_type::allocator_type_of<T2>::type _alloc_t;
-
-    public:
         typedef typename ::boost::mpl::if_<
-            ::std::is_same<
-                _alloc_t,
-                typename ::odds_and_ends::static_introspection::remove_cvref<T1>::type
+            ::std::is_convertible<
+                T1,
+                typename ::odds_and_ends::static_introspection
+                ::nested_type::allocator_type_of<T2>::type
             >,
             ::boost::mpl::true_,
             ::boost::mpl::false_

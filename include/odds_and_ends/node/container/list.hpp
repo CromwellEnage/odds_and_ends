@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Cromwell D. Enage
+// Copyright (C) 2025-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__NODE__CONTAINER__LIST_HPP
 #define ODDS_AND_ENDS__NODE__CONTAINER__LIST_HPP
@@ -6,13 +6,13 @@
 #include <cstddef>
 #include <type_traits>
 #include <memory>
-//#include <initializer_list>
+#include <initializer_list>
 #include <odds_and_ends/node/data.hpp>
 #include <odds_and_ends/node/linked/doubly.hpp>
 #include <odds_and_ends/node/iterator/list.hpp>
 #include <odds_and_ends/node/iterator/indirect.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
-#include <odds_and_ends/static_introspection/concept/is_reversible_container.hpp>
+#include <odds_and_ends/static_introspection/concept/is_single_pass_range.hpp>
 #include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_input_iterator.hpp>
 #include <boost/core/enable_if.hpp>
@@ -22,6 +22,7 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/quote.hpp>
 #include <boost/mpl/apply_wrap.hpp>
+#include <boost/limits.hpp>
 
 namespace odds_and_ends { namespace node { namespace container {
 
@@ -78,7 +79,7 @@ namespace odds_and_ends { namespace node { namespace container {
         explicit list(
             A0&& a0,
             typename ::boost::disable_if<
-                ::odds_and_ends::static_introspection::concept::is_reversible_container<A0>,
+                ::odds_and_ends::static_introspection::concept::is_single_pass_range<A0>,
                 _enabler
             >::type = _enabler()
         );
@@ -93,7 +94,7 @@ namespace odds_and_ends { namespace node { namespace container {
                     ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A1>,
                     ::boost::mpl::if_<
                         ::odds_and_ends::static_introspection
-                        ::concept::is_reversible_container<A0>,
+                        ::concept::is_single_pass_range<A0>,
                         ::odds_and_ends::static_introspection::concept::is_allocator<A1>,
                         ::boost::mpl::false_
                     >
@@ -118,6 +119,16 @@ namespace odds_and_ends { namespace node { namespace container {
                     >,
                     ::boost::mpl::false_
                 >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename Alloc>
+        list(
+            ::std::initializer_list<value_type> l,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
                 _enabler
             >::type = _enabler()
         );
@@ -207,10 +218,12 @@ namespace odds_and_ends { namespace node { namespace container {
             >::type = _enabler()
         );
 
+        list(::std::initializer_list<value_type> l);
         list(list const& copy);
         list(list&& source);
         list();
         ~list();
+        list& operator=(::std::initializer_list<value_type> l);
         list& operator=(list const& copy);
         list& operator=(list&& source);
         allocator_type get_allocator() const;
@@ -262,12 +275,16 @@ namespace odds_and_ends { namespace node { namespace container {
         void pop_back();
         void swap(list& other);
         void clear();
+        static size_type max_size();
 
     private:
         void _push_front(_node_ptr_t p);
         void _push_back(_node_ptr_t p);
         void _insert(_c_itr_t pos, _node_ptr_t p);
         _node_ptr_t _erase(_node_ptr_t p);
+
+        template <typename Itr>
+        void _init(Itr itr_begin, Itr itr_end);
 
         template <typename V, typename S, typename PX, typename AX>
         void _clone(list<V,S,PX,AX> const& copy);
@@ -297,7 +314,7 @@ namespace odds_and_ends { namespace node { namespace container {
     inline list<T,Size,PtrXForm,AllocXForm>::list(
         A0&& a0,
         typename ::boost::disable_if<
-            ::odds_and_ends::static_introspection::concept::is_reversible_container<A0>,
+            ::odds_and_ends::static_introspection::concept::is_single_pass_range<A0>,
             _enabler
         >::type
     ) : _alloc(::std::forward<A0>(a0)),
@@ -318,7 +335,7 @@ namespace odds_and_ends { namespace node { namespace container {
                 ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<A1>,
                 ::boost::mpl::if_<
                     ::odds_and_ends::static_introspection
-                    ::concept::is_reversible_container<A0>,
+                    ::concept::is_single_pass_range<A0>,
                     ::odds_and_ends::static_introspection::concept::is_allocator<A1>,
                     ::boost::mpl::false_
                 >
@@ -365,14 +382,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
     template <typename Itr>
-    inline list<T,Size,PtrXForm,AllocXForm>::list(
-        Itr itr,
-        Itr itr_end,
-        typename ::boost::enable_if<
-            ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Itr>,
-            _enabler
-        >::type
-    ) : _alloc(), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    void list<T,Size,PtrXForm,AllocXForm>::_init(Itr itr, Itr itr_end)
     {
         for (_node_ptr_t p; itr != itr_end; ++itr)
         {
@@ -396,9 +406,44 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    inline list<T,Size,PtrXForm,AllocXForm>::list(::std::initializer_list<value_type> l) :
+        _alloc(), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    {
+        this->_init(l.begin(), l.end());
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    template <typename Alloc>
+    inline list<T,Size,PtrXForm,AllocXForm>::list(
+        ::std::initializer_list<value_type> l,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    {
+        this->_init(l.begin(), l.end());
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    template <typename Itr>
+    inline list<T,Size,PtrXForm,AllocXForm>::list(
+        Itr itr_begin,
+        Itr itr_end,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Itr>,
+            _enabler
+        >::type
+    ) : _alloc(), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
+    {
+        this->_init(itr_begin, itr_end);
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
     template <typename Itr, typename Alloc>
     inline list<T,Size,PtrXForm,AllocXForm>::list(
-        Itr itr,
+        Itr itr_begin,
         Itr itr_end,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -411,25 +456,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type
     ) : _alloc(alloc), _front(nullptr), _back(nullptr), _size(::boost::initialized_value)
     {
-        for (_node_ptr_t p; itr != itr_end; ++itr)
-        {
-            p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-            ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, *itr);
-
-            if (this->_back)
-            {
-                this->_back->insert_next(p);
-            }
-
-            this->_back = p;
-
-            if (!this->_front)
-            {
-                this->_front = p;
-            }
-
-            ++this->_size;
-        }
+        this->_init(itr_begin, itr_end);
     }
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
@@ -587,12 +614,6 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
-    inline list<T,Size,PtrXForm,AllocXForm>::~list()
-    {
-        this->clear();
-    }
-
-    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
     void list<T,Size,PtrXForm,AllocXForm>::clear()
     {
         for (_node_ptr_t p = this->_front; p; p = this->_front)
@@ -607,6 +628,47 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    inline list<T,Size,PtrXForm,AllocXForm>::~list()
+    {
+        this->clear();
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    inline list<T,Size,PtrXForm,AllocXForm>&
+        list<T,Size,PtrXForm,AllocXForm>::operator=(::std::initializer_list<value_type> l)
+    {
+        this->clear();
+        this->_init(l.begin(), l.end());
+        return *this;
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    inline list<T,Size,PtrXForm,AllocXForm>&
+        list<T,Size,PtrXForm,AllocXForm>::operator=(list const& copy)
+    {
+        if (this != &copy)
+        {
+            this->clear();
+            this->_clone(copy);
+        }
+
+        return *this;
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    inline list<T,Size,PtrXForm,AllocXForm>&
+        list<T,Size,PtrXForm,AllocXForm>::operator=(list&& source)
+    {
+        if (this != &static_cast<list&>(source))
+        {
+            this->clear();
+            this->_move(::std::move(source));
+        }
+
+        return *this;
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
     inline bool list<T,Size,PtrXForm,AllocXForm>::empty() const
     {
         return !this->_front;
@@ -617,6 +679,13 @@ namespace odds_and_ends { namespace node { namespace container {
         list<T,Size,PtrXForm,AllocXForm>::size() const
     {
         return this->_size;
+    }
+
+    template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
+    inline typename list<T,Size,PtrXForm,AllocXForm>::size_type
+        list<T,Size,PtrXForm,AllocXForm>::max_size()
+    {
+        return (::std::numeric_limits<size_type>::max)();
     }
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>

@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_INDEXABLE_ITERATOR_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_INDEXABLE_ITERATOR_HPP
@@ -84,6 +84,7 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 #include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/concept/is_comparable.hpp>
 #include <odds_and_ends/static_introspection/concept/_detail/is_bidirectional.hpp>
+#include <odds_and_ends/static_introspection/has_iterator_difference.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept {
 
@@ -91,10 +92,14 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_indexable_iterator_ext :
         ::boost::mpl::eval_if<
             ::odds_and_ends::static_introspection::concept::_detail::is_bidirectional<T>,
-            ::boost::mpl::if_<
+            ::boost::mpl::eval_if<
                 ::odds_and_ends::static_introspection::concept
                 ::_detail::is_indexable_iterator<T,IsStrict>,
-                ::odds_and_ends::static_introspection::concept::is_comparable<T>,
+                ::boost::mpl::if_<
+                    ::odds_and_ends::static_introspection::concept::is_comparable<T>,
+                    ::odds_and_ends::static_introspection::has_iterator_difference<T>,
+                    ::boost::mpl::false_
+                >,
                 ::boost::mpl::false_
             >,
             ::boost::mpl::false_

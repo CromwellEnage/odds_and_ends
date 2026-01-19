@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2025 Cromwell D. Enage
+// Copyright (C) 2013-2026 Cromwell D. Enage
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_SIZE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_SIZE_HPP
@@ -10,13 +10,13 @@ namespace odds_and_ends { namespace static_introspection { namespace member_func
 namespace _detail {
 
     template <typename T, typename Param, typename ResultPlaceholderExpr>
-    struct has_size_of_pointer_container :
-        ::odds_and_ends::static_introspection::member_function::_detail::has_size<
+    struct has_size_of_pointer_container
+    {
+        typedef ::odds_and_ends::static_introspection::member_function::_detail::has_size<
             decltype(::odds_and_ends::static_introspection::declmref<T>().base()),
             Param,
             ResultPlaceholderExpr
-        >
-    {
+        > type;
     };
 }  // namespace _detail
 }}}  // namespace odds_and_ends::static_introspection::member_function
