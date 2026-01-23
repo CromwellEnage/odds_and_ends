@@ -7,19 +7,19 @@ namespace odds_and_ends { namespace node {
 
     struct traversal_state
     {
-        typedef unsigned char value_tye;
+        typedef unsigned char value_type;
 
-        inline explicit traversal_state(value_tye const& b) : _value(b)
+        inline explicit traversal_state(value_type const& b) : _value(b)
         {
         }
 
-        inline value_tye get() const
+        inline value_type get() const
         {
             return this->_value;
         }
 
     private:
-        value_tye _value;
+        value_type _value;
     };
 
     inline bool operator==(traversal_state const& lhs, traversal_state const& rhs)

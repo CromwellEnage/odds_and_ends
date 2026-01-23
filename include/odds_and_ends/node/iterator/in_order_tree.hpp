@@ -551,10 +551,7 @@ namespace odds_and_ends { namespace node {
             in_order_tree_iterator<N2,I2,D2> const& rhs
         )
     {
-        return (
-            ::odds_and_ends::node::traversal_state(lhs) ==
-            ::odds_and_ends::node::traversal_state(rhs)
-        ) && (lhs._current == rhs._current);
+        return (lhs._state.get() == rhs._state.get()) && (lhs._current == rhs._current);
     }
 
     template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>

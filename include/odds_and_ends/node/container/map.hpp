@@ -15,7 +15,6 @@
 #include <odds_and_ends/node/tree/with_size.hpp>
 #include <odds_and_ends/node/iterator/in_order_tree.hpp>
 #include <odds_and_ends/node/iterator/indirect.hpp>
-#include <odds_and_ends/node/iterator/transform.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
 #include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
 #include <odds_and_ends/static_introspection/concept/is_indexable_iterator.hpp>
@@ -39,7 +38,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare = ::std::less<Key>,
-        typename IsStrict = ::boost::mpl::true_,
         typename Size = ::std::size_t,
         typename Difference = ::std::ptrdiff_t,
         typename PtrXForm = ::boost::mpl::quote1< ::std::add_pointer>,
@@ -59,7 +57,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -81,19 +78,13 @@ namespace odds_and_ends { namespace node { namespace container {
                     typename ::boost::mpl::push_front<
                         typename ::boost::mpl::push_front<
                             NodeParentGeneratorList,
-                            ::odds_and_ends::node::tree::with_size<Size>
+                            ::odds_and_ends::node::tree::with_size<size_type>
                         >::type,
-                        ::odds_and_ends::node::tree::binary<Difference>
+                        ::odds_and_ends::node::tree::binary<difference_type>
                     >::type,
                     ::odds_and_ends::node::tree::base<PtrXForm>
                 >::type,
-                ::odds_and_ends::node::data<
-                    typename ::boost::mpl::if_<
-                        IsStrict,
-                        value_type,
-                        ::std::pair<key_type,mapped_type>
-                    >::type
-                >
+                ::odds_and_ends::node::data<value_type>
             >::type
         > node_type;
         typedef typename ::boost::mpl::apply_wrap1<AllocXForm,node_type>::type allocator_type;
@@ -130,28 +121,6 @@ namespace odds_and_ends { namespace node { namespace container {
             friend class map;
         };
 
-        struct _xform_func_0
-        {
-            ::std::pair< ::std::reference_wrapper<Key const>, ::std::reference_wrapper<Mapped> >
-                operator()() const;
-            ::std::pair< ::std::reference_wrapper<Key const>, ::std::reference_wrapper<Mapped> >
-                operator()(node_type& n) const;
-        };
-
-        struct _xform_func_1
-        {
-            ::std::pair<
-                ::std::reference_wrapper<Key const>,
-                ::std::reference_wrapper<Mapped const>
-            >
-                operator()() const;
-            ::std::pair<
-                ::std::reference_wrapper<Key const>,
-                ::std::reference_wrapper<Mapped const>
-            >
-                operator()(node_type const& n) const;
-        };
-
         typedef ::odds_and_ends::node
         ::in_order_tree_iterator<node_type,::boost::mpl::false_,Difference> _itr_t;
         typedef ::odds_and_ends::node
@@ -162,37 +131,17 @@ namespace odds_and_ends { namespace node { namespace container {
         ::in_order_tree_iterator<node_type const,::boost::mpl::true_,Difference> _c_r_itr_t;
 
     public:
-        typedef typename ::boost::mpl::if_<
-            IsStrict,
-            ::odds_and_ends::node::indirect_iterator<_itr_t,PtrXForm>,
-            ::odds_and_ends::node::transform_iterator<_itr_t,_xform_func_0,PtrXForm>
-        >::type iterator;
-        typedef typename ::boost::mpl::if_<
-            IsStrict,
-            ::odds_and_ends::node::indirect_iterator<_c_itr_t,PtrXForm>,
-            ::odds_and_ends::node::transform_iterator<_c_itr_t,_xform_func_1,PtrXForm>
-        >::type const_iterator;
-        typedef typename ::boost::mpl::if_<
-            IsStrict,
-            ::odds_and_ends::node::indirect_iterator<_r_itr_t,PtrXForm>,
-            ::odds_and_ends::node::transform_iterator<_r_itr_t,_xform_func_0,PtrXForm>
-        >::type reverse_iterator;
-        typedef typename ::boost::mpl::if_<
-            IsStrict,
-            ::odds_and_ends::node::indirect_iterator<_c_r_itr_t,PtrXForm>,
-            ::odds_and_ends::node::transform_iterator<_c_r_itr_t,_xform_func_1,PtrXForm>
-        >::type const_reverse_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_itr_t,PtrXForm> iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t,PtrXForm> const_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t,PtrXForm> reverse_iterator;
+        typedef ::odds_and_ends::node
+        ::indirect_iterator<_c_r_itr_t,PtrXForm> const_reverse_iterator;
 
     private:
         typedef typename node_type::traits::const_pointer _node_const_ptr_t;
         typedef typename node_type::traits::pointer _node_ptr_t;
-        typedef typename ::boost::mpl::if_<
-            IsMulti,
-            iterator,
-            ::std::pair<iterator,bool>
-        >::type _insert_once_return_t;
-
-        static ::std::pair<Key,Mapped> _dummy;
+        typedef typename ::boost::mpl
+        ::if_<IsMulti,iterator,::std::pair<iterator,bool> >::type _insert_once_return_t;
 
         key_compare _comp;
         allocator_type _alloc;
@@ -322,7 +271,7 @@ namespace odds_and_ends { namespace node { namespace container {
         ::std::pair<iterator,iterator> equal_range(key_type const& key);
         size_type count(key_type const& key) const;
         _insert_once_return_t insert(const_reference t);
-        _insert_once_return_t insert(value_type&& t);
+        _insert_once_return_t insert(typename ::std::remove_reference<value_type>::type&& t);
         void insert(::std::initializer_list<value_type> ilist);
         iterator erase(const_iterator pos);
         iterator erase(const_iterator itr_begin, const_iterator itr_end);
@@ -379,35 +328,17 @@ namespace odds_and_ends { namespace node { namespace container {
         static size_type max_size();
 
     private:
-        static const_iterator _get_position(node_type const& n, ::boost::mpl::true_);
-        static const_iterator _get_position(node_type const& n, ::boost::mpl::false_);
-        static iterator _get_position(node_type& n, ::boost::mpl::true_);
-        static iterator _get_position(node_type& n, ::boost::mpl::false_);
-        const_iterator _cbegin(::boost::mpl::true_) const;
-        const_iterator _cbegin(::boost::mpl::false_) const;
-        iterator _begin(::boost::mpl::true_);
-        iterator _begin(::boost::mpl::false_);
-        const_iterator _cend(::boost::mpl::true_) const;
-        const_iterator _cend(::boost::mpl::false_) const;
-        iterator _end(::boost::mpl::true_);
-        iterator _end(::boost::mpl::false_);
-        const_reverse_iterator _crbegin(::boost::mpl::true_) const;
-        const_reverse_iterator _crbegin(::boost::mpl::false_) const;
-        reverse_iterator _rbegin(::boost::mpl::true_);
-        reverse_iterator _rbegin(::boost::mpl::false_);
-        const_reverse_iterator _crend(::boost::mpl::true_) const;
-        const_reverse_iterator _crend(::boost::mpl::false_) const;
-        reverse_iterator _rend(::boost::mpl::true_);
-        reverse_iterator _rend(::boost::mpl::false_);
         _node_const_ptr_t _back() const;
         _node_ptr_t _back();
         void _push_back(const_reference t);
-        void _push_back(value_type&& t);
+        void _push_back(typename ::std::remove_reference<value_type>::type&& t);
         void _insert_before(_node_ptr_t n, _node_ptr_t p);
         ::std::pair<iterator,bool> _insert(const_reference t, ::boost::mpl::false_);
-        ::std::pair<iterator,bool> _insert(value_type&& t, ::boost::mpl::false_);
+        ::std::pair<iterator,bool>
+            _insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::false_);
         iterator _insert(const_reference t, ::boost::mpl::true_);
-        iterator _insert(value_type&& t, ::boost::mpl::true_);
+        iterator
+            _insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::true_);
 
         template <typename ...Args>
         ::std::pair<iterator,bool> _emplace(::boost::mpl::false_, Args&&... args);
@@ -416,16 +347,7 @@ namespace odds_and_ends { namespace node { namespace container {
         iterator _emplace(::boost::mpl::true_, Args&&... args);
 
         template <typename Iterator>
-        void _copy_from(Iterator itr_begin, Iterator itr_end, ::boost::mpl::true_);
-
-        template <typename Iterator>
-        void _copy_from(Iterator itr_begin, Iterator itr_end, ::boost::mpl::false_);
-
-        template <typename Iterator>
-        void _move_from(Iterator itr_begin, Iterator itr_end, ::boost::mpl::true_);
-
-        template <typename Iterator>
-        void _move_from(Iterator itr_begin, Iterator itr_end, ::boost::mpl::false_);
+        void _copy_from(Iterator itr_begin, Iterator itr_end);
     };
 }}}  // namespace odds_and_ends::node::container
 
@@ -451,7 +373,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -464,7 +385,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -480,7 +400,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -493,7 +412,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -509,7 +427,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -523,7 +440,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -540,7 +456,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -553,7 +468,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -569,7 +483,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -583,7 +496,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -600,7 +512,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -615,7 +526,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -632,7 +542,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -646,7 +555,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -663,7 +571,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -678,7 +585,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -695,177 +601,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    ::std::pair<Key,Mapped>
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_dummy = ::std::pair<Key,Mapped>();
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline ::std::pair< ::std::reference_wrapper<Key const>, ::std::reference_wrapper<Mapped> >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_xform_func_0::operator()() const
-    {
-        return ::std::pair<
-            ::std::reference_wrapper<Key const>,
-            ::std::reference_wrapper<Mapped>
-        >((type::_dummy).first, (type::_dummy).second);
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline ::std::pair< ::std::reference_wrapper<Key const>, ::std::reference_wrapper<Mapped> >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_xform_func_0::operator()(node_type& n) const
-    {
-        return ::std::pair<
-            ::std::reference_wrapper<Key const>,
-            ::std::reference_wrapper<Mapped>
-        >((*n).first, (*n).second);
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline ::std::pair<
-        ::std::reference_wrapper<Key const>,
-        ::std::reference_wrapper<Mapped const>
-    >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_xform_func_1::operator()() const
-    {
-        return ::std::pair<
-            ::std::reference_wrapper<Key const>,
-            ::std::reference_wrapper<Mapped const>
-        >((type::_dummy).first, (type::_dummy).second);
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline ::std::pair<
-        ::std::reference_wrapper<Key const>,
-        ::std::reference_wrapper<Mapped const>
-    >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_xform_func_1::operator()(node_type const& n) const
-    {
-        return ::std::pair<
-            ::std::reference_wrapper<Key const>,
-            ::std::reference_wrapper<Mapped const>
-        >((*n).first, (*n).second);
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -878,7 +613,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -894,7 +628,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -907,7 +640,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -923,7 +655,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -937,7 +668,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -959,7 +689,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -973,7 +702,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -996,7 +724,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1009,7 +736,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1033,7 +759,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1046,7 +771,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1071,7 +795,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1085,7 +808,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1116,7 +838,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1130,7 +851,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1162,7 +882,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1177,12 +896,11 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_copy_from(Iterator itr, Iterator itr_end, ::boost::mpl::true_)
+        >::_copy_from(Iterator itr, Iterator itr_end)
     {
         for (; itr != itr_end; ++itr)
         {
@@ -1197,202 +915,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    template <typename Iterator>
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_copy_from(Iterator itr, Iterator itr_end, ::boost::mpl::false_)
-    {
-        size_type n = ::boost::initialized_value;
-
-        ::odds_and_ends::node::algorithm::add_distance(n, itr, itr_end);
-
-        if (n)
-        {
-            this->_root_ptr = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-            ::std::allocator_traits<
-                allocator_type
-            >::construct(this->_alloc, this->_root_ptr, *itr);
-            _node_ptr_t node_ptr;
-
-            for (
-                ::odds_and_ends::node::breadth_first_tree_iterator<node_type> this_itr(
-                    *this->_root_ptr
-                );
-                n && !(!this_itr);
-                ++this_itr
-            )
-            {
-                if (--n)
-                {
-                    node_ptr = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-                    ::std::allocator_traits<
-                        allocator_type
-                    >::construct(this->_alloc, node_ptr, *itr);
-                    this_itr->set_left_ptr(node_ptr);
-
-                    if (--n)
-                    {
-                        node_ptr = ::std::allocator_traits<
-                            allocator_type
-                        >::allocate(this->_alloc, 1);
-                        ::std::allocator_traits<
-                            allocator_type
-                        >::construct(this->_alloc, node_ptr, *itr);
-                        this_itr->set_right_ptr(node_ptr);
-                    }
-                }
-            }
-
-            Balancer::post_fill(*this->_root_ptr);
-
-            for (_itr_t out_itr(*this->_root_ptr, false); !(!out_itr); ++out_itr)
-            {
-                **out_itr = *itr;
-                ++itr;
-            }
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    template <typename Iterator>
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_move_from(Iterator itr, Iterator itr_end, ::boost::mpl::true_)
-    {
-        for (; itr != itr_end; ++itr)
-        {
-            this->_insert(::std::move(*itr), IsMulti());
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    template <typename Iterator>
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_move_from(Iterator itr, Iterator itr_end, ::boost::mpl::false_)
-    {
-        size_type n = ::boost::initialized_value;
-
-        ::odds_and_ends::node::algorithm::add_distance(n, itr, itr_end);
-
-        if (n)
-        {
-            this->_root_ptr = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-            ::std::allocator_traits<
-                allocator_type
-            >::construct(this->_alloc, this->_root_ptr, *itr);
-            _node_ptr_t node_ptr;
-
-            for (
-                ::odds_and_ends::node::breadth_first_tree_iterator<node_type> this_itr(
-                    *this->_root_ptr
-                );
-                n && !(!this_itr);
-                ++this_itr
-            )
-            {
-                if (--n)
-                {
-                    node_ptr = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-                    ::std::allocator_traits<
-                        allocator_type
-                    >::construct(this->_alloc, node_ptr, *itr);
-                    this_itr->set_left_ptr(node_ptr);
-
-                    if (--n)
-                    {
-                        node_ptr = ::std::allocator_traits<
-                            allocator_type
-                        >::allocate(this->_alloc, 1);
-                        ::std::allocator_traits<
-                            allocator_type
-                        >::construct(this->_alloc, node_ptr, *itr);
-                        this_itr->set_right_ptr(node_ptr);
-                    }
-                }
-            }
-
-            Balancer::post_fill(*this->_root_ptr);
-
-            for (_itr_t out_itr(*this->_root_ptr, false); !(!out_itr); ++out_itr)
-            {
-                **out_itr = ::std::move(*itr);
-                ++itr;
-            }
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1405,14 +927,13 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
         AllocXForm
     >::map(map const& copy) : _comp(copy._comp), _alloc(copy._alloc), _root_ptr(nullptr)
     {
-        this->_copy_from(copy.cbegin(), copy.cend(), IsStrict());
+        this->_copy_from(copy.cbegin(), copy.cend());
     }
 
     template <
@@ -1422,7 +943,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1435,7 +955,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1443,7 +962,7 @@ namespace odds_and_ends { namespace node { namespace container {
     >::map(map const& copy, key_compare const& comp) :
         _comp(comp), _alloc(copy._alloc), _root_ptr(nullptr)
     {
-        this->_copy_from(copy.cbegin(), copy.cend(), IsStrict());
+        this->_copy_from(copy.cbegin(), copy.cend());
     }
 
     template <
@@ -1453,7 +972,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1467,7 +985,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1481,7 +998,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type
     ) : _comp(copy._comp), _alloc(alloc), _root_ptr(nullptr)
     {
-        this->_copy_from(copy.cbegin(), copy.cend(), IsStrict());
+        this->_copy_from(copy.cbegin(), copy.cend());
     }
 
     template <
@@ -1491,7 +1008,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1505,7 +1021,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1520,7 +1035,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type
     ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
     {
-        this->_copy_from(copy.cbegin(), copy.cend(), IsStrict());
+        this->_copy_from(copy.cbegin(), copy.cend());
     }
 
     template <
@@ -1530,7 +1045,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1543,7 +1057,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1560,7 +1073,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1573,7 +1085,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1591,7 +1102,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1605,7 +1115,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1629,7 +1138,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1643,7 +1151,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1668,7 +1175,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1682,7 +1188,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -1731,7 +1236,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1744,7 +1248,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1761,7 +1264,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1774,7 +1276,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1787,7 +1288,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -1797,7 +1297,7 @@ namespace odds_and_ends { namespace node { namespace container {
         if (this != &copy)
         {
             this->clear();
-            this->_copy_from(copy.cbegin(), copy.cend(), IsStrict());
+            this->_copy_from(copy.cbegin(), copy.cend());
         }
 
         return *this;
@@ -1810,7 +1310,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1823,7 +1322,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1836,7 +1334,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -1860,7 +1357,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1873,7 +1369,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -1886,7 +1381,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -1914,7 +1408,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1928,7 +1421,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -1946,7 +1438,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -1961,7 +1452,6 @@ namespace odds_and_ends { namespace node { namespace container {
                 NodeParentGeneratorList,
                 Balancer,
                 Compare,
-                IsStrict,
                 Size,
                 Difference,
                 PtrXForm,
@@ -1974,7 +1464,6 @@ namespace odds_and_ends { namespace node { namespace container {
                 NodeParentGeneratorList,
                 Balancer,
                 Compare,
-                IsStrict,
                 Size,
                 Difference,
                 PtrXForm,
@@ -1992,7 +1481,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2005,7 +1493,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2018,7 +1505,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -2035,7 +1521,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2048,7 +1533,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2061,7 +1545,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -2078,7 +1561,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2091,7 +1573,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2104,7 +1585,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -2121,7 +1601,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2135,7 +1614,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -2152,7 +1630,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2165,7 +1642,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2178,7 +1654,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -2196,7 +1671,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2209,7 +1683,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2222,7 +1695,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -2239,7 +1711,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2252,7 +1723,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2265,7 +1735,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -2282,7 +1751,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2295,7 +1763,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2308,105 +1775,16 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_cbegin(::boost::mpl::true_) const
-    {
-        return const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_begin<Difference>(*this->_root_ptr)
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_cbegin(::boost::mpl::false_) const
-    {
-        return const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_begin<Difference>(*this->_root_ptr),
-            _xform_func_1()
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::cbegin() const
     {
-        return this->_root_ptr ? this->_cbegin(IsStrict()) : this->cend();
+        return this->_root_ptr ? const_iterator(
+            ::odds_and_ends::node
+            ::make_in_order_tree_iterator_begin<difference_type>(*this->_root_ptr)
+        ) : this->cend();
     }
 
     template <
@@ -2416,7 +1794,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2429,7 +1806,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2442,14 +1818,16 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::begin() const
     {
-        return this->_root_ptr ? this->_cbegin(IsStrict()) : this->cend();
+        return this->_root_ptr ? const_iterator(
+            ::odds_and_ends::node
+            ::make_in_order_tree_iterator_begin<difference_type>(*this->_root_ptr)
+        ) : this->end();
     }
 
     template <
@@ -2459,7 +1837,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2472,7 +1849,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2485,105 +1861,16 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_begin(::boost::mpl::true_)
-    {
-        return iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_begin<Difference>(*this->_root_ptr)
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_begin(::boost::mpl::false_)
-    {
-        return iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_begin<Difference>(*this->_root_ptr),
-            _xform_func_0()
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::begin()
     {
-        return this->_root_ptr ? this->_begin(IsStrict()) : this->end();
+        return this->_root_ptr ? iterator(
+            ::odds_and_ends::node
+            ::make_in_order_tree_iterator_begin<difference_type>(*this->_root_ptr)
+        ) : this->end();
     }
 
     template <
@@ -2593,7 +1880,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2606,7 +1892,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2619,15 +1904,15 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_cend(::boost::mpl::true_) const
+        >::cend() const
     {
         return this->_root_ptr ? const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_end<Difference>(*this->_root_ptr)
+            ::odds_and_ends::node
+            ::make_in_order_tree_iterator_end<difference_type>(*this->_root_ptr)
         ) : const_iterator();
     }
 
@@ -2638,7 +1923,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2651,7 +1935,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2664,103 +1947,16 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_cend(::boost::mpl::false_) const
-    {
-        return this->_root_ptr ? const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_end<Difference>(*this->_root_ptr),
-            _xform_func_1()
-        ) : const_iterator(_xform_func_1());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::cend() const
-    {
-        return this->_cend(IsStrict());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::end() const
     {
-        return this->_cend(IsStrict());
+        return this->_root_ptr ? const_iterator(
+            ::odds_and_ends::node
+            ::make_in_order_tree_iterator_end<difference_type>(*this->_root_ptr)
+        ) : const_iterator();
     }
 
     template <
@@ -2770,7 +1966,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2783,7 +1978,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2796,15 +1990,15 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_end(::boost::mpl::true_)
+        >::end()
     {
         return this->_root_ptr ? iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_end<Difference>(*this->_root_ptr)
+            ::odds_and_ends::node
+            ::make_in_order_tree_iterator_end<difference_type>(*this->_root_ptr)
         ) : iterator();
     }
 
@@ -2815,7 +2009,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -2828,96 +2021,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_end(::boost::mpl::false_)
-    {
-        return this->_root_ptr ? iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_end<Difference>(*this->_root_ptr),
-            _xform_func_0()
-        ) : iterator(_xform_func_0());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::end()
-    {
-        return this->_end(IsStrict());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -2930,109 +2033,17 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_crbegin(::boost::mpl::true_) const
-    {
-        return const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<Difference>(
-                *this->_root_ptr
-            )
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_crbegin(::boost::mpl::false_) const
-    {
-        return const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<Difference>(
-                *this->_root_ptr
-            ),
-            _xform_func_1()
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::crbegin() const
     {
-        return this->_root_ptr ? this->_crbegin(IsStrict()) : this->crend();
+        return this->_root_ptr ? const_reverse_iterator(
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<difference_type>(
+                *this->_root_ptr
+            )
+        ) : this->crend();
     }
 
     template <
@@ -3042,7 +2053,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3055,7 +2065,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3068,61 +2077,17 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::rbegin() const
     {
-        return this->_root_ptr ? this->_crbegin(IsStrict()) : this->crend();
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_rbegin(::boost::mpl::true_)
-    {
-        return reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<Difference>(
+        return this->_root_ptr ? const_reverse_iterator(
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<difference_type>(
                 *this->_root_ptr
             )
-        );
+        ) : this->rend();
     }
 
     template <
@@ -3132,7 +2097,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3145,7 +2109,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3158,62 +2121,17 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_rbegin(::boost::mpl::false_)
-    {
-        return reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<Difference>(
-                *this->_root_ptr
-            ),
-            _xform_func_0()
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::rbegin()
     {
-        return this->_root_ptr ? this->_rbegin(IsStrict()) : this->rend();
+        return this->_root_ptr ? reverse_iterator(
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<difference_type>(
+                *this->_root_ptr
+            )
+        ) : this->rend();
     }
 
     template <
@@ -3223,7 +2141,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3236,7 +2153,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3249,15 +2165,14 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_crend(::boost::mpl::true_) const
+        >::crend() const
     {
         return this->_root_ptr ? const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<Difference>(
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<difference_type>(
                 *this->_root_ptr
             )
         ) : const_reverse_iterator();
@@ -3270,7 +2185,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3283,7 +2197,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3296,105 +2209,17 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_crend(::boost::mpl::false_) const
-    {
-        return this->_root_ptr ? const_reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<Difference>(
-                *this->_root_ptr
-            ),
-            _xform_func_1()
-        ) : const_reverse_iterator(_xform_func_1());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::crend() const
-    {
-        return this->_crend(IsStrict());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
         >::rend() const
     {
-        return this->_crend(IsStrict());
+        return this->_root_ptr ? const_reverse_iterator(
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<difference_type>(
+                *this->_root_ptr
+            )
+        ) : const_reverse_iterator();
     }
 
     template <
@@ -3404,7 +2229,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3417,7 +2241,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3430,15 +2253,14 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_rend(::boost::mpl::true_)
+        >::rend()
     {
         return this->_root_ptr ? reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<Difference>(
+            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<difference_type>(
                 *this->_root_ptr
             )
         ) : reverse_iterator();
@@ -3451,7 +2273,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3464,98 +2285,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_rend(::boost::mpl::false_)
-    {
-        return this->_root_ptr ? reverse_iterator(
-            ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<Difference>(
-                *this->_root_ptr
-            ),
-            _xform_func_0()
-        ) : reverse_iterator(_xform_func_0());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::rend()
-    {
-        return this->_rend(IsStrict());
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3568,189 +2297,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_get_position(node_type const& n, ::boost::mpl::true_)
-    {
-        return const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(n)
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_get_position(node_type const& n, ::boost::mpl::false_)
-    {
-        return const_iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(n),
-            _xform_func_1()
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_get_position(node_type& n, ::boost::mpl::true_)
-    {
-        return iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(n)
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_get_position(node_type& n, ::boost::mpl::false_)
-    {
-        return iterator(
-            ::odds_and_ends::node::make_in_order_tree_iterator_position<Difference>(n),
-            _xform_func_0()
-        );
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename IsStrict,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        IsStrict,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -3762,7 +2308,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->cend();
+        return node_ptr ? const_iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->cend();
     }
 
     template <
@@ -3772,7 +2320,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3786,7 +2333,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3799,7 +2345,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -3811,7 +2356,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->cend();
+        return node_ptr ? const_iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->cend();
     }
 
     template <
@@ -3821,7 +2368,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3834,7 +2380,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3847,7 +2392,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -3859,7 +2403,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->end();
+        return node_ptr ? iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->end();
     }
 
     template <
@@ -3869,7 +2415,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3883,7 +2428,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3896,7 +2440,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -3908,7 +2451,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->end();
+        return node_ptr ? iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->end();
     }
 
     template <
@@ -3918,7 +2463,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3931,7 +2475,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3944,7 +2487,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -3956,7 +2498,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->upper_bound(key);
+        return node_ptr ? const_iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->upper_bound(key);
     }
 
     template <
@@ -3966,7 +2510,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -3980,7 +2523,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -3993,7 +2535,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4005,7 +2546,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->upper_bound(key);
+        return node_ptr ? const_iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->upper_bound(key);
     }
 
     template <
@@ -4015,7 +2558,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4028,7 +2570,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4041,7 +2582,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4053,7 +2593,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->upper_bound(key);
+        return node_ptr ? iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->upper_bound(key);
     }
 
     template <
@@ -4063,7 +2605,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4077,7 +2618,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4090,7 +2630,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4102,7 +2641,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->upper_bound(key);
+        return node_ptr ? iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->upper_bound(key);
     }
 
     template <
@@ -4112,7 +2653,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4125,7 +2665,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4138,7 +2677,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4150,7 +2688,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->cend();
+        return node_ptr ? const_iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->cend();
     }
 
     template <
@@ -4160,7 +2700,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4174,7 +2713,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4187,7 +2725,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4199,7 +2736,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->cend();
+        return node_ptr ? const_iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->cend();
     }
 
     template <
@@ -4209,7 +2748,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4222,7 +2760,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4235,7 +2772,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4247,7 +2783,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->end();
+        return node_ptr ? iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->end();
     }
 
     template <
@@ -4257,7 +2795,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4271,7 +2808,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4284,7 +2820,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4296,7 +2831,9 @@ namespace odds_and_ends { namespace node { namespace container {
             key,
             _node_compare(this->_comp)
         );
-        return node_ptr ? type::_get_position(*node_ptr, IsStrict()) : this->end();
+        return node_ptr ? iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*node_ptr)
+        ) : this->end();
     }
 
     template <
@@ -4306,7 +2843,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4320,7 +2856,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4333,7 +2868,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4347,7 +2881,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4364,7 +2897,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4379,7 +2911,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4392,7 +2923,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4406,7 +2936,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4423,7 +2952,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4437,7 +2965,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4450,7 +2977,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4464,7 +2990,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4481,7 +3006,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4496,7 +3020,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4509,7 +3032,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4523,7 +3045,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4540,7 +3061,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4553,7 +3073,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4566,7 +3085,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4583,7 +3101,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4597,7 +3114,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4610,7 +3126,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4627,7 +3142,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4640,7 +3154,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4653,7 +3166,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4673,7 +3185,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4686,7 +3197,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4699,7 +3209,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4719,7 +3228,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4733,7 +3241,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4769,7 +3276,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4783,12 +3289,11 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_push_back(value_type&& t)
+        >::_push_back(typename ::std::remove_reference<value_type>::type&& t)
     {
         if (this->_root_ptr)
         {
@@ -4823,7 +3328,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4837,7 +3341,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4872,7 +3375,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4885,7 +3387,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4898,7 +3399,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -4917,7 +3417,9 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
             this->_insert_before(n, p);
-            return type::_get_position(*n, IsStrict());
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
+            );
         }
         else
         {
@@ -4934,7 +3436,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -4947,7 +3448,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -4960,12 +3460,11 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_insert(value_type&& t, ::boost::mpl::true_)
+        >::_insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::true_)
     {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
@@ -4979,7 +3478,9 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
             this->_insert_before(n, p);
-            return type::_get_position(*n, IsStrict());
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
+            );
         }
         else
         {
@@ -4996,7 +3497,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5010,7 +3510,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -5023,7 +3522,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5043,7 +3541,9 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
             this->_insert_before(n, p);
-            return type::_get_position(*n, IsStrict());
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
+            );
         }
         else
         {
@@ -5060,7 +3560,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5074,7 +3573,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5089,7 +3587,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5104,7 +3601,13 @@ namespace odds_and_ends { namespace node { namespace container {
 
         if (p)
         {
-            return ::std::make_pair(type::_get_position(*p, IsStrict()), false);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*p)
+                ),
+                false
+            );
         }
 
         p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
@@ -5119,7 +3622,13 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
             this->_insert_before(n, p);
-            return ::std::make_pair(type::_get_position(*n, IsStrict()), true);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*n)
+                ),
+                true
+            );
         }
         else
         {
@@ -5136,7 +3645,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5150,7 +3658,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5165,12 +3672,11 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::_insert(value_type&& t, ::boost::mpl::false_)
+        >::_insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::false_)
     {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
@@ -5180,7 +3686,13 @@ namespace odds_and_ends { namespace node { namespace container {
 
         if (p)
         {
-            return ::std::make_pair(type::_get_position(*p, IsStrict()), false);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*p)
+                ),
+                false
+            );
         }
 
         p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
@@ -5195,7 +3707,13 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
             this->_insert_before(n, p);
-            return ::std::make_pair(type::_get_position(*n, IsStrict()), true);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*n)
+                ),
+                true
+            );
         }
         else
         {
@@ -5212,7 +3730,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5227,7 +3744,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5242,7 +3758,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5258,7 +3773,13 @@ namespace odds_and_ends { namespace node { namespace container {
 
         if (p)
         {
-            return ::std::make_pair(type::_get_position(*p, IsStrict()), false);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*p)
+                ),
+                false
+            );
         }
 
         p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
@@ -5273,7 +3794,13 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
             this->_insert_before(n, p);
-            return ::std::make_pair(type::_get_position(*n, IsStrict()), true);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*n)
+                ),
+                true
+            );
         }
         else
         {
@@ -5290,7 +3817,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5303,7 +3829,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -5316,7 +3841,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5333,7 +3857,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5346,7 +3869,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -5359,12 +3881,11 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
             AllocXForm
-        >::insert(value_type&& t)
+        >::insert(typename ::std::remove_reference<value_type>::type&& t)
     {
         return this->_insert(::std::move(t), IsMulti());
     }
@@ -5376,7 +3897,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5390,7 +3910,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -5403,7 +3922,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5420,7 +3938,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5436,7 +3953,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5450,7 +3966,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5467,7 +3982,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5482,7 +3996,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5502,7 +4015,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5516,7 +4028,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5540,7 +4051,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5553,7 +4063,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -5566,7 +4075,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5594,10 +4102,10 @@ namespace odds_and_ends { namespace node { namespace container {
             allocator_type
         >::deallocate(this->_alloc, ::std::get<0>(sep_result), 1);
         this->_root_ptr = ::std::get<2>(sep_result);
-
-        return ::std::get<1>(sep_result) ? type::_get_position(
-            *::std::get<1>(sep_result),
-            IsStrict()
+        return ::std::get<1>(sep_result) ? iterator(
+            ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(
+                *::std::get<1>(sep_result)
+            )
         ) : this->end();
     }
 
@@ -5608,7 +4116,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5621,7 +4128,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -5634,7 +4140,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5645,9 +4150,10 @@ namespace odds_and_ends { namespace node { namespace container {
 
         if (itr_end != this->cend())
         {
-            result = type::_get_position(
-                const_cast<node_type&>(*itr_end.base()),
-                IsStrict()
+            result = iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(
+                    const_cast<node_type&>(*itr_end.base())
+                )
             );
         }
 
@@ -5666,7 +4172,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5679,7 +4184,6 @@ namespace odds_and_ends { namespace node { namespace container {
         NodeParentGeneratorList,
         Balancer,
         Compare,
-        IsStrict,
         Size,
         Difference,
         PtrXForm,
@@ -5692,7 +4196,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5738,7 +4241,6 @@ namespace odds_and_ends { namespace node { namespace container {
         typename NodeParentGeneratorList,
         typename Balancer,
         typename Compare,
-        typename IsStrict,
         typename Size,
         typename Difference,
         typename PtrXForm,
@@ -5755,7 +4257,6 @@ namespace odds_and_ends { namespace node { namespace container {
                 NodeParentGeneratorList,
                 Balancer,
                 Compare,
-                IsStrict,
                 Size,
                 Difference,
                 PtrXForm,
@@ -5769,7 +4270,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,
@@ -5783,7 +4283,6 @@ namespace odds_and_ends { namespace node { namespace container {
             NodeParentGeneratorList,
             Balancer,
             Compare,
-            IsStrict,
             Size,
             Difference,
             PtrXForm,

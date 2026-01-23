@@ -9,20 +9,22 @@
 #include <odds_and_ends/node/traversal_state.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_bidirectional_iterator.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
+#include <odds_and_ends/use_default_policy.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/apply.hpp>
+#include <boost/mpl/lambda.hpp>
+#include <boost/mpl/apply_wrap.hpp>
 
 namespace odds_and_ends { namespace node {
 
     template <
         typename Node,
         typename IsReverse = ::boost::mpl::false_,
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>
+        typename StackGen = ::odds_and_ends::use_default_policy
     >
     class depth_first_tree_iterator
     {
@@ -64,11 +66,16 @@ namespace odds_and_ends { namespace node {
         typedef value_type& reference;
 
     private:
-        typedef typename ::boost::mpl::apply1<StackGen,pointer>::type _node_stack_t;
-        typedef typename ::boost::mpl::apply1<
-            StackGen,
-            _child_iterator
-        >::type _child_iterator_stack_t;
+        typedef typename ::boost::mpl::lambda<
+            typename ::boost::mpl::if_<
+                ::std::is_same<StackGen,::odds_and_ends::use_default_policy>,
+                ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+                StackGen
+            >::type
+        >::type _stack_gen_lambda;
+        typedef typename ::boost::mpl::apply_wrap1<_stack_gen_lambda,pointer>::type _node_stack_t;
+        typedef typename ::boost::mpl
+        ::apply_wrap1<_stack_gen_lambda,_child_iterator>::type _child_iterator_stack_t;
 
         _node_stack_t _node_stack;
         _child_iterator_stack_t _itr_stack;
@@ -603,7 +610,7 @@ namespace odds_and_ends { namespace node {
     {
         if (lhs._state == rhs._state)
         {
-            return lhs._state ? (lhs._current_ptr == rhs._current_ptr) : !rhs._state;
+            return lhs._state.get() ? (lhs._current_ptr == rhs._current_ptr) : !rhs._state.get();
         }
         else
         {
@@ -650,7 +657,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+        typename StackGen = ::odds_and_ends::use_default_policy,
         typename Node,
         typename ...Args
     >
@@ -665,7 +672,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+        typename StackGen = ::odds_and_ends::use_default_policy,
         typename Node,
         typename ...Args
     >
@@ -680,7 +687,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+        typename StackGen = ::odds_and_ends::use_default_policy,
         typename Node,
         typename ...Args
     >
@@ -695,7 +702,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+        typename StackGen = ::odds_and_ends::use_default_policy,
         typename Node,
         typename ...Args
     >

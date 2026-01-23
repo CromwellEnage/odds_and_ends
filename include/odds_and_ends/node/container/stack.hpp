@@ -4,6 +4,7 @@
 #define ODDS_AND_ENDS__NODE__CONTAINER__STACK_HPP
 
 #include <cstddef>
+#include <type_traits>
 #include <memory>
 #include <odds_and_ends/node/data.hpp>
 #include <odds_and_ends/node/linked/base.hpp>
@@ -159,7 +160,7 @@ namespace odds_and_ends { namespace node { namespace container {
         size_type const& size() const;
         const_reference top() const;
         void push(const_reference t);
-        void push(value_type&& t);
+        void push(typename ::std::remove_reference<value_type>::type&& t);
 
         template <typename ...Args>
         value_type const& emplace(Args&&... args);
@@ -468,7 +469,8 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename AllocGen>
-    inline void stack<T,Size,AllocGen>::push(value_type&& t)
+    inline void
+        stack<T,Size,AllocGen>::push(typename ::std::remove_reference<value_type>::type&& t)
     {
         _pointer p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
         ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, ::std::move(t));

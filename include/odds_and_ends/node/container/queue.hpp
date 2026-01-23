@@ -209,7 +209,7 @@ namespace odds_and_ends { namespace node { namespace container {
         size_type const& size() const;
         const_reference front() const;
         void push(const_reference t);
-        void push(value_type&& t);
+        void push(typename ::std::remove_reference<value_type>::type&& t);
 
         template <typename ...Args>
         const_reference emplace(Args&&... args);
@@ -676,7 +676,8 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename AllocGen>
-    inline void queue<T,Size,AllocGen>::push(value_type&& t)
+    inline void
+        queue<T,Size,AllocGen>::push(typename ::std::remove_reference<value_type>::type&& t)
     {
         _pointer p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
         ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, ::std::move(t));

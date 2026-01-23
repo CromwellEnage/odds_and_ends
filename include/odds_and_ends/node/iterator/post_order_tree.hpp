@@ -8,22 +8,23 @@
 #include <odds_and_ends/node/container/stack.hpp>
 #include <odds_and_ends/node/traversal_state.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_forward_iterator.hpp>
-#include <odds_and_ends/static_introspection/concept/is_runtime_pair.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
+#include <odds_and_ends/use_default_policy.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/apply.hpp>
+#include <boost/mpl/lambda.hpp>
+#include <boost/mpl/apply_wrap.hpp>
 
 namespace odds_and_ends { namespace node {
 
     template <
         typename Node,
         typename IsReverse = ::boost::mpl::false_,
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>
+        typename StackGen = ::odds_and_ends::use_default_policy
     >
     class post_order_tree_iterator
     {
@@ -43,7 +44,14 @@ namespace odds_and_ends { namespace node {
         typedef value_type& reference;
 
     private:
-        typedef typename ::boost::mpl::apply1<StackGen,pointer>::type _stack_t;
+        typedef typename ::boost::mpl::lambda<
+            typename ::boost::mpl::if_<
+                ::std::is_same<StackGen,::odds_and_ends::use_default_policy>,
+                ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+                StackGen
+            >::type
+        >::type _stack_gen_lambda;
+        typedef typename ::boost::mpl::apply_wrap1<_stack_gen_lambda,pointer>::type _stack_t;
 
         _stack_t _stack;
         pointer _current;
@@ -441,7 +449,7 @@ namespace odds_and_ends { namespace node {
     {
         if (lhs._state == rhs._state)
         {
-            return lhs._state ? (lhs._current == rhs._current) : !rhs._state;
+            return lhs._state.get() ? (lhs._current == rhs._current) : !rhs._state.get();
         }
         else
         {
@@ -590,7 +598,7 @@ namespace odds_and_ends { namespace node {
             typename ::std::remove_const<Node>::type::traits::child_iterator
         >::type child_iterator;
 
-        typename ::boost::mpl::apply1<StackGen,child_iterator>::type s;
+        typename ::boost::mpl::apply_wrap1<_stack_gen_lambda,child_iterator>::type s;
 
         this->_init(s, f);
     }
@@ -608,7 +616,7 @@ namespace odds_and_ends { namespace node {
             typename ::std::remove_const<Node>::type::traits::child_iterator
         >::type child_iterator;
 
-        typename ::boost::mpl::apply1<StackGen,child_iterator>::type s(
+        typename ::boost::mpl::apply_wrap1<_stack_gen_lambda,child_iterator>::type s(
             this->_stack.get_allocator()
         );
 
@@ -628,7 +636,7 @@ namespace odds_and_ends { namespace node {
             typename ::std::remove_const<Node>::type::traits::child_reverse_iterator
         >::type child_iterator;
 
-        typename ::boost::mpl::apply1<StackGen,child_iterator>::type s;
+        typename ::boost::mpl::apply_wrap1<_stack_gen_lambda,child_iterator>::type s;
 
         this->_init(s, t);
     }
@@ -646,7 +654,7 @@ namespace odds_and_ends { namespace node {
             typename ::std::remove_const<Node>::type::traits::child_reverse_iterator
         >::type child_iterator;
 
-        typename ::boost::mpl::apply1<StackGen,child_iterator>::type s(
+        typename ::boost::mpl::apply_wrap1<_stack_gen_lambda,child_iterator>::type s(
             this->_stack.get_allocator()
         );
 
@@ -654,7 +662,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+        typename StackGen = ::odds_and_ends::use_default_policy,
         typename Node,
         typename ...Args
     >
@@ -668,7 +676,7 @@ namespace odds_and_ends { namespace node {
     }
 
     template <
-        typename StackGen = ::odds_and_ends::node::container::stack< ::boost::mpl::_>,
+        typename StackGen = ::odds_and_ends::use_default_policy,
         typename Node,
         typename ...Args
     >

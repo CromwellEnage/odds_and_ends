@@ -110,12 +110,14 @@ namespace odds_and_ends { namespace node {
         transform_iterator(transform_iterator const& other);
         transform_iterator(transform_iterator&& other);
         transform_iterator(Iterator const& itr, UnFun uf);
+        transform_iterator(Iterator const& itr);
         explicit transform_iterator(UnFun uf);
         transform_iterator();
         ~transform_iterator();
         transform_iterator& operator=(transform_iterator const& other);
         transform_iterator& operator=(transform_iterator&& other);
         Iterator base() const;
+        bool operator!() const;
         reference operator*() const;
         pointer operator->() const;
         _proxy operator[](difference_type const& n) const;
@@ -295,7 +297,12 @@ namespace odds_and_ends { namespace node {
         }
 
         inline transform_iterator(Iterator const& itr, UnFun uf) :
-            _current(itr), _un_fun(uf), _value(!itr ? uf() : uf(*itr))
+            _current(itr), _un_fun(uf), _value(!_current ? uf() : uf(*_current))
+        {
+        }
+
+        inline transform_iterator(Iterator const& itr) :
+            _current(itr), _un_fun(), _value(!_current ? _un_fun() : _un_fun(*_current))
         {
         }
 
@@ -338,6 +345,11 @@ namespace odds_and_ends { namespace node {
         inline Iterator base() const
         {
             return this->_current;
+        }
+
+        inline bool operator!() const
+        {
+            return !this->_current;
         }
 
         inline reference operator*() const
@@ -420,6 +432,12 @@ namespace odds_and_ends { namespace node {
     {
     }
 
+    template <typename Itr, typename UnFun, typename PtrXForm, typename HasDiff>
+    transform_iterator<Itr,UnFun,PtrXForm,HasDiff>::transform_iterator(Itr const& itr) :
+        _current(itr), _un_fun(), _value(!_current ? _un_fun() : _un_fun(*_current))
+    {
+    }
+
     template <typename Iterator, typename UnFun, typename PtrXForm, typename HasDiff>
     inline transform_iterator<Iterator,UnFun,PtrXForm,HasDiff>::transform_iterator(UnFun uf) :
         _current(), _un_fun(uf), _value(uf())
@@ -428,7 +446,7 @@ namespace odds_and_ends { namespace node {
 
     template <typename Itr, typename UnFun, typename PtrXForm, typename HasDiff>
     transform_iterator<Itr,UnFun,PtrXForm,HasDiff>::transform_iterator(Itr const& itr, UnFun uf) :
-        _current(itr), _un_fun(uf), _value(!itr ? uf() : uf(*itr))
+        _current(itr), _un_fun(uf), _value(!_current ? uf() : uf(*_current))
     {
     }
 
@@ -558,6 +576,12 @@ namespace odds_and_ends { namespace node {
     inline Iterator transform_iterator<Iterator,UnFun,PtrXForm,HasDiff>::base() const
     {
         return this->_current;
+    }
+
+    template <typename Iterator, typename UnFun, typename PtrXForm, typename HasDiff>
+    inline bool transform_iterator<Iterator,UnFun,PtrXForm,HasDiff>::operator!() const
+    {
+        return !this->_current;
     }
 
     template <typename Iterator, typename UnFun, typename PtrXForm, typename HasDiff>

@@ -28,6 +28,7 @@
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
 #include <boost/utility/value_init.hpp>
 #include <boost/core/enable_if.hpp>
+#include <boost/mpl/lambda.hpp>
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/mpl/quote.hpp>
 
@@ -37,8 +38,11 @@ namespace odds_and_ends { namespace node { namespace tree {
         typename ContainerGenerator,
         typename XForm = ::boost::mpl::quote1< ::std::add_pointer>
     >
-    struct nary
+    class nary
     {
+        typedef typename ::boost::mpl::lambda<ContainerGenerator>::type _cg_lambda;
+
+    public:
         template <typename CompositeParentGenerator>
         struct apply
         {
@@ -52,7 +56,7 @@ namespace odds_and_ends { namespace node { namespace tree {
                         Derived
                     >::type _composite_parent_t;
                     typedef typename ::boost::mpl::apply_wrap1<
-                        ContainerGenerator,
+                        _cg_lambda,
                         typename ::boost::mpl::apply_wrap1<XForm,Derived>::type
                     >::type _children_t;
 

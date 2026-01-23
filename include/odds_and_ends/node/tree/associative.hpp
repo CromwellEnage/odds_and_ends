@@ -26,6 +26,7 @@
 #include <odds_and_ends/composite_type/event/swap.hpp>
 #include <odds_and_ends/composite_type/preprocessor/noncopyable_nonmovable_body.hpp>
 #include <odds_and_ends/static_introspection/concept/is_legacy_hashed_associative_container.hpp>
+#include <odds_and_ends/use_default_policy.hpp>
 #include <boost/container/map.hpp>
 #include <boost/optional.hpp>
 #include <boost/utility/value_init.hpp>
@@ -42,13 +43,20 @@ namespace odds_and_ends { namespace node { namespace tree {
 
     template <
         typename Key,
-        typename ContainerGenerator = typename ::boost::mpl::lambda<
-            ::boost::container::map< ::boost::mpl::_1,::boost::mpl::_2>
-        >::type,
+        typename ContainerGenerator = ::odds_and_ends::use_default_policy,
         typename XForm = ::boost::mpl::quote1< ::std::add_pointer>
     >
-    struct associative
+    class associative
     {
+        typedef typename ::boost::mpl::lambda<
+            typename ::boost::mpl::if_<
+                ::std::is_same<ContainerGenerator,::odds_and_ends::use_default_policy>,
+                ::boost::container::map< ::boost::mpl::_1,::boost::mpl::_2>,
+                ContainerGenerator
+            >::type
+        >::type _cg_lambda;
+
+    public:
         template <typename CompositeParentGenerator>
         struct apply
         {
@@ -62,11 +70,8 @@ namespace odds_and_ends { namespace node { namespace tree {
                         Derived
                     >::type _composite_parent_t;
                     typedef typename ::boost::mpl::apply_wrap1<XForm,Derived>::type _pointer_t;
-                    typedef typename ::boost::mpl::apply_wrap2<
-                        ContainerGenerator,
-                        Key,
-                        _pointer_t
-                    >::type _children_t;
+                    typedef typename ::boost::mpl
+                    ::apply_wrap2<_cg_lambda,Key,_pointer_t>::type _children_t;
 
                     class _result_sorted : public _composite_parent_t
                     {
@@ -382,22 +387,20 @@ namespace odds_and_ends { namespace node { namespace tree {
                             return (itr == this->_children.end()) ? nullptr : itr->second;
                         }
 
-                        inline bool unset(typename _children_t::key_type const& key)
+                        inline typename _children_t::iterator
+                            unset(typename _children_t::key_type const& key)
                         {
                             typename _children_t::iterator itr = this->_children.find(key);
 
-                            if (itr == this->_children.end())
-                            {
-                                return false;
-                            }
-                            else
+                            if (itr != this->_children.end())
                             {
                                 BOOST_ASSERT(!!itr->second);
                                 _result_sorted::_pre_erase(itr->second);
-                                this->_children.erase(itr);
+                                itr = this->_children.erase(itr);
                                 this->handle(::odds_and_ends::node::post_erase_event());
-                                return true;
                             }
+
+                            return itr;
                         }
 
                         inline void
@@ -1005,22 +1008,20 @@ namespace odds_and_ends { namespace node { namespace tree {
                             return (itr == this->_children.end()) ? nullptr : itr->second;
                         }
 
-                        inline bool unset(typename _children_t::key_type const& key)
+                        inline typename _children_t::iterator
+                            unset(typename _children_t::key_type const& key)
                         {
                             typename _children_t::iterator itr = this->_children.find(key);
 
-                            if (itr == this->_children.end())
-                            {
-                                return false;
-                            }
-                            else
+                            if (itr != this->_children.end())
                             {
                                 BOOST_ASSERT(!!itr->second);
                                 _result_hashed::_pre_erase(itr->second);
-                                this->_children.erase(itr);
+                                itr = this->_children.erase(itr);
                                 this->handle(::odds_and_ends::node::post_erase_event());
-                                return true;
                             }
+
+                            return itr;
                         }
 
                         inline void

@@ -11,12 +11,14 @@
 #include <odds_and_ends/static_introspection/concept/is_legacy_forward_iterator.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_traits.hpp>
 #include <odds_and_ends/static_introspection/member_function/has_get_allocator.hpp>
+#include <odds_and_ends/use_default_policy.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/equal_to.hpp>
+#include <boost/mpl/lambda.hpp>
 #include <boost/mpl/apply.hpp>
 
 namespace odds_and_ends { namespace node {
@@ -24,7 +26,7 @@ namespace odds_and_ends { namespace node {
     template <
         typename Node,
         typename IsReverse = ::boost::mpl::false_,
-        typename QGen = ::odds_and_ends::node::container::queue< ::boost::mpl::_>
+        typename QGen = ::odds_and_ends::use_default_policy
     >
     class breadth_first_tree_iterator
     {
@@ -44,7 +46,14 @@ namespace odds_and_ends { namespace node {
         typedef value_type& reference;
 
     private:
-        typedef typename ::boost::mpl::apply1<QGen,pointer>::type _queue_t;
+        typedef typename ::boost::mpl::lambda<
+            typename ::boost::mpl::if_<
+                ::std::is_same<QGen,::odds_and_ends::use_default_policy>,
+                ::odds_and_ends::node::container::queue< ::boost::mpl::_>,
+                QGen
+            >::type
+        >::type _q_gen_lambda;
+        typedef typename ::boost::mpl::apply1<_q_gen_lambda,pointer>::type _queue_t;
 
         _queue_t _queue;
         pointer _current;

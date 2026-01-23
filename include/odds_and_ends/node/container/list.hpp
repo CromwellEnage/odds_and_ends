@@ -246,11 +246,12 @@ namespace odds_and_ends { namespace node { namespace container {
         const_reference back() const;
         reference back();
         void push_front(const_reference t);
-        void push_front(value_type&& t);
+        void push_front(typename ::std::remove_reference<value_type>::type&& t);
         void push_back(const_reference t);
-        void push_back(value_type&& t);
+        void push_back(typename ::std::remove_reference<value_type>::type&& t);
         iterator insert(const_iterator pos, const_reference t);
-        iterator insert(const_iterator pos, value_type&& t);
+        iterator
+            insert(const_iterator pos, typename ::std::remove_reference<value_type>::type&& t);
         iterator insert(const_iterator pos, size_type n, const_reference t);
 
         template <typename Iterator>
@@ -827,7 +828,10 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
-    inline void list<T,Size,PtrXForm,AllocXForm>::push_front(value_type&& t)
+    inline void
+        list<T,Size,PtrXForm,AllocXForm>::push_front(
+            typename ::std::remove_reference<value_type>::type&& t
+        )
     {
         _node_ptr_t p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
         ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, ::std::move(t));
@@ -874,7 +878,10 @@ namespace odds_and_ends { namespace node { namespace container {
     }
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
-    inline void list<T,Size,PtrXForm,AllocXForm>::push_back(value_type&& t)
+    inline void
+        list<T,Size,PtrXForm,AllocXForm>::push_back(
+            typename ::std::remove_reference<value_type>::type&& t
+        )
     {
         _node_ptr_t p = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
         ::std::allocator_traits<allocator_type>::construct(this->_alloc, p, ::std::move(t));
@@ -932,7 +939,10 @@ namespace odds_and_ends { namespace node { namespace container {
 
     template <typename T, typename Size, typename PtrXForm, typename AllocXForm>
     inline typename list<T,Size,PtrXForm,AllocXForm>::iterator
-        list<T,Size,PtrXForm,AllocXForm>::insert(const_iterator pos, value_type&& t)
+        list<T,Size,PtrXForm,AllocXForm>::insert(
+            const_iterator pos,
+            typename ::std::remove_reference<value_type>::type&& t
+        )
     {
         BOOST_ASSERT_MSG(
             this->_back == pos.base()._last(),
