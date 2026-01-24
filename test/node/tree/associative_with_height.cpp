@@ -833,7 +833,6 @@ void test_00()
 #include <algorithm>
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/mpl/placeholders.hpp>
-#include <boost/mpl/lambda.hpp>
 
 void test_01()
 {
@@ -843,9 +842,7 @@ void test_01()
             ::odds_and_ends::node::tree::base<>,
             ::odds_and_ends::node::tree::associative<
                 char const*,
-                ::boost::mpl::lambda<
-                    ::boost::unordered::unordered_map< ::boost::mpl::_1,::boost::mpl::_2>
-                >::type
+                ::boost::unordered::unordered_map< ::boost::mpl::_1,::boost::mpl::_2>
             >,
             ::odds_and_ends::node::tree::with_height<>
         >
