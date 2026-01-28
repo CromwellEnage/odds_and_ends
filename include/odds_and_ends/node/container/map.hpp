@@ -15,10 +15,15 @@
 #include <odds_and_ends/node/tree/with_size.hpp>
 #include <odds_and_ends/node/iterator/in_order_tree.hpp>
 #include <odds_and_ends/node/iterator/indirect.hpp>
+#include <odds_and_ends/node/parameter/template.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
 #include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
 #include <odds_and_ends/static_introspection/concept/is_indexable_iterator.hpp>
 #include <odds_and_ends/static_introspection/concept/is_runtime_pair.hpp>
+#include <boost/parameter/optional.hpp>
+#include <boost/parameter/required.hpp>
+#include <boost/parameter/parameters.hpp>
+#include <boost/parameter/value_type.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
@@ -35,13 +40,13 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare = ::std::less<Key>,
-        typename Size = ::std::size_t,
-        typename Difference = ::std::ptrdiff_t,
-        typename PtrXForm = ::boost::mpl::quote1< ::std::add_pointer>,
-        typename AllocXForm = ::boost::mpl::quote1< ::std::allocator>
+        typename T0,
+        typename T1,
+        typename T2 = ::boost::parameter::void_,
+        typename T3 = ::boost::parameter::void_,
+        typename T4 = ::boost::parameter::void_,
+        typename T5 = ::boost::parameter::void_,
+        typename T6 = ::boost::parameter::void_
     >
     class map
     {
@@ -49,45 +54,85 @@ namespace odds_and_ends { namespace node { namespace container {
         {
         };
 
+        typedef typename ::boost::parameter::parameters<
+            ::boost::parameter::required<
+                ::odds_and_ends::node::parameter::tag::_node_parent_generator_list
+            >,
+            ::boost::parameter::required< ::odds_and_ends::node::parameter::tag::_balancer>,
+            ::boost::parameter::optional<
+                ::odds_and_ends::node::parameter::tag::_compare_generator
+            >,
+            ::boost::parameter::optional< ::odds_and_ends::node::parameter::tag::_size>,
+            ::boost::parameter::optional< ::odds_and_ends::node::parameter::tag::_difference>,
+            ::boost::parameter::optional<
+                ::odds_and_ends::node::parameter::tag::_pointer_transform
+            >,
+            ::boost::parameter::optional<
+                ::odds_and_ends::node::parameter::tag::_allocator_transform
+            >
+        >::template bind<T0,T1,T2,T3,T4,T5,T6>::type _template_args;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_node_parent_generator_list
+        >::type _npgl_t;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_balancer
+        >::type _balancer_t;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_compare_generator,
+            ::boost::mpl::quote1< ::std::less>
+        >::type _compare_gen;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_pointer_transform,
+            ::boost::mpl::quote1< ::std::add_pointer>
+        >::type _ptr_xform;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_allocator_transform,
+            ::boost::mpl::quote1< ::std::allocator>
+        >::type _alloc_xform;
+
     public:
-        typedef ::odds_and_ends::node::container::map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        > type;
+        typedef ::odds_and_ends::node::container
+        ::map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6> type;
         typedef Key key_type;
         typedef Mapped mapped_type;
         typedef ::std::pair<key_type const,mapped_type> value_type;
         typedef value_type& reference;
         typedef value_type const& const_reference;
-        typedef Compare key_compare;
-        typedef Size size_type;
-        typedef Difference difference_type;
-        typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type>::type pointer;
-        typedef typename ::boost::mpl::apply_wrap1<PtrXForm,value_type const>::type const_pointer;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_size,
+            ::std::size_t
+        >::type size_type;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_difference,
+            ::std::ptrdiff_t
+        >::type difference_type;
+        typedef typename ::boost::mpl::apply_wrap1<_compare_gen,key_type>::type key_compare;
+        typedef typename ::boost::mpl::apply_wrap1<_ptr_xform,value_type>::type pointer;
+        typedef typename ::boost::mpl
+        ::apply_wrap1<_ptr_xform,value_type const>::type const_pointer;
         typedef ::odds_and_ends::composite_type::composite_type<
             typename ::boost::mpl::push_front<
                 typename ::boost::mpl::push_front<
                     typename ::boost::mpl::push_front<
                         typename ::boost::mpl::push_front<
-                            NodeParentGeneratorList,
+                            _npgl_t,
                             ::odds_and_ends::node::tree::with_size<size_type>
                         >::type,
                         ::odds_and_ends::node::tree::binary<difference_type>
                     >::type,
-                    ::odds_and_ends::node::tree::base<PtrXForm>
+                    ::odds_and_ends::node::tree::base<_ptr_xform>
                 >::type,
                 ::odds_and_ends::node::data<value_type>
             >::type
         > node_type;
-        typedef typename ::boost::mpl::apply_wrap1<AllocXForm,node_type>::type allocator_type;
+        typedef typename ::boost::mpl::apply_wrap1<_alloc_xform,node_type>::type allocator_type;
 
         class value_compare
         {
@@ -122,20 +167,20 @@ namespace odds_and_ends { namespace node { namespace container {
         };
 
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node_type,::boost::mpl::false_,Difference> _itr_t;
+        ::in_order_tree_iterator<node_type,::boost::mpl::false_,difference_type> _itr_t;
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node_type const,::boost::mpl::false_,Difference> _c_itr_t;
+        ::in_order_tree_iterator<node_type const,::boost::mpl::false_,difference_type> _c_itr_t;
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node_type,::boost::mpl::true_,Difference> _r_itr_t;
+        ::in_order_tree_iterator<node_type,::boost::mpl::true_,difference_type> _r_itr_t;
         typedef ::odds_and_ends::node
-        ::in_order_tree_iterator<node_type const,::boost::mpl::true_,Difference> _c_r_itr_t;
+        ::in_order_tree_iterator<node_type const,::boost::mpl::true_,difference_type> _c_r_itr_t;
 
     public:
-        typedef ::odds_and_ends::node::indirect_iterator<_itr_t,PtrXForm> iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t,PtrXForm> const_iterator;
-        typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t,PtrXForm> reverse_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_itr_t,_ptr_xform> iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t,_ptr_xform> const_iterator;
+        typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t,_ptr_xform> reverse_iterator;
         typedef ::odds_and_ends::node
-        ::indirect_iterator<_c_r_itr_t,PtrXForm> const_reverse_iterator;
+        ::indirect_iterator<_c_r_itr_t,_ptr_xform> const_reverse_iterator;
 
     private:
         typedef typename node_type::traits::const_pointer _node_const_ptr_t;
@@ -370,26 +415,15 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::value_compare::value_compare() : _comp()
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare::value_compare() : _comp()
     {
     }
 
@@ -397,26 +431,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::value_compare::value_compare(key_compare const& comp) : _comp(comp)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare::value_compare(
+        key_compare const& comp
+    ) : _comp(comp)
     {
     }
 
@@ -424,27 +449,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline bool
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::value_compare::operator()(const_reference lhs, const_reference rhs) const
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare::operator()(
+            const_reference lhs,
+            const_reference rhs
+        ) const
     {
         return this->_comp(lhs.first, rhs.first);
     }
@@ -453,26 +470,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::_node_compare::_node_compare(key_compare const& comp) : _comp(comp)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::_node_compare(
+        key_compare const& comp
+    ) : _comp(comp)
     {
     }
 
@@ -480,27 +488,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline bool
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_node_compare::operator()(key_type const& lhs, const_reference rhs) const
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+            key_type const& lhs,
+            const_reference rhs
+        ) const
     {
         return this->_comp(lhs, rhs.first);
     }
@@ -509,28 +509,20 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
     inline bool
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_node_compare::operator()(K const& lhs, const_reference rhs) const
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+            K const& lhs,
+            const_reference rhs
+        ) const
     {
         return this->_comp(lhs, rhs.first);
     }
@@ -539,27 +531,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline bool
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_node_compare::operator()(const_reference lhs, key_type const& rhs) const
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+            const_reference lhs,
+            key_type const& rhs
+        ) const
     {
         return this->_comp(lhs.first, rhs);
     }
@@ -568,28 +552,20 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
     inline bool
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_node_compare::operator()(const_reference lhs, K const& rhs) const
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+            const_reference lhs,
+            K const& rhs
+        ) const
     {
         return this->_comp(lhs.first, rhs);
     }
@@ -598,26 +574,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map() : _comp(), _alloc(), _root_ptr(nullptr)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map() :
+        _comp(), _alloc(), _root_ptr(nullptr)
     {
     }
 
@@ -625,159 +591,81 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(key_compare const& comp) : _comp(comp), _alloc(), _root_ptr(nullptr)
-    {
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
-        Alloc const& alloc,
-        typename ::boost::enable_if<
-            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
-            _enabler
-        >::type
-    ) : _comp(), _alloc(alloc), _root_ptr(nullptr)
-    {
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
-        key_compare const& comp,
-        Alloc const& alloc,
-        typename ::boost::enable_if<
-            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
-            _enabler
-        >::type
-    ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
-    {
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(::std::initializer_list<value_type> ilist) : _comp(), _alloc(), _root_ptr(nullptr)
-    {
-        for (
-            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
-            itr != ilist.end();
-            ++itr
-        )
-        {
-            this->_insert(*itr, IsMulti());
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(::std::initializer_list<value_type> ilist, key_compare const& comp) :
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(key_compare const& comp) :
         _comp(comp), _alloc(), _root_ptr(nullptr)
     {
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename Alloc>
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _comp(), _alloc(alloc), _root_ptr(nullptr)
+    {
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename Alloc>
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        key_compare const& comp,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
+    {
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(::std::initializer_list<value_type> ilist) :
+        _comp(), _alloc(), _root_ptr(nullptr)
+    {
         for (
             typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
             itr != ilist.end();
@@ -792,27 +680,43 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        ::std::initializer_list<value_type> ilist,
+        key_compare const& comp
+    ) : _comp(comp), _alloc(), _root_ptr(nullptr)
+    {
+        for (
+            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
+            itr != ilist.end();
+            ++itr
+        )
+        {
+            this->_insert(*itr, IsMulti());
+        }
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
+    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
         ::std::initializer_list<value_type> ilist,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -835,27 +739,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
+    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
         ::std::initializer_list<value_type> ilist,
         key_compare const& comp,
         Alloc const& alloc,
@@ -879,28 +772,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Iterator>
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_copy_from(Iterator itr, Iterator itr_end)
+    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_copy_from(Iterator itr, Iterator itr_end)
     {
         for (; itr != itr_end; ++itr)
         {
@@ -912,26 +793,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(map const& copy) : _comp(copy._comp), _alloc(copy._alloc), _root_ptr(nullptr)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(map const& copy) :
+        _comp(copy._comp), _alloc(copy._alloc), _root_ptr(nullptr)
     {
         this->_copy_from(copy.cbegin(), copy.cend());
     }
@@ -940,27 +811,18 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(map const& copy, key_compare const& comp) :
-        _comp(comp), _alloc(copy._alloc), _root_ptr(nullptr)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        map const& copy,
+        key_compare const& comp
+    ) : _comp(comp), _alloc(copy._alloc), _root_ptr(nullptr)
     {
         this->_copy_from(copy.cbegin(), copy.cend());
     }
@@ -969,27 +831,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
         map const& copy,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -1005,27 +856,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
         map const& copy,
         key_compare const& comp,
         Alloc const& alloc,
@@ -1042,26 +882,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(map&& source) : _comp(source._comp), _alloc(source._alloc), _root_ptr(source._root_ptr)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(map&& source) :
+        _comp(source._comp), _alloc(source._alloc), _root_ptr(source._root_ptr)
     {
         source._root_ptr = nullptr;
     }
@@ -1070,27 +900,18 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(map&& source, key_compare const& comp) :
-        _comp(comp), _alloc(source._alloc), _root_ptr(source._root_ptr)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        map&& source,
+        key_compare const& comp
+    ) : _comp(comp), _alloc(source._alloc), _root_ptr(source._root_ptr)
     {
         source._root_ptr = nullptr;
     }
@@ -1099,27 +920,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
         map&& source,
         Alloc const& alloc,
         typename ::boost::enable_if<
@@ -1135,27 +945,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Alloc>
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::map(
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
         map&& source,
         key_compare const& comp,
         Alloc const& alloc,
@@ -1172,27 +971,15 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::clear()
+    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::clear()
     {
         if (this->_root_ptr)
         {
@@ -1233,26 +1020,15 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::~map()
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::~map()
     {
         this->clear();
     }
@@ -1261,38 +1037,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >&
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::operator=(map const& copy)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>&
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::operator=(map const& copy)
     {
         if (this != &copy)
         {
@@ -1307,38 +1061,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >&
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::operator=(map&& source)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>&
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::operator=(map&& source)
     {
         if (this != &static_cast<map&>(source))
         {
@@ -1354,38 +1086,18 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >&
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::operator=(::std::initializer_list<value_type> ilist)
+    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>&
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::operator=(
+            ::std::initializer_list<value_type> ilist
+        )
     {
         this->clear();
 
@@ -1405,27 +1117,15 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::swap(map& other)
+    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::swap(map& other)
     {
         using ::std::swap;
         swap(this->_root_ptr, other._root_ptr);
@@ -1435,40 +1135,18 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline void
         swap(
-            map<
-                Key,
-                Mapped,
-                IsMulti,
-                NodeParentGeneratorList,
-                Balancer,
-                Compare,
-                Size,
-                Difference,
-                PtrXForm,
-                AllocXForm
-            >& lhs,
-            map<
-                Key,
-                Mapped,
-                IsMulti,
-                NodeParentGeneratorList,
-                Balancer,
-                Compare,
-                Size,
-                Difference,
-                PtrXForm,
-                AllocXForm
-            >& rhs
+            map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>& lhs,
+            map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>& rhs
         )
     {
         lhs.swap(rhs);
@@ -1478,38 +1156,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::key_compare
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::key_comp() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::key_compare
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::key_comp() const
     {
         return this->_comp;
     }
@@ -1518,38 +1174,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::value_compare
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::value_comp() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_comp() const
     {
         return value_compare(this->_comp);
     }
@@ -1558,38 +1192,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::allocator_type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::get_allocator() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::allocator_type
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::get_allocator() const
     {
         return this->_alloc;
     }
@@ -1598,27 +1210,15 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline bool
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::empty() const
+    inline bool map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::empty() const
     {
         return !this->_root_ptr;
     }
@@ -1627,38 +1227,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::size_type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::size() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::size_type
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::size() const
     {
         static size_type const z = ::boost::initialized_value;
         return this->_root_ptr ? this->_root_ptr->size() : z;
@@ -1668,38 +1246,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::size_type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::max_size()
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::size_type
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::max_size()
     {
         return (::std::numeric_limits<size_type>::max)();
     }
@@ -1708,38 +1264,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::_node_const_ptr_t
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::data() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_const_ptr_t
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::data() const
     {
         return this->_root_ptr;
     }
@@ -1748,38 +1282,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::cbegin() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::cbegin() const
     {
         return this->_root_ptr ? const_iterator(
             ::odds_and_ends::node
@@ -1791,38 +1303,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::begin() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::begin() const
     {
         return this->_root_ptr ? const_iterator(
             ::odds_and_ends::node
@@ -1834,38 +1324,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::begin()
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::begin()
     {
         return this->_root_ptr ? iterator(
             ::odds_and_ends::node
@@ -1877,38 +1345,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::cend() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::cend() const
     {
         return this->_root_ptr ? const_iterator(
             ::odds_and_ends::node
@@ -1920,38 +1366,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::end() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::end() const
     {
         return this->_root_ptr ? const_iterator(
             ::odds_and_ends::node
@@ -1963,38 +1387,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::end()
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::end()
     {
         return this->_root_ptr ? iterator(
             ::odds_and_ends::node
@@ -2006,38 +1408,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::crbegin() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_reverse_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::crbegin() const
     {
         return this->_root_ptr ? const_reverse_iterator(
             ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<difference_type>(
@@ -2050,38 +1430,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::rbegin() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_reverse_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::rbegin() const
     {
         return this->_root_ptr ? const_reverse_iterator(
             ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<difference_type>(
@@ -2094,38 +1452,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::rbegin()
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::reverse_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::rbegin()
     {
         return this->_root_ptr ? reverse_iterator(
             ::odds_and_ends::node::make_in_order_tree_reverse_iterator_begin<difference_type>(
@@ -2138,38 +1474,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::crend() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_reverse_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::crend() const
     {
         return this->_root_ptr ? const_reverse_iterator(
             ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<difference_type>(
@@ -2182,38 +1496,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::rend() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_reverse_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::rend() const
     {
         return this->_root_ptr ? const_reverse_iterator(
             ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<difference_type>(
@@ -2226,38 +1518,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::reverse_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::rend()
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::reverse_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::rend()
     {
         return this->_root_ptr ? reverse_iterator(
             ::odds_and_ends::node::make_in_order_tree_reverse_iterator_end<difference_type>(
@@ -2270,38 +1540,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::find(key_type const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::find(key_type const& key) const
     {
         _node_const_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
@@ -2317,39 +1565,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::find(K const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::find(K const& key) const
     {
         _node_const_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
@@ -2365,38 +1591,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::find(key_type const& key)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::find(key_type const& key)
     {
         _node_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
@@ -2412,39 +1616,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::find(K const& key)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::find(K const& key)
     {
         _node_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
@@ -2460,38 +1642,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::lower_bound(key_type const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::lower_bound(key_type const& key) const
     {
         _node_const_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_lower_bound(
             this->_root_ptr,
@@ -2507,39 +1667,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::lower_bound(K const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::lower_bound(K const& key) const
     {
         _node_const_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_lower_bound(
             this->_root_ptr,
@@ -2555,38 +1693,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::lower_bound(key_type const& key)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::lower_bound(key_type const& key)
     {
         _node_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_lower_bound(
             this->_root_ptr,
@@ -2602,39 +1718,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::lower_bound(K const& key)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::lower_bound(K const& key)
     {
         _node_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_lower_bound(
             this->_root_ptr,
@@ -2650,38 +1744,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::upper_bound(key_type const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::upper_bound(key_type const& key) const
     {
         _node_const_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
@@ -2697,39 +1769,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::const_iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::upper_bound(K const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::upper_bound(K const& key) const
     {
         _node_const_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
@@ -2745,38 +1795,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::upper_bound(key_type const& key)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::upper_bound(key_type const& key)
     {
         _node_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
@@ -2792,39 +1820,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::upper_bound(K const& key)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::upper_bound(K const& key)
     {
         _node_ptr_t node_ptr = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
@@ -2840,52 +1846,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline ::std::pair<
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::const_iterator,
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::const_iterator
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator,
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
     >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::equal_range(key_type const& key) const
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::equal_range(key_type const& key) const
     {
         return ::std::make_pair(this->lower_bound(key), this->upper_bound(key));
     }
@@ -2894,53 +1867,20 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
     inline ::std::pair<
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::const_iterator,
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::const_iterator
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator,
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
     >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::equal_range(K const& key) const
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::equal_range(K const& key) const
     {
         return ::std::make_pair(this->lower_bound(key), this->upper_bound(key));
     }
@@ -2949,52 +1889,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline ::std::pair<
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::iterator,
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::iterator
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
     >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::equal_range(key_type const& key)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::equal_range(key_type const& key)
     {
         return ::std::make_pair(this->lower_bound(key), this->upper_bound(key));
     }
@@ -3003,53 +1910,20 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
     inline ::std::pair<
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::iterator,
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::iterator
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
     >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::equal_range(K const& key)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::equal_range(K const& key)
     {
         return ::std::make_pair(this->lower_bound(key), this->upper_bound(key));
     }
@@ -3058,38 +1932,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::size_type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::count(key_type const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::size_type
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::count(key_type const& key) const
     {
         return this->upper_bound(key) - this->lower_bound(key);
     }
@@ -3098,39 +1950,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::size_type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::count(K const& key) const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::size_type
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::count(K const& key) const
     {
         return this->upper_bound(key) - this->lower_bound(key);
     }
@@ -3139,38 +1969,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::_node_const_ptr_t
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_back() const
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_const_ptr_t
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_back() const
     {
         return ::odds_and_ends::node::algorithm::decrement_in_binary_tree(
             static_cast<_node_const_ptr_t>(nullptr),
@@ -3182,38 +1990,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::_node_ptr_t
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_back()
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_ptr_t
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_back()
     {
         return ::odds_and_ends::node::algorithm::decrement_in_binary_tree(
             static_cast<_node_ptr_t>(nullptr),
@@ -3225,27 +2011,15 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_push_back(const_reference t)
+    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_push_back(const_reference t)
     {
         if (this->_root_ptr)
         {
@@ -3254,7 +2028,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
             p->set_right_ptr(n);
-            p = Balancer::post_insert(*n);
+            p = _balancer_t::post_insert(*n);
 
             if (!p->parent())
             {
@@ -3265,7 +2039,7 @@ namespace odds_and_ends { namespace node { namespace container {
         {
             this->_root_ptr = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, this->_root_ptr, t);
-            Balancer::post_fill(*this->_root_ptr);
+            _balancer_t::post_fill(*this->_root_ptr);
         }
     }
 
@@ -3273,27 +2047,18 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_push_back(typename ::std::remove_reference<value_type>::type&& t)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_push_back(
+            typename ::std::remove_reference<value_type>::type&& t
+        )
     {
         if (this->_root_ptr)
         {
@@ -3302,7 +2067,7 @@ namespace odds_and_ends { namespace node { namespace container {
 
             ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
             p->set_right_ptr(n);
-            p = Balancer::post_insert(*n);
+            p = _balancer_t::post_insert(*n);
 
             if (!p->parent())
             {
@@ -3317,7 +2082,7 @@ namespace odds_and_ends { namespace node { namespace container {
                 this->_root_ptr,
                 ::std::move(t)
             );
-            Balancer::post_fill(*this->_root_ptr);
+            _balancer_t::post_fill(*this->_root_ptr);
         }
     }
 
@@ -3325,27 +2090,15 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_insert_before(_node_ptr_t n, _node_ptr_t p)
+    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert_before(_node_ptr_t n, _node_ptr_t p)
     {
         if (p->left())
         {
@@ -3360,7 +2113,7 @@ namespace odds_and_ends { namespace node { namespace container {
             p->set_left_ptr(n);
         }
 
-        p = Balancer::post_insert(*n);
+        p = _balancer_t::post_insert(*n);
 
         if (!p->parent())
         {
@@ -3372,38 +2125,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_insert(const_reference t, ::boost::mpl::true_)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            const_reference t,
+            ::boost::mpl::true_
+        )
     {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
@@ -3433,38 +2167,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::true_)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            typename ::std::remove_reference<value_type>::type&& t,
+            ::boost::mpl::true_
+        )
     {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
@@ -3494,39 +2209,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename ...Args>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_emplace(::boost::mpl::true_, Args&&... args)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_emplace(::boost::mpl::true_, Args&&... args)
     {
         value_type t(::std::forward<Args>(args)...);
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
@@ -3557,41 +2250,22 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline ::std::pair<
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::iterator,
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
         bool
     >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_insert(const_reference t, ::boost::mpl::false_)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            const_reference t,
+            ::boost::mpl::false_
+        )
     {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
@@ -3642,41 +2316,22 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     inline ::std::pair<
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::iterator,
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
         bool
     >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::false_)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            typename ::std::remove_reference<value_type>::type&& t,
+            ::boost::mpl::false_
+        )
     {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
@@ -3727,42 +2382,23 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename ...Args>
     inline ::std::pair<
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::iterator,
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
         bool
     >
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_emplace(::boost::mpl::false_, Args&&... args)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_emplace(
+            ::boost::mpl::false_,
+            Args&&... args
+        )
     {
         value_type t(::std::forward<Args>(args)...);
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
@@ -3814,38 +2450,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::_insert_once_return_t
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::insert(const_reference t)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert_once_return_t
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::insert(const_reference t)
     {
         return this->_insert(t, IsMulti());
     }
@@ -3854,38 +2468,18 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::_insert_once_return_t
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::insert(typename ::std::remove_reference<value_type>::type&& t)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert_once_return_t
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::insert(
+            typename ::std::remove_reference<value_type>::type&& t
+        )
     {
         return this->_insert(::std::move(t), IsMulti());
     }
@@ -3894,39 +2488,17 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename ...Args>
-    inline typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::_insert_once_return_t
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::emplace(Args&&... args)
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert_once_return_t
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::emplace(Args&&... args)
     {
         return this->_emplace(IsMulti(), ::std::forward<Args>(args)...);
     }
@@ -3935,42 +2507,20 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename P>
     inline typename ::boost::enable_if<
         ::odds_and_ends::static_introspection::concept::is_runtime_pair<P>,
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::_insert_once_return_t
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert_once_return_t
     >::type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::insert(P&& t)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::insert(P&& t)
     {
         return this->_emplace(IsMulti(), ::std::forward<P>(t));
     }
@@ -3979,28 +2529,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename Iterator>
-    void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::insert(Iterator itr, Iterator itr_end)
+    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::insert(Iterator itr, Iterator itr_end)
     {
         for (; itr != itr_end; ++itr)
         {
@@ -4012,27 +2550,18 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     void
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::insert(::std::initializer_list<value_type> ilist)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::insert(
+            ::std::initializer_list<value_type> ilist
+        )
     {
         for (
             typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
@@ -4048,38 +2577,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::erase(const_iterator pos)
+    typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::erase(const_iterator pos)
     {
         BOOST_ASSERT(pos != this->cend());
 
@@ -4093,7 +2600,7 @@ namespace odds_and_ends { namespace node { namespace container {
             "The iterator does not point to any element in this container!"
         );
 
-        ::std::tuple<_node_ptr_t,_node_ptr_t,_node_ptr_t> sep_result = Balancer::separate(
+        ::std::tuple<_node_ptr_t,_node_ptr_t,_node_ptr_t> sep_result = _balancer_t::separate(
             *node_ptr
         );
 
@@ -4113,38 +2620,19 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::iterator
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::erase(const_iterator itr, const_iterator itr_end)
+    typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::erase(
+            const_iterator itr,
+            const_iterator itr_end
+        )
     {
         iterator result = this->end();
 
@@ -4169,38 +2657,16 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
-    typename map<
-        Key,
-        Mapped,
-        IsMulti,
-        NodeParentGeneratorList,
-        Balancer,
-        Compare,
-        Size,
-        Difference,
-        PtrXForm,
-        AllocXForm
-    >::size_type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::erase(key_type const& key)
+    typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::size_type
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::erase(key_type const& key)
     {
         ::std::tuple<_node_ptr_t,_node_ptr_t,_node_ptr_t> sep_result;
         _node_ptr_t end_ptr = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
@@ -4220,7 +2686,7 @@ namespace odds_and_ends { namespace node { namespace container {
             node_ptr = ::std::get<1>(sep_result)
         )
         {
-            sep_result = Balancer::separate(*node_ptr);
+            sep_result = _balancer_t::separate(*node_ptr);
             ::std::allocator_traits<
                 allocator_type
             >::destroy(this->_alloc, ::std::get<0>(sep_result));
@@ -4238,56 +2704,23 @@ namespace odds_and_ends { namespace node { namespace container {
         typename Key,
         typename Mapped,
         typename IsMulti,
-        typename NodeParentGeneratorList,
-        typename Balancer,
-        typename Compare,
-        typename Size,
-        typename Difference,
-        typename PtrXForm,
-        typename AllocXForm
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
     >
     template <typename K>
     typename ::boost::disable_if<
         ::std::is_convertible<
             K,
-            typename map<
-                Key,
-                Mapped,
-                IsMulti,
-                NodeParentGeneratorList,
-                Balancer,
-                Compare,
-                Size,
-                Difference,
-                PtrXForm,
-                AllocXForm
-            >::const_iterator
+            typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::const_iterator
         >,
-        typename map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::size_type
+        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::size_type
     >::type
-        map<
-            Key,
-            Mapped,
-            IsMulti,
-            NodeParentGeneratorList,
-            Balancer,
-            Compare,
-            Size,
-            Difference,
-            PtrXForm,
-            AllocXForm
-        >::erase(K&& key)
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::erase(K&& key)
     {
         ::std::tuple<_node_ptr_t,_node_ptr_t,_node_ptr_t> sep_result;
         _node_ptr_t end_ptr = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
@@ -4307,7 +2740,7 @@ namespace odds_and_ends { namespace node { namespace container {
             node_ptr = ::std::get<1>(sep_result)
         )
         {
-            sep_result = Balancer::separate(*node_ptr);
+            sep_result = _balancer_t::separate(*node_ptr);
             ::std::allocator_traits<
                 allocator_type
             >::destroy(this->_alloc, ::std::get<0>(sep_result));

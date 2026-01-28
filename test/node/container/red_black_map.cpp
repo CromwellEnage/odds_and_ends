@@ -1,7 +1,6 @@
 // Copyright (C) 2025-2026 Cromwell D. Enage
 
 #include <utility>
-#include <functional>
 #include <initializer_list>
 #include <string>
 #include <odds_and_ends/node/container/map.hpp>
@@ -98,7 +97,9 @@ void output_depth(::std::size_t const& index, ::std::size_t const& depth)
     ::std::cout << " has red-black depth " << depth << '.' << ::std::endl;
 }
 
+#include <functional>
 #include <odds_and_ends/node/iterator/in_order_tree.hpp>
+#include <boost/mpl/quote.hpp>
 
 typedef ::odds_and_ends::node::container::map<
     int,
@@ -106,7 +107,7 @@ typedef ::odds_and_ends::node::container::map<
     ::boost::mpl::true_,
     ::boost::mpl::deque< ::odds_and_ends::node::red_black>,
     ::odds_and_ends::node::left_leaning_red_black_tree_balancer,
-    ::std::greater<int>
+    ::boost::mpl::quote1< ::std::greater>
 > MMap;
 typedef ::odds_and_ends::node::in_order_tree_iterator<MMap::node_type const> node_itr;
 

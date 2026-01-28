@@ -12,6 +12,7 @@
 #include <odds_and_ends/static_introspection/concept/is_legacy_pair_associative_container.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
+#include <boost/mpl/quote.hpp>
 #include <boost/core/lightweight_test.hpp>
 
 void test_map_00()
@@ -62,7 +63,7 @@ void test_multimap_00()
         ::boost::mpl::true_,
         ::boost::mpl::deque< ::odds_and_ends::node::with_balance_factor>,
         ::odds_and_ends::node::adelson_velskii_landis_tree_balancer,
-        ::std::greater<int>
+        ::boost::mpl::quote1< ::std::greater>
     > MMap;
 
     static_assert(

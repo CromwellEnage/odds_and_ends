@@ -18,6 +18,7 @@
 #include <odds_and_ends/node/iterator/stack_or_queue.hpp>
 #include <odds_and_ends/node/iterator/transform.hpp>
 #include <odds_and_ends/node/iterator/filter.hpp>
+#include <odds_and_ends/node/parameter/template.hpp>
 #include <odds_and_ends/composite_type/composite_type.hpp>
 #include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
 #include <odds_and_ends/static_introspection/concept/is_runtime_pair.hpp>
@@ -25,6 +26,9 @@
 #include <odds_and_ends/static_introspection/nested_type/is_value_type_of.hpp>
 #include <odds_and_ends/use_default_policy.hpp>
 #include <boost/optional.hpp>
+#include <boost/parameter/optional.hpp>
+#include <boost/parameter/parameters.hpp>
+#include <boost/parameter/value_type.hpp>
 #include <boost/core/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/deque.hpp>
@@ -38,10 +42,10 @@ namespace odds_and_ends { namespace node { namespace container {
     template <
         typename Key,
         typename Mapped,
-        typename ContainerGenerator = ::odds_and_ends::use_default_policy,
-        typename Size = ::std::size_t,
-        typename PtrXForm = ::boost::mpl::quote1< ::std::add_pointer>,
-        typename AllocXForm = ::boost::mpl::quote1< ::std::allocator>
+        typename T0 = ::boost::parameter::void_,
+        typename T1 = ::boost::parameter::void_,
+        typename T2 = ::boost::parameter::void_,
+        typename T3 = ::boost::parameter::void_
     >
     class trie_map
     {
@@ -49,23 +53,48 @@ namespace odds_and_ends { namespace node { namespace container {
         {
         };
 
+        typedef typename ::boost::parameter::parameters<
+            ::boost::parameter::optional<
+                ::odds_and_ends::node::parameter::tag::_container_generator
+            >,
+            ::boost::parameter::optional< ::odds_and_ends::node::parameter::tag::_size>,
+            ::boost::parameter::optional<
+                ::odds_and_ends::node::parameter::tag::_pointer_transform
+            >,
+            ::boost::parameter::optional<
+                ::odds_and_ends::node::parameter::tag::_allocator_transform
+            >
+        >::template bind<T0,T1,T2,T3>::type _template_args;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_container_generator,
+            ::odds_and_ends::use_default_policy
+        >::type _container_gen;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_size,
+            ::std::size_t
+        >::type _size_t;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_pointer_transform,
+            ::boost::mpl::quote1< ::std::add_pointer>
+        >::type _ptr_xform;
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_allocator_transform,
+            ::boost::mpl::quote1< ::std::allocator>
+        >::type _alloc_xform;
         typedef ::boost::optional<Mapped> _opt_mapped;
 
     public:
-        typedef ::odds_and_ends::node::container::trie_map<
-            Key,
-            Mapped,
-            ContainerGenerator,
-            Size,
-            PtrXForm,
-            AllocXForm
-        > type;
+        typedef ::odds_and_ends::node::container::trie_map<Key,Mapped,T0,T1,T2,T3> type;
         typedef Mapped mapped_type;
         typedef ::odds_and_ends::composite_type::composite_type<
             ::boost::mpl::deque<
                 ::odds_and_ends::node::data<_opt_mapped>,
-                ::odds_and_ends::node::tree::base<PtrXForm>,
-                ::odds_and_ends::node::tree::associative<Key,ContainerGenerator,PtrXForm>
+                ::odds_and_ends::node::tree::base<_ptr_xform>,
+                ::odds_and_ends::node::tree::associative<Key,_container_gen,_ptr_xform>
             >
         > node_type;
 
@@ -75,13 +104,13 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef ::odds_and_ends::node::stack_or_queue_iterator<
             Key,
             ::boost::mpl::true_,
-            Size,
-            PtrXForm,
-            AllocXForm
+            _size_t,
+            _ptr_xform,
+            _alloc_xform
         > _s_or_q_itr;
 
     public:
-        typedef typename ::boost::mpl::apply_wrap1<AllocXForm,node_type>::type allocator_type;
+        typedef typename ::boost::mpl::apply_wrap1<_alloc_xform,node_type>::type allocator_type;
         typedef ::std::pair<_s_or_q_itr,_s_or_q_itr> key_type;
         typedef ::std::pair<key_type,mapped_type> value_type;
         typedef value_type const& const_reference;
@@ -112,27 +141,27 @@ namespace odds_and_ends { namespace node { namespace container {
         typedef ::odds_and_ends::node
         ::post_order_tree_iterator<node_type,::boost::mpl::true_> _r_itr_t_0;
         typedef ::odds_and_ends::node
-        ::transform_iterator<_itr_t_0,_xform_func_0,PtrXForm,::boost::mpl::false_> _itr_t_1;
+        ::transform_iterator<_itr_t_0,_xform_func_0,_ptr_xform,::boost::mpl::false_> _itr_t_1;
         typedef ::odds_and_ends::node
-        ::transform_iterator<_r_itr_t_0,_xform_func_0,PtrXForm,::boost::mpl::false_> _r_itr_t_1;
+        ::transform_iterator<_r_itr_t_0,_xform_func_0,_ptr_xform,::boost::mpl::false_> _r_itr_t_1;
         typedef ::odds_and_ends::node::filter_iterator<_itr_t_1,_filter_func> _itr_t_2;
         typedef ::odds_and_ends::node::filter_iterator<_r_itr_t_1,_filter_func> _r_itr_t_2;
 
     public:
         typedef ::odds_and_ends::node
-        ::transform_iterator<_itr_t_2,_xform_func_1,PtrXForm,::boost::mpl::false_> iterator;
+        ::transform_iterator<_itr_t_2,_xform_func_1,_ptr_xform,::boost::mpl::false_> iterator;
         typedef ::odds_and_ends::node
-        ::transform_iterator<_itr_t_2,_xform_func_1,PtrXForm,::boost::mpl::true_> const_iterator;
+        ::transform_iterator<_itr_t_2,_xform_func_1,_ptr_xform,::boost::mpl::true_> const_iterator;
         typedef ::odds_and_ends::node::transform_iterator<
             _r_itr_t_2,
             _xform_func_1,
-            PtrXForm,
+            _ptr_xform,
             ::boost::mpl::false_
         > reverse_iterator;
         typedef ::odds_and_ends::node::transform_iterator<
             _r_itr_t_2,
             _xform_func_1,
-            PtrXForm,
+            _ptr_xform,
             ::boost::mpl::true_
         > const_reverse_iterator;
 
@@ -145,6 +174,7 @@ namespace odds_and_ends { namespace node { namespace container {
     public:
         trie_map();
         ~trie_map();
+        allocator_type get_allocator() const;
         void clear();
         const_iterator cbegin() const;
         const_iterator begin() const;
@@ -175,44 +205,21 @@ namespace odds_and_ends { namespace node { namespace container {
 
 namespace odds_and_ends { namespace node { namespace container {
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ContainerGenerator,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    typename trie_map<Key,Mapped,ContainerGenerator,Size,PtrXForm,AllocXForm>::key_type const
-        trie_map<Key,Mapped,ContainerGenerator,Size,PtrXForm,AllocXForm>::_dummy =
-        typename trie_map<Key,Mapped,ContainerGenerator,Size,PtrXForm,AllocXForm>::key_type();
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    typename trie_map<Key,Mapped,T0,T1,T2,T3>::key_type const
+        trie_map<Key,Mapped,T0,T1,T2,T3>::_dummy =
+        typename trie_map<Key,Mapped,T0,T1,T2,T3>::key_type();
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::_value_opt_t
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::_xform_func_0::operator()() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::_value_opt_t
+        trie_map<Key,Mapped,T0,T1,T2,T3>::_xform_func_0::operator()() const
     {
         return _value_opt_t(type::_dummy, _opt_mapped());
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::_value_opt_t
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::_xform_func_0::operator()(
-            node_type& n
-        ) const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    typename trie_map<Key,Mapped,T0,T1,T2,T3>::_value_opt_t
+        trie_map<Key,Mapped,T0,T1,T2,T3>::_xform_func_0::operator()(node_type& n) const
     {
         _s_or_q_itr itr;
 
@@ -228,74 +235,33 @@ namespace odds_and_ends { namespace node { namespace container {
         return _value_opt_t(key_type(itr, _s_or_q_itr()), *n);
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::value_type
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::_xform_func_1::operator()() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::value_type
+        trie_map<Key,Mapped,T0,T1,T2,T3>::_xform_func_1::operator()() const
     {
         return value_type(type::_dummy, mapped_type());
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::value_type
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::_xform_func_1::operator()(
-            _value_opt_t& p
-        ) const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::value_type
+        trie_map<Key,Mapped,T0,T1,T2,T3>::_xform_func_1::operator()(_value_opt_t& p) const
     {
         return value_type(p.first, *p.second);
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline bool
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::_filter_func::operator()(
-            _value_opt_t& p
-        ) const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline bool trie_map<Key,Mapped,T0,T1,T2,T3>::_filter_func::operator()(_value_opt_t& p) const
     {
         return !!p.second;
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ContainerGenerator,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline trie_map<Key,Mapped,ContainerGenerator,Size,PtrXForm,AllocXForm>::trie_map() :
-        _alloc(), _root()
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline trie_map<Key,Mapped,T0,T1,T2,T3>::trie_map() : _alloc(), _root()
     {
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ContainerGenerator,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    void trie_map<Key,Mapped,ContainerGenerator,Size,PtrXForm,AllocXForm>::clear()
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    void trie_map<Key,Mapped,T0,T1,T2,T3>::clear()
     {
         typename node_type::traits::pointer p = nullptr;
 
@@ -318,202 +284,111 @@ namespace odds_and_ends { namespace node { namespace container {
         }
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ContainerGenerator,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline trie_map<Key,Mapped,ContainerGenerator,Size,PtrXForm,AllocXForm>::~trie_map()
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline trie_map<Key,Mapped,T0,T1,T2,T3>::~trie_map()
     {
         this->clear();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::cbegin() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::allocator_type
+        trie_map<Key,Mapped,T0,T1,T2,T3>::get_allocator() const
+    {
+        return this->_alloc;
+    }
+
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::cbegin() const
     {
         return const_iterator(_itr_t_2(_itr_t_1(_itr_t_0(const_cast<node_type&>(this->_root)))));
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::begin() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::begin() const
     {
         return const_iterator(_itr_t_2(_itr_t_1(_itr_t_0(const_cast<node_type&>(this->_root)))));
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::begin()
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::begin()
     {
         return iterator(_itr_t_2(_itr_t_1(_itr_t_0(this->_root))));
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::cend() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::cend() const
     {
         return const_iterator();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::end() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::end() const
     {
         return const_iterator();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::end()
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::end()
     {
         return iterator();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_reverse_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::crbegin() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_reverse_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::crbegin() const
     {
         return const_reverse_iterator(_r_itr_t_2(_r_itr_t_1(_r_itr_t_0(
             const_cast<node_type&>(this->_root)
         ))));
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_reverse_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::rbegin() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_reverse_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::rbegin() const
     {
         return const_reverse_iterator(_r_itr_t_2(_r_itr_t_1(_r_itr_t_0(
             const_cast<node_type&>(this->_root)
         ))));
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::reverse_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::rbegin()
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::reverse_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::rbegin()
     {
         return reverse_iterator(_r_itr_t_2(_r_itr_t_1(_r_itr_t_0(this->_root))));
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_reverse_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::crend() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_reverse_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::crend() const
     {
         return const_reverse_iterator();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_reverse_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::rend() const
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_reverse_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::rend() const
     {
         return const_reverse_iterator();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::reverse_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::rend()
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
+    inline typename trie_map<Key,Mapped,T0,T1,T2,T3>::reverse_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::rend()
     {
         return reverse_iterator();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
     template <typename A0, typename ...Args>
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::emplace(A0&& a0, Args&&... args)
+    typename trie_map<Key,Mapped,T0,T1,T2,T3>::iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::emplace(A0&& a0, Args&&... args)
     {
         _node_ptr_t p = ::std::pointer_traits<_node_ptr_t>::pointer_to(this->_root);
         _node_ptr_t n;
@@ -540,17 +415,10 @@ namespace odds_and_ends { namespace node { namespace container {
         return iterator(_itr_t_2(_itr_t_1(_itr_t_0(*p))));
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
     template <typename K>
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::const_iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::find(K const& key) const
+    typename trie_map<Key,Mapped,T0,T1,T2,T3>::const_iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::find(K const& key) const
     {
         _node_ptr_const_t p = ::std::pointer_traits<_node_ptr_const_t>::pointer_to(this->_root);
 
@@ -573,17 +441,10 @@ namespace odds_and_ends { namespace node { namespace container {
         )))) : this->cend();
     }
 
-    template <
-        typename Key,
-        typename Mapped,
-        typename ConGen,
-        typename Size,
-        typename PtrXForm,
-        typename AllocXForm
-    >
+    template <typename Key, typename Mapped, typename T0, typename T1, typename T2, typename T3>
     template <typename K>
-    inline typename trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::iterator
-        trie_map<Key,Mapped,ConGen,Size,PtrXForm,AllocXForm>::find(K const& key)
+    typename trie_map<Key,Mapped,T0,T1,T2,T3>::iterator
+        trie_map<Key,Mapped,T0,T1,T2,T3>::find(K const& key)
     {
         _node_ptr_t p = ::std::pointer_traits<_node_ptr_t>::pointer_to(this->_root);
 
