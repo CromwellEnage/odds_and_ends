@@ -6,9 +6,9 @@
 namespace odds_and_ends { namespace node { namespace algorithm {
 
     template <typename NodePointer, typename Value>
-    Value binary_tree_index_of(NodePointer node_ptr, Value offset, NodePointer root_ptr)
+    Value binary_tree_index_of(NodePointer node_ptr, Value offset, NodePointer root_ptr, bool is_r)
     {
-        NodePointer child_ptr = node_ptr->left();
+        NodePointer child_ptr = is_r ? node_ptr->right() : node_ptr->left();
 
         if (child_ptr)
         {
@@ -22,26 +22,26 @@ namespace odds_and_ends { namespace node { namespace algorithm {
                 child_ptr = node_ptr;
                 node_ptr = node_ptr->parent();
 
-                if (child_ptr == node_ptr->right())
+                if (child_ptr == (is_r ? node_ptr->left() : node_ptr->right()))
                 {
                     ++offset;
 
-                    if ((child_ptr = node_ptr->left()))
+                    if ((child_ptr = (is_r ? node_ptr->right() : node_ptr->left())))
                     {
                         offset += child_ptr->size();
                     }
                 }
             }
         }
-        else
+        else  // if (!root_ptr)
         {
             for (child_ptr = node_ptr; (node_ptr = node_ptr->parent()); child_ptr = node_ptr)
             {
-                if (child_ptr == node_ptr->right())
+                if (child_ptr == (is_r ? node_ptr->left() : node_ptr->right()))
                 {
                     ++offset;
 
-                    if ((child_ptr = node_ptr->left()))
+                    if ((child_ptr = (is_r ? node_ptr->right() : node_ptr->left())))
                     {
                         offset += child_ptr->size();
                     }

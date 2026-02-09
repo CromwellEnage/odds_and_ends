@@ -596,6 +596,8 @@ void test_char_deque_00()
     BOOST_TEST(c_r_itr == char_deque.rend());
     char_deque.clear();
     BOOST_TEST(char_deque.empty());
+    char_deque.resize(100);
+    BOOST_TEST(100 == char_deque.size());
 }
 
 int main(int argc, char** argv)

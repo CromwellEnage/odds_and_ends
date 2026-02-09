@@ -86,37 +86,7 @@ namespace odds_and_ends { namespace node {
                 _enabler
             >::type = _enabler()
         );
-/*
-        template <typename N, typename I, typename D>
-        typename ::boost::enable_if<
-            typename ::boost::mpl::eval_if<
-                ::boost::mpl::equal_to<I,IsReverse>,
-                ::boost::mpl::if_<
-                    ::std::is_same<N,Node>,
-                    ::boost::mpl::false_,
-                    ::std::is_convertible<N,Node>
-                >,
-                ::boost::mpl::false_
-            >::type,
-            binary_tree_child_iterator&
-        >::type
-            operator=(binary_tree_child_iterator<N,I,D> const& other);
 
-        template <typename N, typename I, typename D>
-        typename ::boost::enable_if<
-            typename ::boost::mpl::eval_if<
-                ::boost::mpl::equal_to<I,IsReverse>,
-                ::boost::mpl::if_<
-                    ::std::is_same<N,Node>,
-                    ::boost::mpl::false_,
-                    ::std::is_convertible<N,Node>
-                >,
-                ::boost::mpl::false_
-            >::type,
-            binary_tree_child_iterator&
-        >::type
-            operator=(binary_tree_child_iterator<N,I,D>&& other);
-*/
         binary_tree_child_iterator& operator=(binary_tree_child_iterator const& other);
         binary_tree_child_iterator& operator=(binary_tree_child_iterator&& other);
         reference operator*() const;
@@ -150,9 +120,13 @@ namespace odds_and_ends { namespace node {
 
         template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
         friend typename ::boost::lazy_enable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_integral<D1>,
-                ::std::is_integral<D2>,
+            typename ::boost::mpl::eval_if<
+                ::boost::mpl::equal_to<I1,I2>,
+                ::boost::mpl::if_<
+                    ::std::is_integral<D1>,
+                    ::std::is_integral<D2>,
+                    ::boost::mpl::false_
+                >,
                 ::boost::mpl::false_
             >::type,
             ::std::common_type<D1,D2>
@@ -164,10 +138,14 @@ namespace odds_and_ends { namespace node {
 
         template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
         friend typename ::boost::lazy_disable_if<
-            typename ::boost::mpl::if_<
-                ::std::is_integral<D1>,
-                ::std::is_integral<D2>,
-                ::boost::mpl::false_
+            typename ::boost::mpl::eval_if<
+                ::boost::mpl::equal_to<I1,I2>,
+                ::boost::mpl::if_<
+                    ::std::is_integral<D1>,
+                    ::std::is_integral<D2>,
+                    ::boost::mpl::false_
+                >,
+                ::boost::mpl::true_
             >::type,
             ::std::common_type<D1,D2>
         >::type
@@ -303,34 +281,7 @@ namespace odds_and_ends { namespace node {
 
         return *this;
     }
-/*
-    template <typename Node, typename IsReverse, typename Difference>
-    template <typename N, typename I, typename D>
-    inline typename ::boost::enable_if<
-        typename ::boost::mpl::eval_if<
-            ::boost::mpl::equal_to<I,IsReverse>,
-            ::boost::mpl::if_<
-                ::std::is_same<N,Node>,
-                ::boost::mpl::false_,
-                ::std::is_convertible<N,Node>
-            >,
-            ::boost::mpl::false_
-        >::type,
-        binary_tree_child_iterator<Node,IsReverse,Difference>&
-    >::type
-        binary_tree_child_iterator<Node,IsReverse,Difference>::operator=(
-            binary_tree_child_iterator<N,I,D> const& other
-        )
-    {
-        if (this != &other)
-        {
-            this->_current = other.current();
-            this->_parent = other.parent();
-        }
 
-        return *this;
-    }
-*/
     template <typename Node, typename IsReverse, typename Difference>
     inline binary_tree_child_iterator<Node,IsReverse,Difference>&
         binary_tree_child_iterator<Node,IsReverse,Difference>::operator=(
@@ -345,34 +296,7 @@ namespace odds_and_ends { namespace node {
 
         return *this;
     }
-/*
-    template <typename Node, typename IsReverse, typename Difference>
-    template <typename N, typename I, typename D>
-    inline typename ::boost::enable_if<
-        typename ::boost::mpl::eval_if<
-            ::boost::mpl::equal_to<I,IsReverse>,
-            ::boost::mpl::if_<
-                ::std::is_same<N,Node>,
-                ::boost::mpl::false_,
-                ::std::is_convertible<N,Node>
-            >,
-            ::boost::mpl::false_
-        >::type,
-        binary_tree_child_iterator<Node,IsReverse,Difference>&
-    >::type
-        binary_tree_child_iterator<Node,IsReverse,Difference>::operator=(
-            binary_tree_child_iterator<N,I,D>&& other
-        )
-    {
-        if (this != &static_cast<binary_tree_child_iterator<N,I,D>&>(other))
-        {
-            this->_current = ::std::move(other.current());
-            this->_parent = ::std::move(other.parent());
-        }
 
-        return *this;
-    }
-*/
     template <typename Node, typename IsReverse, typename Difference>
     inline typename binary_tree_child_iterator<Node,IsReverse,Difference>::reference
         binary_tree_child_iterator<Node,IsReverse,Difference>::operator*() const
@@ -811,9 +735,13 @@ namespace odds_and_ends { namespace node {
 
     template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
     inline typename ::boost::lazy_enable_if<
-        typename ::boost::mpl::if_<
-            ::std::is_integral<D1>,
-            ::std::is_integral<D2>,
+        typename ::boost::mpl::eval_if<
+            ::boost::mpl::equal_to<I1,I2>,
+            ::boost::mpl::if_<
+                ::std::is_integral<D1>,
+                ::std::is_integral<D2>,
+                ::boost::mpl::false_
+            >,
             ::boost::mpl::false_
         >::type,
         ::std::common_type<D1,D2>
@@ -834,16 +762,13 @@ namespace odds_and_ends { namespace node {
         {
             return 0;
         }
-        else if (lhs._current)
+        else if (lhs._current && rhs._current)
         {
-            if (rhs._current)
-            {
-                return (rhs._current == lhs._parent->left()) ? 1 : -1;
-            }
-            else
-            {
-                return (lhs._parent->left() && lhs._parent->right()) ? 2 : 1;
-            }
+            return (lhs._current == rhs._parent->right()) ? 1 : -1;
+        }
+        else if (rhs._current)
+        {
+            return (lhs._parent->left() && lhs._parent->right()) ? 2 : 1;
         }
         else
         {
@@ -853,10 +778,14 @@ namespace odds_and_ends { namespace node {
 
     template <typename N1, typename I1, typename D1, typename N2, typename I2, typename D2>
     inline typename ::boost::lazy_disable_if<
-        typename ::boost::mpl::if_<
-            ::std::is_integral<D1>,
-            ::std::is_integral<D2>,
-            ::boost::mpl::false_
+        typename ::boost::mpl::eval_if<
+            ::boost::mpl::equal_to<I1,I2>,
+            ::boost::mpl::if_<
+                ::std::is_integral<D1>,
+                ::std::is_integral<D2>,
+                ::boost::mpl::false_
+            >,
+            ::boost::mpl::true_
         >::type,
         ::std::common_type<D1,D2>
     >::type
@@ -876,27 +805,24 @@ namespace odds_and_ends { namespace node {
 
         if (lhs._current != rhs._current)
         {
-            if (lhs._current)
+            if (lhs._current && rhs._current)
             {
-                if (rhs._current)
+                if (lhs._current == rhs._parent->right())
                 {
-                    if (rhs._current == lhs._parent->left())
-                    {
-                        ++result;
-                    }
-                    else
-                    {
-                        --result;
-                    }
+                    ++result;
                 }
                 else
                 {
-                    ++result;
+                    --result;
+                }
+            }
+            else if (rhs._current)
+            {
+                ++result;
 
-                    if (lhs._parent->left() && lhs._parent->right())
-                    {
-                        ++result;
-                    }
+                if (lhs._parent->left() && lhs._parent->right())
+                {
+                    ++result;
                 }
             }
             else

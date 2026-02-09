@@ -455,13 +455,15 @@ namespace odds_and_ends { namespace node {
                         ::odds_and_ends::node::algorithm::binary_tree_index_of(
                             this->_current,
                             -n,
-                            this->_root
+                            this->_root,
+                            false
                         )
                     ) : !(
                         ::odds_and_ends::node::algorithm::binary_tree_index_of(
                             this->_current,
                             n,
-                            this->_root
+                            this->_root,
+                            false
                         ) < z
                     ),
                     "Index out of bounds."
@@ -575,30 +577,20 @@ namespace odds_and_ends { namespace node {
 
         static typename ::std::common_type<D1,D2>::type const zero_d = ::boost::initialized_value;
 
-        if (lhs._state.get())
+        if (lhs._state.get() && rhs._state.get())
         {
-            if (rhs._state.get())
-            {
-                return I1::value ? (
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(rhs._current, zero_d, rhs._root) <
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(lhs._current, zero_d, lhs._root)
-                ) : (
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(lhs._current, zero_d, lhs._root) <
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(rhs._current, zero_d, rhs._root)
-                );
-            }
-            else
-            {
-                return true;
-            }
+            return (
+                ::odds_and_ends::node::algorithm
+                ::binary_tree_index_of(lhs._current, zero_d, lhs._root, I1::value) <
+                ::odds_and_ends::node::algorithm
+                ::binary_tree_index_of(rhs._current, zero_d, rhs._root, I2::value)
+            );
         }
         else
         {
-            return !rhs._state.get();
+            return I1::value ? (
+                rhs._state.get() && !lhs._state.get()
+            ) : (lhs._state.get() && !rhs._state.get());
         }
     }
 
@@ -647,58 +639,34 @@ namespace odds_and_ends { namespace node {
         {
             if (rhs._state.get())
             {
-                return I1::value ? (
+                v = typename ::std::common_type<D1,D2>::type(
                     ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(lhs._current, v, lhs._root) -
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(rhs._current, v, rhs._root)
-                ) : (
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(rhs._current, v, rhs._root) -
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(lhs._current, v, lhs._root)
+                    ::binary_tree_index_of(rhs._current, v, rhs._root, I2::value)
                 );
-            }
-            else if (I1::value)
-            {
-                v = (
+                v = typename ::std::common_type<D1,D2>::type(
                     ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(lhs._current, v, lhs._root)
+                    ::binary_tree_index_of(lhs._current, -v, lhs._root, I1::value)
                 );
-                return ++v;
             }
             else
             {
-                v = -(
+                v = typename ::std::common_type<D1,D2>::type(lhs._root->size());
+                v = typename ::std::common_type<D1,D2>::type(
                     ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(lhs._current, v, lhs._root)
+                    ::binary_tree_index_of(lhs._current, -v, lhs._root, I2::value)
                 );
-                return (v += lhs._root->size());
             }
         }
         else if (rhs._state.get())
         {
-            if (I1::value)
-            {
-                v = -(
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(rhs._current, v, rhs._root)
-                );
-                return --v;
-            }
-            else
-            {
-                v = (
-                    ::odds_and_ends::node::algorithm
-                    ::binary_tree_index_of(rhs._current, v, rhs._root)
-                );
-                return (v -= rhs._root->size());
-            }
+            v = typename ::std::common_type<D1,D2>::type(
+                ::odds_and_ends::node::algorithm
+                ::binary_tree_index_of(rhs._current, v, rhs._root, I1::value)
+            );
+            v = typename ::std::common_type<D1,D2>::type(rhs._root->size()) - v;
         }
-        else
-        {
-            return v;
-        }
+
+        return v;
     }
 
     template <typename Difference = ::std::ptrdiff_t, typename Node>
