@@ -53,6 +53,9 @@ namespace odds_and_ends { namespace graph {
             ::odds_and_ends::graph::parameter::tag::_index_difference,
             ::std::ptrdiff_t
         >::type _index_difference;
+
+    public:
+        // If only template specializations could be friends instead...
         typedef typename ::boost::parameter::value_type<
             _template_args,
             ::odds_and_ends::node::parameter::tag::_pointer_transform,
@@ -1876,7 +1879,6 @@ namespace odds_and_ends { namespace graph { namespace _detail {
     }
 }}}  // namespace odds_and_ends::graph::_detail
 
-#include <odds_and_ends/graph/_detail/index_map.hpp>
 #include <boost/graph/properties.hpp>
 
 namespace boost {
@@ -1904,6 +1906,11 @@ namespace boost {
             ::hypercubic_honeycomb_reverse_edge_map<DC,T0,T1,T2,T3>()
         );
     }
+}  // namespace boost
+
+#include <odds_and_ends/graph/_detail/index_map.hpp>
+
+namespace boost {
 
     template <typename DC, typename T0, typename T1, typename T2, typename T3>
     struct property_map<
@@ -1913,6 +1920,7 @@ namespace boost {
     {
         typedef ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>,
+            typename ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>::_ptr_xform,
             true
         > type;
         typedef type const_type;
@@ -1921,6 +1929,7 @@ namespace boost {
     template <typename DC, typename T0, typename T1, typename T2, typename T3>
     ::odds_and_ends::graph::_detail::index_map<
         ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>,
+        typename ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>::_ptr_xform,
         true
     >
         get(
@@ -1930,6 +1939,7 @@ namespace boost {
     {
         return ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>,
+            typename ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>::_ptr_xform,
             true
         >(g);
     }
@@ -1942,6 +1952,7 @@ namespace boost {
     {
         typedef ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>,
+            typename ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>::_ptr_xform,
             false
         > type;
         typedef type const_type;
@@ -1950,6 +1961,7 @@ namespace boost {
     template <typename DC, typename T0, typename T1, typename T2, typename T3>
     ::odds_and_ends::graph::_detail::index_map<
         ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>,
+        typename ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>::_ptr_xform,
         false
     >
         get(
@@ -1959,6 +1971,7 @@ namespace boost {
     {
         return ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>,
+            typename ::odds_and_ends::graph::hypercubic_honeycomb<DC,T0,T1,T2,T3>::_ptr_xform,
             false
         >(g);
     }

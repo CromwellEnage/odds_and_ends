@@ -72,11 +72,6 @@ namespace odds_and_ends { namespace graph {
         >::type _index_difference;
         typedef typename ::boost::parameter::value_type<
             _template_args,
-            ::odds_and_ends::node::parameter::tag::_pointer_transform,
-            ::boost::mpl::quote1< ::std::add_pointer>
-        >::type _ptr_xform;
-        typedef typename ::boost::parameter::value_type<
-            _template_args,
             ::odds_and_ends::node::parameter::tag::_compare_generator,
             ::boost::mpl::quote1< ::std::less>
         >::type _compare_gen;
@@ -85,6 +80,14 @@ namespace odds_and_ends { namespace graph {
             ::odds_and_ends::node::parameter::tag::_container_generator,
             ::odds_and_ends::use_default_policy
         >::type _container_gen;
+
+    public:
+        // If only template specializations could be friends instead...
+        typedef typename ::boost::parameter::value_type<
+            _template_args,
+            ::odds_and_ends::node::parameter::tag::_pointer_transform,
+            ::boost::mpl::quote1< ::std::add_pointer>
+        >::type _ptr_xform;
 
     public:
         typedef ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5> type;
@@ -1969,7 +1972,6 @@ namespace odds_and_ends { namespace graph { namespace _detail {
     }
 }}}  // namespace odds_and_ends::graph::_detail
 
-#include <odds_and_ends/graph/_detail/index_map.hpp>
 #include <boost/graph/properties.hpp>
 
 namespace boost {
@@ -1996,6 +1998,12 @@ namespace boost {
             ::odds_and_ends::graph::_detail::orthodiagrid_reverse_edge_map<T0,T1,T2,T3,T4,T5>()
         );
     }
+}  // namespace boost
+
+#include <odds_and_ends/graph/_detail/index_map.hpp>
+
+namespace boost {
+
 
     template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
     struct property_map<
@@ -2005,6 +2013,7 @@ namespace boost {
     {
         typedef ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>,
+            typename ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>::_ptr_xform,
             true
         > type;
         typedef type const_type;
@@ -2013,6 +2022,7 @@ namespace boost {
     template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
     inline ::odds_and_ends::graph::_detail::index_map<
         ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>,
+        typename ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>::_ptr_xform,
         true
     >
         get(
@@ -2022,6 +2032,7 @@ namespace boost {
     {
         return ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>,
+            typename ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>::_ptr_xform,
             true
         >(g);
     }
@@ -2034,6 +2045,7 @@ namespace boost {
     {
         typedef ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>,
+            typename ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>::_ptr_xform,
             false
         > type;
         typedef type const_type;
@@ -2042,6 +2054,7 @@ namespace boost {
     template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
     inline ::odds_and_ends::graph::_detail::index_map<
         ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>,
+        typename ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>::_ptr_xform,
         false
     >
         get(
@@ -2051,6 +2064,7 @@ namespace boost {
     {
         return ::odds_and_ends::graph::_detail::index_map<
             ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>,
+            typename ::odds_and_ends::graph::orthodiagrid<T0,T1,T2,T3,T4,T5>::_ptr_xform,
             false
         >(g);
     }
