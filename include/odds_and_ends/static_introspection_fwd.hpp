@@ -1160,6 +1160,9 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
     struct is_math_distribution;
 
     template <typename T>
+    struct is_std_ratio;
+
+    template <typename T>
     struct is_std_integral_constant;
 
     template <typename T>
@@ -1410,7 +1413,34 @@ namespace odds_and_ends { namespace static_introspection { namespace concept {
 
     template <typename T>
     struct is_edge_mutable_graph;
-}}}  // namespace odds_and_ends::static_introspection::concept
+}}}  // namespace odds_and_ends::static_introspection::member_function
+
+namespace odds_and_ends { namespace static_introspection { namespace math {
+
+    template <typename NumericConstant>
+    struct is_odd;
+
+    template <typename NumericConstant>
+    struct is_zero;
+
+    template <typename NumericConstant>
+    struct is_negative;
+
+    template <typename NumericConstant>
+    struct abs;
+
+    template <typename NumericConstant>
+    struct reciprocal;
+
+    template <typename NumericTag, typename IntegralConstant>
+    struct reciprocal_integral;
+
+    template <typename NumericConstantBase, typename IntegralConstantPower>
+    struct integral_power;
+
+    template <typename NumericConstant>
+    struct factorial;
+}}}  // namespace odds_and_ends::static_introspection::math
 
 #include <odds_and_ends/static_introspection/remove_vref.hpp>
 #include <type_traits>

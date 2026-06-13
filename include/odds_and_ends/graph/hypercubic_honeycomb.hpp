@@ -533,10 +533,7 @@ namespace odds_and_ends { namespace graph {
     }
 
     template <typename DC, typename T0, typename T1, typename T2, typename T3>
-    ::std::pair<
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_descriptor,
-        bool
-    >
+    ::std::pair<typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_descriptor,bool>
         edge(
             typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_descriptor u,
             typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_descriptor v,
@@ -546,10 +543,7 @@ namespace odds_and_ends { namespace graph {
         BOOST_ASSERT(::odds_and_ends::graph::_detail::is_valid_vertex(u, g));
         BOOST_ASSERT(::odds_and_ends::graph::_detail::is_valid_vertex(v, g));
 
-        ::std::pair<
-            typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_descriptor,
-            bool
-        > result;
+        ::std::pair<typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_descriptor,bool> result;
         typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertices_size_type one = (
             ::boost::initialized_value
         );
@@ -1267,7 +1261,7 @@ namespace odds_and_ends { namespace graph {
     typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator
         hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator::operator++(int)
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator itr(*this);
+        vertex_iterator itr(*this);
         ++(*this);
         return itr;
     }
@@ -1276,7 +1270,7 @@ namespace odds_and_ends { namespace graph {
     typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator
         hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator::operator++(int)
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator itr(*this);
+        edge_iterator itr(*this);
         ++(*this);
         return itr;
     }
@@ -1301,7 +1295,7 @@ namespace odds_and_ends { namespace graph {
     typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator
         hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator::operator--(int)
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator itr(*this);
+        vertex_iterator itr(*this);
         --(*this);
         return itr;
     }
@@ -1310,7 +1304,7 @@ namespace odds_and_ends { namespace graph {
     typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator
         hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator::operator--(int)
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator itr(*this);
+        edge_iterator itr(*this);
         --(*this);
         return itr;
     }
@@ -1337,7 +1331,7 @@ namespace odds_and_ends { namespace graph {
             difference_type const& d
         ) const
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator itr(*this);
+        vertex_iterator itr(*this);
         itr += d;
         return itr;
     }
@@ -1348,7 +1342,7 @@ namespace odds_and_ends { namespace graph {
             difference_type const& d
         ) const
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator itr(*this);
+        edge_iterator itr(*this);
         itr += d;
         return itr;
     }
@@ -1375,7 +1369,7 @@ namespace odds_and_ends { namespace graph {
             difference_type const& d
         ) const
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::vertex_iterator itr(*this);
+        vertex_iterator itr(*this);
         itr -= d;
         return itr;
     }
@@ -1386,7 +1380,7 @@ namespace odds_and_ends { namespace graph {
             difference_type const& d
         ) const
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_iterator itr(*this);
+        edge_iterator itr(*this);
         itr -= d;
         return itr;
     }
@@ -1472,7 +1466,7 @@ namespace odds_and_ends { namespace graph {
     typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator
         hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator::operator++(int)
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator itr(*this);
+        edge_key_iterator itr(*this);
         ++(*this);
         return itr;
     }
@@ -1490,7 +1484,7 @@ namespace odds_and_ends { namespace graph {
     typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator
         hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator::operator--(int)
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator itr(*this);
+        edge_key_iterator itr(*this);
         --(*this);
         return itr;
     }
@@ -1512,7 +1506,7 @@ namespace odds_and_ends { namespace graph {
             difference_type const& d
         ) const
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator itr(*this);
+        edge_key_iterator itr(*this);
         itr += d;
         return itr;
     }
@@ -1534,7 +1528,7 @@ namespace odds_and_ends { namespace graph {
             difference_type const& d
         ) const
     {
-        typename hypercubic_honeycomb<DC,T0,T1,T2,T3>::edge_key_iterator itr(*this);
+        edge_key_iterator itr(*this);
         itr -= d;
         return itr;
     }

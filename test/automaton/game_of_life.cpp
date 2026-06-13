@@ -1,8 +1,9 @@
 // Copyright (C) 2011-2026 Cromwell D. Enage
 
-#include <odds_and_ends/graph/orthodiagrid.hpp>
+#include <odds_and_ends/graph/zeta_grid.hpp>
+#include <boost/mpl/size_t.hpp>
 
-typedef ::odds_and_ends::graph::orthodiagrid<> Graph;
+typedef ::odds_and_ends::graph::zeta_grid< ::boost::mpl::size_t<2> > Graph;
 
 #include <vector>
 #include <odds_and_ends/automaton/base.hpp>
@@ -21,7 +22,7 @@ class life_program
     Graph _g;
     ::odds_and_ends::automaton::cellular_graph_input_rule<Graph> _rule;
 
-    life_program() : _g(5, 5, true, true), _rule(_g)
+    life_program() : _g({5, 5}, true), _rule(_g)
     {
     }
 

@@ -20,6 +20,7 @@
 #include <odds_and_ends/static_introspection/concept/is_allocator.hpp>
 #include <odds_and_ends/static_introspection/concept/is_indexable_iterator.hpp>
 #include <odds_and_ends/static_introspection/concept/is_runtime_pair.hpp>
+#include <odds_and_ends/static_introspection/concept/is_legacy_input_iterator.hpp>
 #include <boost/parameter/optional.hpp>
 #include <boost/parameter/required.hpp>
 #include <boost/parameter/parameters.hpp>
@@ -100,7 +101,11 @@ namespace odds_and_ends { namespace node { namespace container {
         ::map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6> type;
         typedef Key key_type;
         typedef Mapped mapped_type;
-        typedef ::std::pair<key_type const,mapped_type> value_type;
+        typedef typename ::boost::mpl::if_<
+            ::std::is_void<mapped_type>,
+            key_type,
+            ::std::pair<key_type const,mapped_type>
+        >::type value_type;
         typedef value_type& reference;
         typedef value_type const& const_reference;
         typedef typename ::boost::parameter::value_type<
@@ -134,25 +139,25 @@ namespace odds_and_ends { namespace node { namespace container {
         > node_type;
         typedef typename ::boost::mpl::apply_wrap1<_alloc_xform,node_type>::type allocator_type;
 
-        class value_compare
+    private:
+        class _value_compare
         {
             key_compare _comp;
 
         protected:
-            value_compare();
-            explicit value_compare(key_compare const& comp);
+            _value_compare();
+            explicit _value_compare(key_compare const& comp);
 
         public:
             bool operator()(const_reference lhs, const_reference rhs) const;
             friend class map;
         };
 
-    private:
-        class _node_compare
+        class _node_compare_0
         {
             key_compare const& _comp;
 
-            explicit _node_compare(key_compare const& comp);
+            explicit _node_compare_0(key_compare const& comp);
 
         public:
             template <typename K>
@@ -166,6 +171,25 @@ namespace odds_and_ends { namespace node { namespace container {
             friend class map;
         };
 
+        class _node_compare_1
+        {
+            key_compare const& _comp;
+
+            explicit _node_compare_1(key_compare const& comp);
+
+        public:
+            template <typename K>
+            bool operator()(K const& lhs, const_reference rhs) const;
+
+            template <typename K>
+            bool operator()(const_reference lhs, K const& rhs) const;
+
+            bool operator()(const_reference lhs, const_reference rhs) const;
+            friend class map;
+        };
+
+        typedef typename ::boost::mpl
+        ::if_< ::std::is_void<mapped_type>,_node_compare_1,_node_compare_0>::type _node_compare;
         typedef ::odds_and_ends::node
         ::in_order_tree_iterator<node_type,::boost::mpl::false_,difference_type> _itr_t;
         typedef ::odds_and_ends::node
@@ -176,6 +200,8 @@ namespace odds_and_ends { namespace node { namespace container {
         ::in_order_tree_iterator<node_type const,::boost::mpl::true_,difference_type> _c_r_itr_t;
 
     public:
+        typedef typename ::boost::mpl
+        ::if_< ::std::is_void<mapped_type>,key_compare,_value_compare>::type value_compare;
         typedef ::odds_and_ends::node::indirect_iterator<_itr_t,_ptr_xform> iterator;
         typedef ::odds_and_ends::node::indirect_iterator<_c_itr_t,_ptr_xform> const_iterator;
         typedef ::odds_and_ends::node::indirect_iterator<_r_itr_t,_ptr_xform> reverse_iterator;
@@ -275,6 +301,186 @@ namespace odds_and_ends { namespace node { namespace container {
             >::type = _enabler()
         );
 
+        template <
+            typename K,
+            typename M,
+            typename I,
+            typename U0,
+            typename U1,
+            typename U2,
+            typename U3,
+            typename U4,
+            typename U5,
+            typename U6
+        >
+        map(
+            map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+            typename ::boost::enable_if<
+                typename ::boost::mpl::eval_if<
+                    ::std::is_convertible<K,Key>,
+                    ::boost::mpl::if_<
+                        ::std::is_void<M>,
+                        ::std::is_void<Mapped>,
+                        ::std::is_convertible<M,Mapped>
+                    >,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <
+            typename K,
+            typename M,
+            typename I,
+            typename U0,
+            typename U1,
+            typename U2,
+            typename U3,
+            typename U4,
+            typename U5,
+            typename U6
+        >
+        map(
+            map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+            key_compare const& comp,
+            typename ::boost::enable_if<
+                typename ::boost::mpl::eval_if<
+                    ::std::is_convertible<K,Key>,
+                    ::boost::mpl::if_<
+                        ::std::is_void<M>,
+                        ::std::is_void<Mapped>,
+                        ::std::is_convertible<M,Mapped>
+                    >,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <
+            typename K,
+            typename M,
+            typename I,
+            typename U0,
+            typename U1,
+            typename U2,
+            typename U3,
+            typename U4,
+            typename U5,
+            typename U6,
+            typename Alloc
+        >
+        map(
+            map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                typename ::boost::mpl::eval_if<
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::eval_if<
+                        ::std::is_convertible<K,Key>,
+                        ::boost::mpl::if_<
+                            ::std::is_void<M>,
+                            ::std::is_void<Mapped>,
+                            ::std::is_convertible<M,Mapped>
+                        >,
+                        ::boost::mpl::false_
+                    >,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <
+            typename K,
+            typename M,
+            typename I,
+            typename U0,
+            typename U1,
+            typename U2,
+            typename U3,
+            typename U4,
+            typename U5,
+            typename U6,
+            typename Alloc
+        >
+        map(
+            map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+            key_compare const& comp,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                typename ::boost::mpl::eval_if<
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::eval_if<
+                        ::std::is_convertible<K,Key>,
+                        ::boost::mpl::if_<
+                            ::std::is_void<M>,
+                            ::std::is_void<Mapped>,
+                            ::std::is_convertible<M,Mapped>
+                        >,
+                        ::boost::mpl::false_
+                    >,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename Iterator>
+        map(
+            Iterator itr_begin,
+            Iterator itr_end,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename Iterator>
+        map(
+            Iterator itr_begin,
+            Iterator itr_end,
+            key_compare const& comp,
+            typename ::boost::enable_if<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename Iterator, typename Alloc>
+        map(
+            Iterator itr_begin,
+            Iterator itr_end,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                typename ::boost::mpl::if_<
+                    ::odds_and_ends::static_introspection
+                    ::concept::is_legacy_input_iterator<Iterator>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
+        template <typename Iterator, typename Alloc>
+        map(
+            Iterator itr_begin,
+            Iterator itr_end,
+            key_compare const& comp,
+            Alloc const& alloc,
+            typename ::boost::enable_if<
+                typename ::boost::mpl::if_<
+                    ::odds_and_ends::static_introspection
+                    ::concept::is_legacy_input_iterator<Iterator>,
+                    ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                    ::boost::mpl::false_
+                >::type,
+                _enabler
+            >::type = _enabler()
+        );
+
         map();
         explicit map(key_compare const& comp);
         map(::std::initializer_list<value_type> ilist);
@@ -364,10 +570,7 @@ namespace odds_and_ends { namespace node { namespace container {
         void insert(Iterator itr_begin, Iterator itr_end);
 
         template <typename K>
-        typename ::boost::disable_if<
-            ::std::is_convertible<K,const_iterator>,
-            size_type
-        >::type
+        typename ::boost::disable_if< ::std::is_convertible<K,const_iterator>,size_type>::type
             erase(K&& key);
 
         static size_type max_size();
@@ -375,15 +578,41 @@ namespace odds_and_ends { namespace node { namespace container {
     private:
         _node_const_ptr_t _back() const;
         _node_ptr_t _back();
+        key_compare _value_comp(::std::true_type) const;
+        _value_compare _value_comp(::std::false_type) const;
         void _push_back(const_reference t);
         void _push_back(typename ::std::remove_reference<value_type>::type&& t);
         void _insert_before(_node_ptr_t n, _node_ptr_t p);
-        ::std::pair<iterator,bool> _insert(const_reference t, ::boost::mpl::false_);
-        ::std::pair<iterator,bool>
-            _insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::false_);
         iterator _insert(const_reference t, ::boost::mpl::true_);
+        ::std::pair<iterator,bool> _insert(const_reference t, ::boost::mpl::false_);
+
         iterator
-            _insert(typename ::std::remove_reference<value_type>::type&& t, ::boost::mpl::true_);
+            _insert(
+                typename ::std::remove_reference<value_type>::type&& t,
+                ::boost::mpl::true_,
+                ::std::true_type
+            );
+
+        iterator
+            _insert(
+                typename ::std::remove_reference<value_type>::type&& t,
+                ::boost::mpl::true_,
+                ::std::false_type
+            );
+
+        ::std::pair<iterator,bool>
+            _insert(
+                typename ::std::remove_reference<value_type>::type&& t,
+                ::boost::mpl::false_,
+                ::std::true_type
+            );
+
+        ::std::pair<iterator,bool>
+            _insert(
+                typename ::std::remove_reference<value_type>::type&& t,
+                ::boost::mpl::false_,
+                ::std::false_type
+            );
 
         template <typename ...Args>
         ::std::pair<iterator,bool> _emplace(::boost::mpl::false_, Args&&... args);
@@ -423,7 +652,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T5,
         typename T6
     >
-    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare::value_compare() : _comp()
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_value_compare::_value_compare() : _comp()
     {
     }
 
@@ -439,7 +668,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T5,
         typename T6
     >
-    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare::value_compare(
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_value_compare::_value_compare(
         key_compare const& comp
     ) : _comp(comp)
     {
@@ -458,7 +687,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T6
     >
     inline bool
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare::operator()(
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_value_compare::operator()(
             const_reference lhs,
             const_reference rhs
         ) const
@@ -478,7 +707,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T5,
         typename T6
     >
-    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::_node_compare(
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_0::_node_compare_0(
         key_compare const& comp
     ) : _comp(comp)
     {
@@ -497,7 +726,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T6
     >
     inline bool
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_0::operator()(
             key_type const& lhs,
             const_reference rhs
         ) const
@@ -519,7 +748,7 @@ namespace odds_and_ends { namespace node { namespace container {
     >
     template <typename K>
     inline bool
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_0::operator()(
             K const& lhs,
             const_reference rhs
         ) const
@@ -540,7 +769,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T6
     >
     inline bool
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_0::operator()(
             const_reference lhs,
             key_type const& rhs
         ) const
@@ -562,12 +791,95 @@ namespace odds_and_ends { namespace node { namespace container {
     >
     template <typename K>
     inline bool
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare::operator()(
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_0::operator()(
             const_reference lhs,
             K const& rhs
         ) const
     {
         return this->_comp(lhs.first, rhs);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_1::_node_compare_1(
+        key_compare const& comp
+    ) : _comp(comp)
+    {
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline bool
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_1::operator()(
+            const_reference lhs,
+            const_reference rhs
+        ) const
+    {
+        return this->_comp(lhs, rhs);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename K>
+    inline bool
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_1::operator()(
+            K const& lhs,
+            const_reference rhs
+        ) const
+    {
+        return this->_comp(lhs, rhs);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename K>
+    inline bool
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_node_compare_1::operator()(
+            const_reference lhs,
+            K const& rhs
+        ) const
+    {
+        return this->_comp(lhs, rhs);
     }
 
     template <
@@ -663,106 +975,10 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T5,
         typename T6
     >
-    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(::std::initializer_list<value_type> ilist) :
-        _comp(), _alloc(), _root_ptr(nullptr)
+    template <typename Iterator>
+    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_copy_from(Iterator itr, Iterator itr_end)
     {
-        for (
-            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
-            itr != ilist.end();
-            ++itr
-        )
-        {
-            this->_insert(*itr, IsMulti());
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename T0,
-        typename T1,
-        typename T2,
-        typename T3,
-        typename T4,
-        typename T5,
-        typename T6
-    >
-    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
-        ::std::initializer_list<value_type> ilist,
-        key_compare const& comp
-    ) : _comp(comp), _alloc(), _root_ptr(nullptr)
-    {
-        for (
-            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
-            itr != ilist.end();
-            ++itr
-        )
-        {
-            this->_insert(*itr, IsMulti());
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename T0,
-        typename T1,
-        typename T2,
-        typename T3,
-        typename T4,
-        typename T5,
-        typename T6
-    >
-    template <typename Alloc>
-    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
-        ::std::initializer_list<value_type> ilist,
-        Alloc const& alloc,
-        typename ::boost::enable_if<
-            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
-            _enabler
-        >::type
-    ) : _comp(), _alloc(alloc), _root_ptr(nullptr)
-    {
-        for (
-            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
-            itr != ilist.end();
-            ++itr
-        )
-        {
-            this->_insert(*itr, IsMulti());
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename T0,
-        typename T1,
-        typename T2,
-        typename T3,
-        typename T4,
-        typename T5,
-        typename T6
-    >
-    template <typename Alloc>
-    map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
-        ::std::initializer_list<value_type> ilist,
-        key_compare const& comp,
-        Alloc const& alloc,
-        typename ::boost::enable_if<
-            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
-            _enabler
-        >::type
-    ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
-    {
-        for (
-            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
-            itr != ilist.end();
-            ++itr
-        )
+        for (; itr != itr_end; ++itr)
         {
             this->_insert(*itr, IsMulti());
         }
@@ -781,12 +997,193 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T6
     >
     template <typename Iterator>
-    void map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_copy_from(Iterator itr, Iterator itr_end)
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        Iterator itr_begin,
+        Iterator itr_end,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+            _enabler
+        >::type
+    ) : _comp(), _alloc(), _root_ptr(nullptr)
     {
-        for (; itr != itr_end; ++itr)
-        {
-            this->_insert(*itr, IsMulti());
-        }
+        this->_copy_from(itr_begin, itr_end);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename Iterator>
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        Iterator itr_begin,
+        Iterator itr_end,
+        key_compare const& comp,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+            _enabler
+        >::type
+    ) : _comp(comp), _alloc(), _root_ptr(nullptr)
+    {
+        this->_copy_from(itr_begin, itr_end);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename Iterator, typename Alloc>
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        Iterator itr_begin,
+        Iterator itr_end,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            typename ::boost::mpl::if_<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _comp(), _alloc(alloc), _root_ptr(nullptr)
+    {
+        this->_copy_from(itr_begin, itr_end);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename Iterator, typename Alloc>
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        Iterator itr_begin,
+        Iterator itr_end,
+        key_compare const& comp,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            typename ::boost::mpl::if_<
+                ::odds_and_ends::static_introspection::concept::is_legacy_input_iterator<Iterator>,
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
+    {
+        this->_copy_from(itr_begin, itr_end);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        ::std::initializer_list<value_type> ilist
+    ) : _comp(), _alloc(), _root_ptr(nullptr)
+    {
+        this->_copy_from(ilist.begin(), ilist.end());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        ::std::initializer_list<value_type> ilist,
+        key_compare const& comp
+    ) : _comp(comp), _alloc(), _root_ptr(nullptr)
+    {
+        this->_copy_from(ilist.begin(), ilist.end());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename Alloc>
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        ::std::initializer_list<value_type> ilist,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _comp(), _alloc(alloc), _root_ptr(nullptr)
+    {
+        this->_copy_from(ilist.begin(), ilist.end());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename Alloc>
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        ::std::initializer_list<value_type> ilist,
+        key_compare const& comp,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
+    {
+        this->_copy_from(ilist.begin(), ilist.end());
     }
 
     template <
@@ -871,6 +1268,192 @@ namespace odds_and_ends { namespace node { namespace container {
         Alloc const& alloc,
         typename ::boost::enable_if<
             ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+            _enabler
+        >::type
+    ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
+    {
+        this->_copy_from(copy.cbegin(), copy.cend());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <
+        typename K,
+        typename M,
+        typename I,
+        typename U0,
+        typename U1,
+        typename U2,
+        typename U3,
+        typename U4,
+        typename U5,
+        typename U6
+    >
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+        typename ::boost::enable_if<
+            typename ::boost::mpl::eval_if<
+                ::std::is_convertible<K,Key>,
+                ::boost::mpl::if_<
+                    ::std::is_void<M>,
+                    ::std::is_void<Mapped>,
+                    ::std::is_convertible<M,Mapped>
+                >,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _comp(), _alloc(copy.get_allocator()), _root_ptr(nullptr)
+    {
+        this->_copy_from(copy.cbegin(), copy.cend());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <
+        typename K,
+        typename M,
+        typename I,
+        typename U0,
+        typename U1,
+        typename U2,
+        typename U3,
+        typename U4,
+        typename U5,
+        typename U6
+    >
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+        key_compare const& comp,
+        typename ::boost::enable_if<
+            typename ::boost::mpl::eval_if<
+                ::std::is_convertible<K,Key>,
+                ::boost::mpl::if_<
+                    ::std::is_void<M>,
+                    ::std::is_void<Mapped>,
+                    ::std::is_convertible<M,Mapped>
+                >,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _comp(comp), _alloc(copy.get_allocator()), _root_ptr(nullptr)
+    {
+        this->_copy_from(copy.cbegin(), copy.cend());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <
+        typename K,
+        typename M,
+        typename I,
+        typename U0,
+        typename U1,
+        typename U2,
+        typename U3,
+        typename U4,
+        typename U5,
+        typename U6,
+        typename Alloc
+    >
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            typename ::boost::mpl::eval_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::eval_if<
+                    ::std::is_convertible<K,Key>,
+                    ::boost::mpl::if_<
+                        ::std::is_void<M>,
+                        ::std::is_void<Mapped>,
+                        ::std::is_convertible<M,Mapped>
+                    >,
+                    ::boost::mpl::false_
+                >,
+                ::boost::mpl::false_
+            >::type,
+            _enabler
+        >::type
+    ) : _comp(), _alloc(alloc), _root_ptr(nullptr)
+    {
+        this->_copy_from(copy.cbegin(), copy.cend());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <
+        typename K,
+        typename M,
+        typename I,
+        typename U0,
+        typename U1,
+        typename U2,
+        typename U3,
+        typename U4,
+        typename U5,
+        typename U6,
+        typename Alloc
+    >
+    inline map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::map(
+        map<K,M,I,U0,U1,U2,U3,U4,U5,U6> const& copy,
+        key_compare const& comp,
+        Alloc const& alloc,
+        typename ::boost::enable_if<
+            typename ::boost::mpl::eval_if<
+                ::odds_and_ends::static_introspection::concept::is_allocator<Alloc>,
+                ::boost::mpl::eval_if<
+                    ::std::is_convertible<K,Key>,
+                    ::boost::mpl::if_<
+                        ::std::is_void<M>,
+                        ::std::is_void<Mapped>,
+                        ::std::is_convertible<M,Mapped>
+                    >,
+                    ::boost::mpl::false_
+                >,
+                ::boost::mpl::false_
+            >::type,
             _enabler
         >::type
     ) : _comp(comp), _alloc(alloc), _root_ptr(nullptr)
@@ -1100,16 +1683,7 @@ namespace odds_and_ends { namespace node { namespace container {
         )
     {
         this->clear();
-
-        for (
-            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
-            itr != ilist.end();
-            ++itr
-        )
-        {
-            this->_insert(*itr, IsMulti());
-        }
-
+        this->_copy_from(ilist.begin(), ilist.end());
         return *this;
     }
 
@@ -1182,10 +1756,46 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T5,
         typename T6
     >
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::key_compare
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_value_comp(::std::true_type) const
+    {
+        return this->_comp;
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_value_compare
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_value_comp(::std::false_type) const
+    {
+        return value_compare(this->_comp);
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
     inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_compare
         map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::value_comp() const
     {
-        return value_compare(this->_comp);
+        return this->_value_comp(::std::is_void<mapped_type>());
     }
 
     template <
@@ -2142,7 +2752,7 @@ namespace odds_and_ends { namespace node { namespace container {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
             t,
-            value_compare(this->_comp)
+            this->value_comp()
         );
 
         if (p)
@@ -2175,93 +2785,7 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T5,
         typename T6
     >
-    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
-            typename ::std::remove_reference<value_type>::type&& t,
-            ::boost::mpl::true_
-        )
-    {
-        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
-            this->_root_ptr,
-            t.first,
-            _node_compare(this->_comp)
-        );
-
-        if (p)
-        {
-            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-
-            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
-            this->_insert_before(n, p);
-            return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
-            );
-        }
-        else
-        {
-            this->_push_back(::std::move(t));
-            iterator result = this->end();
-            return --result;
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename T0,
-        typename T1,
-        typename T2,
-        typename T3,
-        typename T4,
-        typename T5,
-        typename T6
-    >
-    template <typename ...Args>
-    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_emplace(::boost::mpl::true_, Args&&... args)
-    {
-        value_type t(::std::forward<Args>(args)...);
-        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
-            this->_root_ptr,
-            t,
-            value_compare(this->_comp)
-        );
-
-        if (p)
-        {
-            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-
-            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
-            this->_insert_before(n, p);
-            return iterator(
-                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
-            );
-        }
-        else
-        {
-            this->_push_back(t);
-            iterator result = this->end();
-            return --result;
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename T0,
-        typename T1,
-        typename T2,
-        typename T3,
-        typename T4,
-        typename T5,
-        typename T6
-    >
-    inline ::std::pair<
-        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
-        bool
-    >
+    inline ::std::pair<typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,bool>
         map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
             const_reference t,
             ::boost::mpl::false_
@@ -2270,7 +2794,7 @@ namespace odds_and_ends { namespace node { namespace container {
         _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
             this->_root_ptr,
             t,
-            value_compare(this->_comp)
+            this->value_comp()
         );
 
         if (p)
@@ -2287,141 +2811,7 @@ namespace odds_and_ends { namespace node { namespace container {
         p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
             this->_root_ptr,
             t,
-            value_compare(this->_comp)
-        );
-
-        if (p)
-        {
-            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-
-            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
-            this->_insert_before(n, p);
-            return ::std::make_pair(
-                iterator(
-                    ::odds_and_ends::node
-                    ::make_in_order_tree_iterator_position<difference_type>(*n)
-                ),
-                true
-            );
-        }
-        else
-        {
-            this->_push_back(t);
-            iterator result = this->end();
-            return ::std::make_pair(--result, true);
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename T0,
-        typename T1,
-        typename T2,
-        typename T3,
-        typename T4,
-        typename T5,
-        typename T6
-    >
-    inline ::std::pair<
-        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
-        bool
-    >
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
-            typename ::std::remove_reference<value_type>::type&& t,
-            ::boost::mpl::false_
-        )
-    {
-        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
-            this->_root_ptr,
-            t.first,
-            _node_compare(this->_comp)
-        );
-
-        if (p)
-        {
-            return ::std::make_pair(
-                iterator(
-                    ::odds_and_ends::node
-                    ::make_in_order_tree_iterator_position<difference_type>(*p)
-                ),
-                false
-            );
-        }
-
-        p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
-            this->_root_ptr,
-            t.first,
-            _node_compare(this->_comp)
-        );
-
-        if (p)
-        {
-            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
-
-            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
-            this->_insert_before(n, p);
-            return ::std::make_pair(
-                iterator(
-                    ::odds_and_ends::node
-                    ::make_in_order_tree_iterator_position<difference_type>(*n)
-                ),
-                true
-            );
-        }
-        else
-        {
-            this->_push_back(::std::move(t));
-            iterator result = this->end();
-            return ::std::make_pair(--result, true);
-        }
-    }
-
-    template <
-        typename Key,
-        typename Mapped,
-        typename IsMulti,
-        typename T0,
-        typename T1,
-        typename T2,
-        typename T3,
-        typename T4,
-        typename T5,
-        typename T6
-    >
-    template <typename ...Args>
-    inline ::std::pair<
-        typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,
-        bool
-    >
-        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_emplace(
-            ::boost::mpl::false_,
-            Args&&... args
-        )
-    {
-        value_type t(::std::forward<Args>(args)...);
-        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
-            this->_root_ptr,
-            t,
-            value_compare(this->_comp)
-        );
-
-        if (p)
-        {
-            return ::std::make_pair(
-                iterator(
-                    ::odds_and_ends::node
-                    ::make_in_order_tree_iterator_position<difference_type>(*p)
-                ),
-                false
-            );
-        }
-
-        p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
-            this->_root_ptr,
-            t,
-            value_compare(this->_comp)
+            this->value_comp()
         );
 
         if (p)
@@ -2476,12 +2866,332 @@ namespace odds_and_ends { namespace node { namespace container {
         typename T5,
         typename T6
     >
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            typename ::std::remove_reference<value_type>::type&& t,
+            ::boost::mpl::true_,
+            ::std::true_type
+        )
+    {
+        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
+            this->_root_ptr,
+            t,
+            _node_compare(this->_comp)
+        );
+
+        if (p)
+        {
+            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+
+            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
+            this->_insert_before(n, p);
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
+            );
+        }
+        else
+        {
+            this->_push_back(::std::move(t));
+            iterator result = this->end();
+            return --result;
+        }
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            typename ::std::remove_reference<value_type>::type&& t,
+            ::boost::mpl::true_,
+            ::std::false_type
+        )
+    {
+        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
+            this->_root_ptr,
+            t.first,
+            _node_compare(this->_comp)
+        );
+
+        if (p)
+        {
+            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+
+            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
+            this->_insert_before(n, p);
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
+            );
+        }
+        else
+        {
+            this->_push_back(::std::move(t));
+            iterator result = this->end();
+            return --result;
+        }
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline ::std::pair<typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,bool>
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            typename ::std::remove_reference<value_type>::type&& t,
+            ::boost::mpl::false_,
+            ::std::true_type
+        )
+    {
+        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
+            this->_root_ptr,
+            t,
+            _node_compare(this->_comp)
+        );
+
+        if (p)
+        {
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*p)
+                ),
+                false
+            );
+        }
+
+        p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
+            this->_root_ptr,
+            t,
+            _node_compare(this->_comp)
+        );
+
+        if (p)
+        {
+            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+
+            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
+            this->_insert_before(n, p);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*n)
+                ),
+                true
+            );
+        }
+        else
+        {
+            this->_push_back(::std::move(t));
+            iterator result = this->end();
+            return ::std::make_pair(--result, true);
+        }
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    inline ::std::pair<typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,bool>
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert(
+            typename ::std::remove_reference<value_type>::type&& t,
+            ::boost::mpl::false_,
+            ::std::false_type
+        )
+    {
+        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
+            this->_root_ptr,
+            t.first,
+            _node_compare(this->_comp)
+        );
+
+        if (p)
+        {
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*p)
+                ),
+                false
+            );
+        }
+
+        p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
+            this->_root_ptr,
+            t.first,
+            _node_compare(this->_comp)
+        );
+
+        if (p)
+        {
+            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+
+            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, ::std::move(t));
+            this->_insert_before(n, p);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*n)
+                ),
+                true
+            );
+        }
+        else
+        {
+            this->_push_back(::std::move(t));
+            iterator result = this->end();
+            return ::std::make_pair(--result, true);
+        }
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
     inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_insert_once_return_t
         map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::insert(
             typename ::std::remove_reference<value_type>::type&& t
         )
     {
-        return this->_insert(::std::move(t), IsMulti());
+        return this->_insert(::std::move(t), IsMulti(), ::std::is_void<mapped_type>());
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename ...Args>
+    inline typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_emplace(::boost::mpl::true_, Args&&... args)
+    {
+        value_type t(::std::forward<Args>(args)...);
+        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
+            this->_root_ptr,
+            t,
+            this->value_comp()
+        );
+
+        if (p)
+        {
+            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+
+            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
+            this->_insert_before(n, p);
+            return iterator(
+                ::odds_and_ends::node::make_in_order_tree_iterator_position<difference_type>(*n)
+            );
+        }
+        else
+        {
+            this->_push_back(t);
+            iterator result = this->end();
+            return --result;
+        }
+    }
+
+    template <
+        typename Key,
+        typename Mapped,
+        typename IsMulti,
+        typename T0,
+        typename T1,
+        typename T2,
+        typename T3,
+        typename T4,
+        typename T5,
+        typename T6
+    >
+    template <typename ...Args>
+    inline ::std::pair<typename map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::iterator,bool>
+        map<Key,Mapped,IsMulti,T0,T1,T2,T3,T4,T5,T6>::_emplace(
+            ::boost::mpl::false_,
+            Args&&... args
+        )
+    {
+        value_type t(::std::forward<Args>(args)...);
+        _node_ptr_t p = ::odds_and_ends::node::algorithm::binary_tree_descendant(
+            this->_root_ptr,
+            t,
+            this->value_comp()
+        );
+
+        if (p)
+        {
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*p)
+                ),
+                false
+            );
+        }
+
+        p = ::odds_and_ends::node::algorithm::binary_tree_upper_bound(
+            this->_root_ptr,
+            t,
+            this->value_comp()
+        );
+
+        if (p)
+        {
+            _node_ptr_t n = ::std::allocator_traits<allocator_type>::allocate(this->_alloc, 1);
+
+            ::std::allocator_traits<allocator_type>::construct(this->_alloc, n, t);
+            this->_insert_before(n, p);
+            return ::std::make_pair(
+                iterator(
+                    ::odds_and_ends::node
+                    ::make_in_order_tree_iterator_position<difference_type>(*n)
+                ),
+                true
+            );
+        }
+        else
+        {
+            this->_push_back(t);
+            iterator result = this->end();
+            return ::std::make_pair(--result, true);
+        }
     }
 
     template <
@@ -2563,14 +3273,7 @@ namespace odds_and_ends { namespace node { namespace container {
             ::std::initializer_list<value_type> ilist
         )
     {
-        for (
-            typename ::std::initializer_list<value_type>::iterator itr = ilist.begin();
-            itr != ilist.end();
-            ++itr
-        )
-        {
-            this->_insert(*itr, IsMulti());
-        }
+        this->_copy_from(ilist.begin(), ilist.end());
     }
 
     template <

@@ -13,8 +13,6 @@ namespace odds_and_ends { namespace automaton {
         Graph const& _g;
 
     public:
-        typedef bool result_type;
-
         explicit cellular_graph_input_rule(Graph const& g);
 
         template <typename CellMap>
@@ -80,6 +78,7 @@ namespace odds_and_ends { namespace automaton {
     }
 }}  // namespace odds_and_ends::automaton
 
+#include <type_traits>
 #include <vector>
 #include <boost/graph/properties.hpp>
 #include <boost/property_map/property_map.hpp>
