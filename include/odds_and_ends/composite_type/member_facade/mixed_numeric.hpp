@@ -1,4 +1,7 @@
 // Copyright (C) 2012-2026 Cromwell D. Enage
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// https://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef OODS_AND_ENDS__COMPOSITE_TYPE__MEMBER_FACADE__MIXED_NUMERIC_HPP
 #define OODS_AND_ENDS__COMPOSITE_TYPE__MEMBER_FACADE__MIXED_NUMERIC_HPP

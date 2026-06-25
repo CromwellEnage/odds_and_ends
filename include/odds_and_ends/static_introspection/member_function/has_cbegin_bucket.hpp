@@ -1,4 +1,7 @@
 // Copyright (C) 2016-2026 Cromwell D. Enage
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// https://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_CBEGIN_BUCKET_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MEMBER_FUNCTION__HAS_CBEGIN_BUCKET_HPP

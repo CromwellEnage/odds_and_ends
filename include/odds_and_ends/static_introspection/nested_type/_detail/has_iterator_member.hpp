@@ -23,7 +23,7 @@ namespace odds_and_ends { namespace static_introspection { namespace nested_type
 namespace _detail {
 
     template <typename T>
-    struct has_const_iterator_non_void
+    class has_const_iterator_non_void
     {
         typedef typename T::const_iterator _T_i;
 
@@ -36,7 +36,7 @@ namespace _detail {
     };
 
     template <typename T>
-    struct has_mutable_iterator_non_void
+    class has_mutable_iterator_non_void
     {
         typedef typename T::iterator _T_i;
 

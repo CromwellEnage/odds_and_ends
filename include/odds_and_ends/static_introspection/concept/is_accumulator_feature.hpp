@@ -1,10 +1,14 @@
 // Copyright (C) 2013-2026 Cromwell D. Enage
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// https://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_ACCUMULATOR_FEATURE_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__CONCEPT__IS_ACCUMULATOR_FEATURE_HPP
 
 #include <odds_and_ends/static_introspection/remove_cvref.hpp>
-#include <odds_and_ends/static_introspection/nested_template/has_apply.hpp>
+//#include <odds_and_ends/static_introspection/nested_template/has_apply.hpp>
+#include <boost/mpl/bool.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace concept { namespace _detail {
 
@@ -36,7 +40,6 @@ namespace odds_and_ends { namespace static_introspection { namespace concept { n
 #include <odds_and_ends/static_introspection/nested_type/has_dependencies.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_impl.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_is_weight_accumulator.hpp>
-#include <boost/mpl/bool.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/eval_if.hpp>
 

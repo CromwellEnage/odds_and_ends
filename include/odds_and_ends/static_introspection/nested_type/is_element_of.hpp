@@ -1,4 +1,7 @@
 // Copyright (C) 2013-2026 Cromwell D. Enage
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// https://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__IS_ELEMENT_OF_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__NESTED_TYPE__IS_ELEMENT_OF_HPP
@@ -27,7 +30,7 @@ namespace _detail {
 }  // namespace _detail
 }}}  // namespace odds_and_ends::static_introspection::nested_type
 
-#include <odds_and_ends/static_introspection/nested_type_fwd.hpp>
+#include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_element.hpp>
 
 namespace odds_and_ends { namespace static_introspection { namespace nested_type {

@@ -1,4 +1,7 @@
 // Copyright (C) 2005-2026 Cromwell D. Enage
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// https://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef ODDS_AND_ENDS__STATIC_INTROSPECTION__MATH__FACTORIAL_HPP
 #define ODDS_AND_ENDS__STATIC_INTROSPECTION__MATH__FACTORIAL_HPP
@@ -120,6 +123,7 @@ namespace odds_and_ends { namespace static_introspection { namespace math { name
     };
 }}}}  // namespace odds_and_ends::static_introspection::math::_detail
 
+#include <odds_and_ends/static_introspection_fwd.hpp>
 #include <odds_and_ends/static_introspection/math/is_negative.hpp>
 #include <odds_and_ends/static_introspection/math/_detail/error__input_out_of_domain.hpp>
 #include <odds_and_ends/static_introspection/nested_type/has_tag.hpp>
