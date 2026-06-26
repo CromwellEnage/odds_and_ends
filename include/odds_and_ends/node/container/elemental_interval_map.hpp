@@ -47,7 +47,7 @@ namespace odds_and_ends { namespace node { namespace container {
                 ::odds_and_ends::node::parameter::tag::_compare_generator
             >,
             ::boost::parameter::optional<
-                ::odds_and_ends::node::parameter::tag::_container_generator
+                ::odds_and_ends::node::parameter::tag::_range_generator
             >
         >::template bind<T0,T1>::type _template_args;
         typedef typename ::boost::parameter::value_type<
@@ -57,7 +57,7 @@ namespace odds_and_ends { namespace node { namespace container {
         >::type _compare_gen;
         typedef typename ::boost::parameter::value_type<
             _template_args,
-            ::odds_and_ends::node::parameter::tag::_container_generator,
+            ::odds_and_ends::node::parameter::tag::_range_generator,
             ::odds_and_ends::use_default_policy
         >::type _container_gen;
 

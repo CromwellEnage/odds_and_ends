@@ -14,7 +14,8 @@ namespace odds_and_ends { namespace node { namespace parameter {
         struct _node_parent_generator_list;
         struct _balancer;
         struct _compare_generator;
-        struct _container_generator;
+        struct _range_generator;
+        struct _associative_container_generator;
         struct _size;
         struct _difference;
         struct _pointer_transform;
@@ -49,9 +50,18 @@ namespace odds_and_ends { namespace node { namespace parameter {
     };
 
     template <typename T>
-    struct _container_generator :
+    struct _range_generator :
         ::boost::parameter::template_keyword<
-            ::odds_and_ends::node::parameter::tag::_container_generator,
+            ::odds_and_ends::node::parameter::tag::_range_generator,
+            T
+        >
+    {
+    };
+
+    template <typename T>
+    struct _associative_container_generator :
+        ::boost::parameter::template_keyword<
+            ::odds_and_ends::node::parameter::tag::_associative_container_generator,
             T
         >
     {
